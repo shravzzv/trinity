@@ -15,6 +15,10 @@ const config: Config = {
   roots: ['<rootDir>/__tests__'],
   testPathIgnorePatterns: ['<rootDir>/e2e'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  coveragePathIgnorePatterns: [
+    '<rootDir>/components/ui',
+    '<rootDir>/node_modules',
+  ],
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
