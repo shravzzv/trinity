@@ -1,9 +1,10 @@
+import FastingPlanCard from '@/components/fasting-plan-card'
 import { ThemeToggle } from '@/components/theme-toggle'
 import Image from 'next/image'
 
 export default function Home() {
   return (
-    <main className='mx-auto max-w-xl px-6 py-6'>
+    <main className='mx-auto max-w-xl space-y-6 px-6 py-6'>
       <header className='flex items-center justify-between'>
         <div className='flex flex-1 items-center gap-4'>
           <Image
@@ -20,6 +21,8 @@ export default function Home() {
           <ThemeToggle />
         </div>
       </header>
+
+      <FastingPlanCard />
     </main>
   )
 }
