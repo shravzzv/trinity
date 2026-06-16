@@ -28,39 +28,9 @@ import {
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { useEffect, useRef, useState } from 'react'
 import { Skeleton } from './ui/skeleton'
-
-const fastingPlans = [
-  {
-    id: '16:8',
-    title: '16:8',
-    fastingHours: 16,
-    eatingHours: 8,
-  },
-  {
-    id: '18:6',
-    title: '18:6',
-    fastingHours: 18,
-    eatingHours: 6,
-  },
-  {
-    id: '20:4',
-    title: '20:4',
-    fastingHours: 20,
-    eatingHours: 4,
-  },
-  {
-    id: '23:1',
-    title: '23:1',
-    fastingHours: 23,
-    eatingHours: 1,
-  },
-]
-
-const formatHours = (hours: number) => {
-  return `${hours} hour${hours === 1 ? '' : 's'}`
-}
-
-const LOCAL_STORAGE_TITLE = 'fastingPlan'
+import { formatHours } from '@/lib/time'
+import { fastingPlans } from '@/constants/fasting-plans'
+import { FASTING_PLAN_LOCAL_STORAGE_KEY } from '@/constants/storage-keys'
 
 export default function FastingPlanCard() {
   const [plan, setPlan] = useState('16:8')
@@ -82,16 +52,10 @@ export default function FastingPlanCard() {
    */
   useEffect(() => {
     const hydrate = () => {
-      const existingPlan = localStorage.getItem(LOCAL_STORAGE_TITLE)
-      if (!existingPlan) {
-        hasHydrated.current = true
-        setIsLoading(false)
-        return
-      }
-
-      setPlan(existingPlan)
-      setIsLoading(false)
+      const existingPlan = localStorage.getItem(FASTING_PLAN_LOCAL_STORAGE_KEY)
+      if (existingPlan) setPlan(existingPlan)
       hasHydrated.current = true
+      setIsLoading(false)
     }
 
     hydrate()
@@ -102,7 +66,7 @@ export default function FastingPlanCard() {
    */
   useEffect(() => {
     if (!hasHydrated.current) return
-    localStorage.setItem(LOCAL_STORAGE_TITLE, plan)
+    localStorage.setItem(FASTING_PLAN_LOCAL_STORAGE_KEY, plan)
   }, [plan])
 
   return (
