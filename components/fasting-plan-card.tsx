@@ -26,7 +26,8 @@ import {
   FieldTitle,
 } from '@/components/ui/field'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { Skeleton } from './ui/skeleton'
 
 const fastingPlans = [
   {
@@ -65,6 +66,8 @@ export default function FastingPlanCard() {
   const [plan, setPlan] = useState('16:8')
   const [draftPlan, setDraftPlan] = useState(plan)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const hasHydrated = useRef(false)
 
   const selectedPlan =
     fastingPlans.find((p) => p.id === plan) ?? fastingPlans[0]
@@ -74,6 +77,33 @@ export default function FastingPlanCard() {
     setIsDialogOpen(false)
   }
 
+  /**
+   * Hydrate plan from local storage if present.
+   */
+  useEffect(() => {
+    const hydrate = () => {
+      const existingPlan = localStorage.getItem(LOCAL_STORAGE_TITLE)
+      if (!existingPlan) {
+        hasHydrated.current = true
+        setIsLoading(false)
+        return
+      }
+
+      setPlan(existingPlan)
+      setIsLoading(false)
+      hasHydrated.current = true
+    }
+
+    hydrate()
+  }, [])
+
+  /**
+   * Sync selected plan with local storage on change.
+   */
+  useEffect(() => {
+    if (!hasHydrated.current) return
+    localStorage.setItem(LOCAL_STORAGE_TITLE, plan)
+  }, [plan])
 
   return (
     <Card>
@@ -140,16 +170,23 @@ export default function FastingPlanCard() {
       </CardHeader>
 
       <CardContent>
-        <div className='space-y-2'>
-          <Badge className='bg-sky-50 px-4 py-4 text-xl text-sky-700 dark:bg-sky-950 dark:text-sky-300'>
-            {selectedPlan.title}
-          </Badge>
+        {isLoading ? (
+          <div className='space-y-2'>
+            <Skeleton className='h-8 w-32 rounded-2xl' />
+            <Skeleton className='h-4 w-full rounded-2xl' />
+          </div>
+        ) : (
+          <div className='space-y-2'>
+            <Badge className='bg-sky-50 px-4 py-4 text-xl text-sky-700 dark:bg-sky-950 dark:text-sky-300'>
+              {selectedPlan.title}
+            </Badge>
 
-          <p className='text-muted-foreground text-sm'>
-            {formatHours(selectedPlan.fastingHours)} fasting with{' '}
-            {formatHours(selectedPlan.eatingHours)} eating window
-          </p>
-        </div>
+            <p className='text-muted-foreground text-sm'>
+              {formatHours(selectedPlan.fastingHours)} fasting with{' '}
+              {formatHours(selectedPlan.eatingHours)} eating window
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
