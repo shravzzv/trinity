@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/card'
 import { Button } from './ui/button'
 import { Pen } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import {
   Dialog,
   DialogContent,
@@ -26,18 +25,24 @@ import {
   FieldTitle,
 } from '@/components/ui/field'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { Skeleton } from './ui/skeleton'
 import { formatHours } from '@/lib/time'
 import { fastingPlans } from '@/constants/fasting-plans'
-import { FASTING_PLAN_LOCAL_STORAGE_KEY } from '@/constants/storage-keys'
 
-export default function FastingPlanCard() {
-  const [plan, setPlan] = useState('16:8')
+interface FastingPlanCardProps {
+  plan: string
+  isLoading: boolean
+  setPlan: (plan: string) => void
+}
+
+export default function FastingPlanCard({
+  plan,
+  setPlan,
+  isLoading,
+}: FastingPlanCardProps) {
   const [draftPlan, setDraftPlan] = useState(plan)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const hasHydrated = useRef(false)
 
   const selectedPlan =
     fastingPlans.find((p) => p.id === plan) ?? fastingPlans[0]
@@ -46,28 +51,6 @@ export default function FastingPlanCard() {
     setPlan(draftPlan)
     setIsDialogOpen(false)
   }
-
-  /**
-   * Hydrate plan from local storage if present.
-   */
-  useEffect(() => {
-    const hydrate = () => {
-      const existingPlan = localStorage.getItem(FASTING_PLAN_LOCAL_STORAGE_KEY)
-      if (existingPlan) setPlan(existingPlan)
-      hasHydrated.current = true
-      setIsLoading(false)
-    }
-
-    hydrate()
-  }, [])
-
-  /**
-   * Sync selected plan with local storage on change.
-   */
-  useEffect(() => {
-    if (!hasHydrated.current) return
-    localStorage.setItem(FASTING_PLAN_LOCAL_STORAGE_KEY, plan)
-  }, [plan])
 
   return (
     <Card>
@@ -89,7 +72,7 @@ export default function FastingPlanCard() {
               </Button>
             </DialogTrigger>
 
-            <DialogContent onInteractOutside={(e) => e.preventDefault()}>
+            <DialogContent>
               <DialogHeader>
                 <DialogTitle>Select your fasting plan</DialogTitle>
                 <DialogDescription>
@@ -136,14 +119,14 @@ export default function FastingPlanCard() {
       <CardContent>
         {isLoading ? (
           <div className='space-y-2'>
-            <Skeleton className='h-8 w-32 rounded-2xl' />
+            <Skeleton className='h-10 w-28 rounded-2xl' />
             <Skeleton className='h-4 w-full rounded-2xl' />
           </div>
         ) : (
           <div className='space-y-2'>
-            <Badge className='bg-sky-50 px-4 py-4 text-xl text-sky-700 dark:bg-sky-950 dark:text-sky-300'>
+            <p className='bg-primary text-primary-foreground w-fit rounded-full px-4 py-1 text-xl font-medium'>
               {selectedPlan.title}
-            </Badge>
+            </p>
 
             <p className='text-muted-foreground text-sm'>
               {formatHours(selectedPlan.fastingHours)} fasting with{' '}
