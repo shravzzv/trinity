@@ -1,0 +1,149 @@
+'use client'
+
+import { STORAGE_KEY } from '@/constants/storage-keys'
+import type {
+  FastingPlanId,
+  FastingSession,
+  FastingState,
+  FastingStatus,
+} from '@/types/fasting'
+import { useEffect, useState } from 'react'
+
+/**
+ * The public API exposed by {@link useFasting}.
+ */
+export interface UseFastingResult {
+  /**
+   * The currently selected fasting plan.
+   *
+   * Defaults to `"16:8"` when no saved preference exists.
+   */
+  planId: FastingPlanId
+
+  /**
+   * The user's active fasting session.
+   *
+   * Returns `null` when no fasting or eating session is active.
+   */
+  session: FastingSession | null
+
+  /**
+   * Whether the fasting state has been restored from persisted storage.
+   *
+   * Useful for preventing hydration mismatches and displaying loading
+   * placeholders while the initial state is being restored.
+   */
+  isHydrated: boolean
+
+  /**
+   * Updates the selected fasting plan.
+   *
+   * @param id The new fasting plan identifier.
+   */
+  updatePlanId: (id: FastingPlanId) => void
+
+  /**
+   * Starts a fasting session and records the current timestamp as the
+   * session start time.
+   */
+  startFasting: () => void
+
+  /**
+   * Starts an eating session and records the current timestamp as the
+   * session start time.
+   */
+  endFasting: () => void
+}
+
+const DEFAULT_FASTING_STATE: FastingState = {
+  planId: '16:8',
+  session: null,
+}
+
+/**
+ * Manages the fasting domain state for the application.
+ *
+ * Responsibilities:
+ *
+ * - Tracks the selected fasting plan.
+ * - Tracks the user's current fasting or eating session.
+ * - Restores previously saved state from persistent storage.
+ * - Persists state changes automatically.
+ * - Exposes actions for starting fasting and eating sessions.
+ *
+ * The hook initializes with a default fasting plan and no active session.
+ * Once mounted, it attempts to hydrate state from persisted storage and
+ * falls back to the default state if the stored data is missing or invalid.
+ *
+ * @returns The current fasting state and actions for updating it.
+ */
+export const useFasting = (): UseFastingResult => {
+  const [fastingState, setFastingState] = useState<FastingState>(
+    DEFAULT_FASTING_STATE,
+  )
+  const [isHydrated, setIsHydrated] = useState<boolean>(false)
+
+  const updatePlanId = (planId: FastingPlanId) => {
+    setFastingState((p) => ({ ...p, planId }))
+  }
+
+  const startSession = (status: FastingStatus) => {
+    setFastingState((p) => ({
+      ...p,
+      session: { status, startedAt: new Date().toISOString() },
+    }))
+  }
+
+  useEffect(() => {
+    const hydrate = () => {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY)
+        if (!saved) return
+
+        const state = JSON.parse(saved) as FastingState
+
+        const isValidSession =
+          state.session === null ||
+          (typeof state.session.startedAt === 'string' &&
+            (state.session.status === 'fasting' ||
+              state.session.status === 'eating'))
+
+        if (typeof state.planId !== 'string' || !isValidSession) {
+          throw Error('Local storage was corrupted')
+        }
+
+        setFastingState(state)
+      } catch (error) {
+        console.error(
+          'Hydrating fasting state from local storage failed',
+          error,
+        )
+        localStorage.removeItem(STORAGE_KEY)
+        setFastingState(DEFAULT_FASTING_STATE)
+      } finally {
+        setIsHydrated(true)
+      }
+    }
+
+    hydrate()
+  }, [])
+
+  useEffect(() => {
+    if (!isHydrated) return
+
+    const sync = () => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(fastingState))
+    }
+
+    sync()
+  }, [fastingState, isHydrated])
+
+  return {
+    isHydrated,
+    updatePlanId,
+    planId: fastingState.planId,
+    session: fastingState.session,
+    endFasting: () => startSession('eating'),
+    startFasting: () => startSession('fasting'),
+  }
+}
