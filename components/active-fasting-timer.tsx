@@ -28,6 +28,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Flame, UtensilsCrossed } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface ActiveFastingTimerProps {
   planId: FastingPlanId
@@ -78,6 +79,16 @@ export default function ActiveFastingTimer({
   const hasExceededSessionLength = remainingMs < 0
   const excessMs = elapsedMs - sessionLengthMs
 
+  const handleContinue = () => {
+    if (isFasting) {
+      endFasting()
+      toast.success('Fast ended')
+    } else {
+      startFasting()
+      toast.success('Fast started')
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -123,9 +134,7 @@ export default function ActiveFastingTimer({
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
 
-                <AlertDialogAction
-                  onClick={() => (isFasting ? endFasting() : startFasting())}
-                >
+                <AlertDialogAction onClick={handleContinue}>
                   Continue
                 </AlertDialogAction>
               </AlertDialogFooter>

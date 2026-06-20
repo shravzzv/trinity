@@ -30,6 +30,7 @@ import { fastingPlans } from '@/constants/fasting-plans'
 import { FastingPlanId } from '@/types/fasting'
 import { UseFastingResult } from '@/hooks/use-fasting'
 import { pluralize } from '@/lib/utils'
+import { toast } from 'sonner'
 
 interface FastingPlanCardProps {
   planId: FastingPlanId
@@ -49,6 +50,7 @@ export default function FastingPlanCard({
   const handleSave = () => {
     updatePlanId(draftPlanId)
     setIsDialogOpen(false)
+    toast.success('Fasting plan updated')
   }
 
   return (

@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { ThemeProvider } from '@/providers/theme-provider'
 import { Analytics } from '@vercel/analytics/next'
 import { SerwistProvider } from '@serwist/turbopack/react'
+import { Toaster } from '@/components/ui/sonner'
 
 const APP_NAME = 'Trinity'
 const APP_DEFAULT_TITLE = 'Trinity'
@@ -75,6 +76,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             {children}
+            <Toaster richColors />
           </ThemeProvider>
         </SerwistProvider>
         <Analytics />

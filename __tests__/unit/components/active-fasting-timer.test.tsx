@@ -1,9 +1,16 @@
 import ActiveFastingTimer from '@/components/active-fasting-timer'
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { toast } from 'sonner'
 
 const mockEndFasting = jest.fn()
 const mockStartFasting = jest.fn()
+
+jest.mock('sonner', () => ({
+  toast: {
+    success: jest.fn(),
+  },
+}))
 
 const renderActiveFastingTimer = (props = {}) => {
   return render(
@@ -201,5 +208,32 @@ describe('Active fasting timer', () => {
     expect(screen.getByLabelText('fasting-timer')).toHaveTextContent(
       '+01:00:00',
     )
+  })
+
+  it('should show success toast when ending a fast', async () => {
+    const user = userEvent.setup()
+
+    renderActiveFastingTimer()
+
+    await user.click(screen.getByRole('button', { name: /end fasting/i }))
+    await user.click(screen.getByRole('button', { name: /continue/i }))
+
+    expect(toast.success).toHaveBeenCalledWith('Fast ended')
+  })
+
+  it('should show success toast when starting a fast', async () => {
+    const user = userEvent.setup()
+
+    renderActiveFastingTimer({
+      session: {
+        status: 'eating',
+        startedAt: new Date().toISOString(),
+      },
+    })
+
+    await user.click(screen.getByRole('button', { name: /start fasting/i }))
+    await user.click(screen.getByRole('button', { name: /continue/i }))
+
+    expect(toast.success).toHaveBeenCalledWith('Fast started')
   })
 })

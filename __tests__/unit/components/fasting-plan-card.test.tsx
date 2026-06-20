@@ -2,8 +2,15 @@ import FastingPlanCard from '@/components/fasting-plan-card'
 import { fastingPlans } from '@/constants/fasting-plans'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { toast } from 'sonner'
 
 const mockUpdatePlanId = jest.fn()
+
+jest.mock('sonner', () => ({
+  toast: {
+    success: jest.fn(),
+  },
+}))
 
 const renderFastingPlanCard = (props = {}) => {
   return render(
@@ -161,5 +168,19 @@ describe('Fasting plan card', () => {
     })
 
     expect(screen.getByText('16:8')).toBeInTheDocument()
+  })
+
+  it('should show a success toast after saving a new plan', async () => {
+    renderFastingPlanCard()
+
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: /edit/i }))
+
+    const dialog = screen.getByRole('dialog')
+
+    await user.click(within(dialog).getByText('20:4'))
+    await user.click(within(dialog).getByRole('button', { name: /save/i }))
+
+    expect(toast.success).toHaveBeenCalledWith('Fasting plan updated')
   })
 })
