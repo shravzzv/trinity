@@ -26,29 +26,28 @@ import {
 } from '@/components/ui/field'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { useState } from 'react'
-import { Skeleton } from './ui/skeleton'
 import { formatHours } from '@/lib/time'
 import { fastingPlans } from '@/constants/fasting-plans'
+import { FastingPlanId } from '@/types/fasting'
+import { UseFastingResult } from '@/hooks/use-fasting'
 
 interface FastingPlanCardProps {
-  plan: string
-  isLoading: boolean
-  setPlan: (plan: string) => void
+  planId: FastingPlanId
+  updatePlanId: UseFastingResult['updatePlanId']
 }
 
 export default function FastingPlanCard({
-  plan,
-  setPlan,
-  isLoading,
+  planId,
+  updatePlanId,
 }: FastingPlanCardProps) {
-  const [draftPlan, setDraftPlan] = useState(plan)
+  const [draftPlanId, setDraftPlanId] = useState<FastingPlanId>(planId)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const selectedPlan =
-    fastingPlans.find((p) => p.id === plan) ?? fastingPlans[0]
+    fastingPlans.find((p) => p.id === planId) ?? fastingPlans[0]
 
   const handleSave = () => {
-    setPlan(draftPlan)
+    updatePlanId(draftPlanId)
     setIsDialogOpen(false)
   }
 
@@ -61,12 +60,12 @@ export default function FastingPlanCard({
           <Dialog
             open={isDialogOpen}
             onOpenChange={(open) => {
-              if (open) setDraftPlan(plan)
+              if (open) setDraftPlanId(planId)
               setIsDialogOpen(open)
             }}
           >
             <DialogTrigger asChild>
-              <Button variant='outline' size='sm'>
+              <Button variant='outline'>
                 <Pen />
                 Edit
               </Button>
@@ -81,8 +80,8 @@ export default function FastingPlanCard({
               </DialogHeader>
 
               <RadioGroup
-                value={draftPlan}
-                onValueChange={setDraftPlan}
+                value={draftPlanId}
+                onValueChange={(v) => setDraftPlanId(v as FastingPlanId)}
                 className='max-h-[50vh] max-w-sm overflow-y-auto'
               >
                 {fastingPlans.map((fastingPlan) => (
@@ -94,7 +93,8 @@ export default function FastingPlanCard({
 
                           <FieldDescription>
                             {formatHours(fastingPlan.fastingHours)} fasting with{' '}
-                            {formatHours(fastingPlan.eatingHours)} eating window
+                            {formatHours(fastingPlan.eatingHours)} eating
+                            window.
                           </FieldDescription>
                         </FieldContent>
 
@@ -108,7 +108,7 @@ export default function FastingPlanCard({
                 ))}
               </RadioGroup>
 
-              <Button onClick={handleSave} disabled={plan === draftPlan}>
+              <Button onClick={handleSave} disabled={planId === draftPlanId}>
                 Save
               </Button>
             </DialogContent>
@@ -117,23 +117,16 @@ export default function FastingPlanCard({
       </CardHeader>
 
       <CardContent>
-        {isLoading ? (
-          <div className='space-y-2'>
-            <Skeleton className='h-10 w-28 rounded-2xl' />
-            <Skeleton className='h-4 w-full rounded-2xl' />
-          </div>
-        ) : (
-          <div className='space-y-2'>
-            <p className='bg-primary text-primary-foreground w-fit rounded-full px-4 py-1 text-xl font-medium'>
-              {selectedPlan.title}
-            </p>
+        <div className='space-y-2'>
+          <p className='bg-primary text-primary-foreground w-fit rounded-full px-4 py-1 text-xl font-medium'>
+            {selectedPlan.title}
+          </p>
 
-            <p className='text-muted-foreground text-sm'>
-              {formatHours(selectedPlan.fastingHours)} fasting with{' '}
-              {formatHours(selectedPlan.eatingHours)} eating window
-            </p>
-          </div>
-        )}
+          <p className='text-muted-foreground text-sm'>
+            {formatHours(selectedPlan.fastingHours)} fasting with{' '}
+            {formatHours(selectedPlan.eatingHours)} eating window.
+          </p>
+        </div>
       </CardContent>
     </Card>
   )

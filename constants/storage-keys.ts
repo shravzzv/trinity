@@ -1,1 +1,1 @@
-export const FASTING_PLAN_LOCAL_STORAGE_KEY = 'fastingPlan'
+export const STORAGE_KEY = 'trinity-fasting'

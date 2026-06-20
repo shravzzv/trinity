@@ -3,14 +3,13 @@ import { fastingPlans } from '@/constants/fasting-plans'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-const mockSetPlan = jest.fn()
+const mockUpdatePlanId = jest.fn()
 
 const renderFastingPlanCard = (props = {}) => {
   return render(
     <FastingPlanCard
-      plan='16:8'
-      isLoading={false}
-      setPlan={mockSetPlan}
+      planId='16:8'
+      updatePlanId={mockUpdatePlanId}
       {...props}
     />,
   )
@@ -35,7 +34,7 @@ describe('Fasting plan card', () => {
     renderFastingPlanCard()
     expect(screen.getByText('16:8')).toBeInTheDocument()
     expect(
-      screen.getByText('16 hours fasting with 8 hours eating window'),
+      screen.getByText('16 hours fasting with 8 hours eating window.'),
     ).toBeInTheDocument()
   })
 
@@ -104,7 +103,7 @@ describe('Fasting plan card', () => {
     await user.click(within(dialog).getByText('20:4'))
     await user.click(saveButton)
 
-    expect(mockSetPlan).toHaveBeenCalledWith('20:4')
+    expect(mockUpdatePlanId).toHaveBeenCalledWith('20:4')
   })
 
   it('should close the dialog after saving', async () => {
@@ -120,15 +119,6 @@ describe('Fasting plan card', () => {
     await user.click(saveButton)
 
     expect(dialog).not.toBeInTheDocument()
-  })
-
-  it('should hide plan details while loading', () => {
-    renderFastingPlanCard({ isLoading: true })
-
-    expect(screen.queryByText('16:8')).not.toBeInTheDocument()
-    expect(
-      screen.queryByText('16 hours fasting with 8 hours eating window'),
-    ).not.toBeInTheDocument()
   })
 
   it('should reset draft plan when dialog is reopened', async () => {

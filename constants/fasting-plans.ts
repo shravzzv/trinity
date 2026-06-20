@@ -23,4 +23,4 @@ export const fastingPlans = [
     fastingHours: 23,
     eatingHours: 1,
   },
-]
+] as const
