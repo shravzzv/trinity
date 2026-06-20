@@ -1,14 +1,3 @@
-// todo: better naming? It only checks for pluralizing. pluralizeHours?
-/**
- * Pluralizes hours if needed and returns it as a string.
- *
- * @param hours The number of hours to format.
- * @returns The formatted hours as singular or plural hours.
- */
-export const formatHours = (hours: number) => {
-  return `${hours} hour${hours === 1 ? '' : 's'}`
-}
-
 /**
  * Returns a HH:MM:SS version of a duration.
  *

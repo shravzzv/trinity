@@ -26,10 +26,10 @@ import {
 } from '@/components/ui/field'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { useState } from 'react'
-import { formatHours } from '@/lib/time'
 import { fastingPlans } from '@/constants/fasting-plans'
 import { FastingPlanId } from '@/types/fasting'
 import { UseFastingResult } from '@/hooks/use-fasting'
+import { pluralize } from '@/lib/utils'
 
 interface FastingPlanCardProps {
   planId: FastingPlanId
@@ -92,8 +92,9 @@ export default function FastingPlanCard({
                           <FieldTitle>{fastingPlan.title}</FieldTitle>
 
                           <FieldDescription>
-                            {formatHours(fastingPlan.fastingHours)} fasting with{' '}
-                            {formatHours(fastingPlan.eatingHours)} eating
+                            {pluralize(fastingPlan.fastingHours, 'hour')}{' '}
+                            fasting with{' '}
+                            {pluralize(fastingPlan.eatingHours, 'hour')} eating
                             window.
                           </FieldDescription>
                         </FieldContent>
@@ -123,8 +124,8 @@ export default function FastingPlanCard({
           </p>
 
           <p className='text-muted-foreground text-sm'>
-            {formatHours(selectedPlan.fastingHours)} fasting with{' '}
-            {formatHours(selectedPlan.eatingHours)} eating window.
+            {pluralize(selectedPlan.fastingHours, 'hour')} fasting with{' '}
+            {pluralize(selectedPlan.eatingHours, 'hour')} eating window.
           </p>
         </div>
       </CardContent>
