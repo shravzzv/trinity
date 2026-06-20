@@ -15,6 +15,19 @@ import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 import { Progress } from './ui/progress'
 import type { FastingPlanId, FastingSession } from '@/types/fasting'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { Flame, UtensilsCrossed } from 'lucide-react'
 
 interface ActiveFastingTimerProps {
   planId: FastingPlanId
@@ -55,11 +68,15 @@ export default function ActiveFastingTimer({
   // timeline
   const startedAtMs = new Date(startedAt).getTime()
   const elapsedMs = now - startedAtMs
-  const remainingMs = Math.max(sessionLengthMs - elapsedMs, 0)
+  const remainingMs = sessionLengthMs - elapsedMs
 
   // presentation
   const progress = Math.min((elapsedMs / sessionLengthMs) * 100, 100)
   const endsAt = new Date(startedAtMs + sessionLengthMs)
+
+  // excess
+  const hasExceededSessionLength = remainingMs < 0
+  const excessMs = elapsedMs - sessionLengthMs
 
   return (
     <Card>
@@ -67,21 +84,66 @@ export default function ActiveFastingTimer({
         <CardTitle>Fasting timer</CardTitle>
 
         <CardDescription>
-          <Badge>{isFasting ? 'Fasting' : 'Eating'}</Badge>
+          <Badge aria-label='fasting-status'>
+            {isFasting ? 'Fasting' : 'Eating'}
+          </Badge>
         </CardDescription>
 
         <CardAction>
-          <Button onClick={() => (isFasting ? endFasting() : startFasting())}>
-            {isFasting ? 'End' : 'Start'} fasting
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button>{isFasting ? 'End' : 'Start'} fasting</Button>
+            </AlertDialogTrigger>
+
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogMedia>
+                  {isFasting ? <UtensilsCrossed /> : <Flame />}
+                </AlertDialogMedia>
+
+                <AlertDialogTitle>
+                  {isFasting ? 'End' : 'Start'} fasting session?
+                </AlertDialogTitle>
+
+                <AlertDialogDescription className='flex flex-col gap-1 space-y-2'>
+                  <span>
+                    {isFasting
+                      ? 'This will end your current fasting session and start your eating window.'
+                      : 'This will end your current eating window and start a new fasting session.'}
+                  </span>
+
+                  {remainingMs > 0 && (
+                    <span className='font-medium'>
+                      {formatDuration(remainingMs)} remaining.
+                    </span>
+                  )}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+                <AlertDialogAction
+                  onClick={() => (isFasting ? endFasting() : startFasting())}
+                >
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </CardAction>
       </CardHeader>
 
       <CardContent className='space-y-4'>
         <div className='flex items-center justify-between'>
-          <h1 className='text-2xl font-bold'>{formatDuration(remainingMs)}</h1>
+          <h1 className='text-2xl font-bold' aria-label='fasting-timer'>
+            {hasExceededSessionLength
+              ? `+${formatDuration(excessMs)}`
+              : formatDuration(remainingMs)}
+          </h1>
+
           <p className='text-muted-foreground text-sm'>
-            Ends at{' '}
+            {hasExceededSessionLength ? 'Goal reached' : 'Ends'} at{' '}
             {endsAt.toLocaleTimeString([], {
               hour: 'numeric',
               minute: '2-digit',
