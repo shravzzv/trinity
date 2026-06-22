@@ -1,4 +1,21 @@
 /**
+ * Time-related utilities.
+ *
+ * This module contains generic helpers for working with dates, times,
+ * durations, and timestamps. Functions in this file should be reusable
+ * across the application and should not depend on any Trinity-specific
+ * domain concepts.
+ *
+ * Examples:
+ *
+ * - Converting between time units.
+ * - Formatting dates and durations.
+ * - Calculating elapsed time.
+ * - Determining whether a timestamp falls within a time range.
+ * - Other domain-agnostic date and time operations.
+ */
+
+/**
  * Returns a HH:MM:SS version of a duration.
  *
  * @param ms The duration **in milliseconds**.

@@ -29,7 +29,7 @@ import { useState } from 'react'
 import { fastingPlans } from '@/constants/fasting-plans'
 import { FastingPlanId } from '@/types/fasting'
 import { UseFastingResult } from '@/hooks/use-fasting'
-import { pluralize } from '@/lib/utils'
+import { pluralize } from '@/lib/strings'
 import { toast } from 'sonner'
 
 interface FastingPlanCardProps {

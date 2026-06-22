@@ -1,4 +1,4 @@
-import { pluralize } from '@/lib/utils'
+import { pluralize } from '@/lib/strings'
 
 describe('pluralize', () => {
   it('should return the singular form when value is 1', () => {
