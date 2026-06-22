@@ -16,7 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from './ui/card'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   Select,
   SelectContent,
@@ -26,63 +26,21 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Clock3, Flame, Trophy } from 'lucide-react'
+import { Fast } from '@/types/fasting'
+import { getFastDurationHours } from '@/lib/fasting'
 
-interface Fast {
-  id: string
-  startedAt: string
-  endedAt: string
-}
 type Cadence = 'week' | 'month' | 'year' | 'all'
 
-const generateFakeFasts = (count: number): Fast[] => {
-  const fasts: Fast[] = []
-  const now = new Date()
-
-  for (let i = 0; i < count; i++) {
-    const daysAgo = count - i
-
-    const startedAt = new Date(now)
-    startedAt.setDate(now.getDate() - daysAgo)
-    startedAt.setHours(20, 0, 0, 0)
-
-    const durationHours = 16 + Math.floor(Math.random() * 8)
-
-    const endedAt = new Date(startedAt)
-    endedAt.setHours(endedAt.getHours() + durationHours)
-
-    fasts.push({
-      id: `fast-${i + 1}`,
-      startedAt: startedAt.toISOString(),
-      endedAt: endedAt.toISOString(),
-    })
-  }
-
-  return fasts
+interface FastingStatisticsProps {
+  fasts: Fast[]
 }
 
-const getFastDurationHours = (fast: Fast) =>
-  (new Date(fast.endedAt).getTime() - new Date(fast.startedAt).getTime()) /
-  (1000 * 60 * 60)
-
-export default function FastingStatistics() {
+export default function FastingStatistics({ fasts }: FastingStatisticsProps) {
   const [cadence, setCadence] = useState<Cadence>('week')
-  const [fasts, setFasts] = useState<Fast[]>([])
-
-  useEffect(() => {
-    const initialize = () => {
-      setFasts(
-        generateFakeFasts(10).sort(
-          (a, b) =>
-            new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime(),
-        ),
-      )
-    }
-
-    initialize()
-  }, [])
 
   const filteredFasts = fasts.filter((fast) => {
     if (cadence === 'all') return true
+
     const startedAt = new Date(fast.startedAt)
     const cutoff = new Date()
 
@@ -106,12 +64,12 @@ export default function FastingStatistics() {
   const firstFast = filteredFasts[0]
   const lastFast = filteredFasts.at(-1)
 
-  const dateRange =
+  const dateRange: string =
     firstFast && lastFast
       ? `${new Date(firstFast.startedAt).toLocaleDateString('en-US', { dateStyle: 'long' })} - ${new Date(
           lastFast.startedAt,
         ).toLocaleDateString('en-US', { dateStyle: 'long' })}`
-      : 'No fasting data'
+      : 'No fasting data available.'
 
   const averageFastHours =
     filteredFasts.length === 0
@@ -134,7 +92,7 @@ export default function FastingStatistics() {
           ? { day: 'numeric', month: 'short', year: 'numeric' }
           : { day: 'numeric', month: 'short' },
     ),
-    length: getFastDurationHours(fast),
+    length: getFastDurationHours(fast).toFixed(),
   }))
 
   const chartConfig = {
@@ -184,7 +142,7 @@ export default function FastingStatistics() {
               {cadence === 'week' && (
                 <LabelList
                   position='top'
-                  offset={12}
+                  offset={6}
                   className='fill-foreground'
                   fontSize={12}
                 />

@@ -2,12 +2,14 @@
 
 import { STORAGE_KEY } from '@/constants/storage-keys'
 import type {
+  Fast,
   FastingPlanId,
   FastingSession,
   FastingState,
   FastingStatus,
 } from '@/types/fasting'
 import { useEffect, useState } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 
 /**
  * The public API exposed by {@link useFasting}.
@@ -26,6 +28,11 @@ export interface UseFastingResult {
    * Returns `null` when no fasting or eating session is active.
    */
   session: FastingSession | null
+
+  /**
+   * An array of all the fasts the user has completed.
+   */
+  fasts: Fast[]
 
   /**
    * Whether the fasting state has been restored from persisted storage.
@@ -58,6 +65,7 @@ export interface UseFastingResult {
 const DEFAULT_FASTING_STATE: FastingState = {
   planId: '16:8',
   session: null,
+  fasts: [],
 }
 
 /**
@@ -70,6 +78,7 @@ const DEFAULT_FASTING_STATE: FastingState = {
  * - Restores previously saved state from persistent storage.
  * - Persists state changes automatically.
  * - Exposes actions for starting fasting and eating sessions.
+ * - Tracks the user's completed fasts.
  *
  * The hook initializes with a default fasting plan and no active session.
  * Once mounted, it attempts to hydrate state from persisted storage and
@@ -88,10 +97,26 @@ export const useFasting = (): UseFastingResult => {
   }
 
   const startSession = (status: FastingStatus) => {
-    setFastingState((p) => ({
-      ...p,
-      session: { status, startedAt: new Date().toISOString() },
-    }))
+    setFastingState((previous) => {
+      const now = new Date().toISOString()
+      const fasts =
+        previous.session?.status === 'fasting' && status === 'eating'
+          ? [
+              ...previous.fasts,
+              {
+                id: uuidv4(),
+                startedAt: previous.session.startedAt,
+                endedAt: now,
+              },
+            ]
+          : previous.fasts
+
+      return {
+        ...previous,
+        fasts,
+        session: { status, startedAt: now },
+      }
+    })
   }
 
   useEffect(() => {
@@ -141,6 +166,7 @@ export const useFasting = (): UseFastingResult => {
   return {
     isHydrated,
     updatePlanId,
+    fasts: fastingState.fasts,
     planId: fastingState.planId,
     session: fastingState.session,
     endFasting: () => startSession('eating'),
