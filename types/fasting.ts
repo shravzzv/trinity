@@ -12,3 +12,9 @@ export interface FastingState {
   planId: FastingPlanId
   session: FastingSession | null
 }
+
+export interface Fast {
+  id: string
+  startedAt: string
+  endedAt: string
+}

@@ -1,6 +1,7 @@
 'use client'
 
 import FastingPlanCard from '@/components/fasting-plan-card'
+import FastingStatistics from '@/components/fasting-statistics'
 import FastingTimer from '@/components/fasting-timer'
 import Header from '@/components/header'
 import FastingPlanCardSkeleton from '@/components/skeletons/fasting-plan-card-skeleton'
@@ -38,6 +39,8 @@ export default function Home() {
           <FastingPlanCard planId={planId} updatePlanId={updatePlanId} />
         </>
       )}
+
+      <FastingStatistics />
     </main>
   )
 }
