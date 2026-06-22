@@ -6,6 +6,8 @@ jest.mock('@/components/fasting-plan-card', () => ({
   default: jest.fn(() => <div>Mock Card</div>),
 }))
 
+jest.mock('uuid')
+
 describe('Home page', () => {
   beforeEach(() => {
     localStorage.clear()

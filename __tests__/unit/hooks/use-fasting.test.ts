@@ -2,6 +2,8 @@ import { useFasting } from '@/hooks/use-fasting'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { STORAGE_KEY } from '@/constants/storage-keys'
 
+jest.mock('uuid')
+
 describe('useFasting', () => {
   let consoleErrorSpy: jest.SpyInstance
 
