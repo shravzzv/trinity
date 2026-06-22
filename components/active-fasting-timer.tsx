@@ -144,14 +144,14 @@ export default function ActiveFastingTimer({
       </CardHeader>
 
       <CardContent className='space-y-4'>
-        <div className='flex items-center justify-between'>
-          <h1 className='text-2xl font-bold' aria-label='fasting-timer'>
+        <div className='flex items-center justify-between gap-2'>
+          <h1 className='flex-1 text-2xl font-bold' aria-label='fasting-timer'>
             {hasExceededSessionLength
               ? `+${formatDuration(excessMs)}`
               : formatDuration(remainingMs)}
           </h1>
 
-          <p className='text-muted-foreground text-sm'>
+          <p className='text-muted-foreground flex-1/2 text-right text-sm text-balance'>
             {hasExceededSessionLength ? 'Goal reached' : 'Ends'} at{' '}
             {endsAt.toLocaleTimeString([], {
               hour: 'numeric',
