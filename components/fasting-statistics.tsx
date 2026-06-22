@@ -25,9 +25,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Clock3, Flame, Trophy } from 'lucide-react'
+import { Clock3, Flame, Pen, Plus, Trophy } from 'lucide-react'
 import { Fast } from '@/types/fasting'
 import { getFastDurationHours } from '@/lib/fasting'
+import { Button } from './ui/button'
 
 type Cadence = 'week' | 'month' | 'year' | 'all'
 
@@ -152,22 +153,36 @@ export default function FastingStatistics({ fasts }: FastingStatisticsProps) {
         </ChartContainer>
       </CardContent>
 
-      <CardFooter className='flex flex-wrap items-center justify-evenly gap-2 text-sm'>
-        <div className='flex items-center gap-2'>
-          <Flame className='size-4' />
-          <span>
-            {filteredFasts.length} fast{filteredFasts.length !== 1 && 's'}
-          </span>
+      <CardFooter className='flex flex-col gap-4'>
+        <div className='flex w-full flex-wrap items-center justify-evenly gap-2 text-sm'>
+          <div className='flex items-center gap-2'>
+            <Flame className='size-4' />
+            <span>
+              {filteredFasts.length} fast{filteredFasts.length !== 1 && 's'}
+            </span>
+          </div>
+
+          <div className='flex items-center gap-2'>
+            <Clock3 className='size-4' />
+            <span>{averageFastHours.toFixed(1)}h average</span>
+          </div>
+
+          <div className='flex items-center gap-2'>
+            <Trophy className='size-4' />
+            <span>{longestFastHours.toFixed(1)}h longest</span>
+          </div>
         </div>
 
-        <div className='flex items-center gap-2'>
-          <Clock3 className='size-4' />
-          <span>{averageFastHours.toFixed(1)}h average</span>
-        </div>
+        <div className='flex w-full items-center justify-center gap-2'>
+          <Button variant='secondary'>
+            <Pen />
+            Edit fasts
+          </Button>
 
-        <div className='flex items-center gap-2'>
-          <Trophy className='size-4' />
-          <span>{longestFastHours.toFixed(1)}h longest</span>
+          <Button variant='secondary'>
+            <Plus />
+            Add fast
+          </Button>
         </div>
       </CardFooter>
     </Card>
