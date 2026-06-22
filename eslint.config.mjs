@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     'build/**',
     'next-env.d.ts',
     'coverage',
+    // Ignore imported ShadCN UI components.
+    'components/ui/**',
   ]),
   prettier,
 ])
