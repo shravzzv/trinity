@@ -51,7 +51,7 @@ export default function AddFastDialog() {
           </DialogDescription>
         </DialogHeader>
 
-        <FieldGroup className='mx-auto flex-row'>
+        <FieldGroup className='flex-row'>
           <Field>
             <FieldLabel htmlFor='start-date-picker'>Start date</FieldLabel>
             <Popover
@@ -75,13 +75,14 @@ export default function AddFastDialog() {
               >
                 <Calendar
                   mode='single'
-                  selected={startDate}
                   captionLayout='dropdown'
+                  selected={startDate}
                   defaultMonth={startDate}
                   onSelect={(date) => {
                     setStartDate(date)
                     setStartDatePopoverOpen(false)
                   }}
+                  disabled={{ after: new Date() }}
                 />
               </PopoverContent>
             </Popover>
@@ -101,7 +102,7 @@ export default function AddFastDialog() {
 
         <Separator />
 
-        <FieldGroup className='mx-auto flex-row'>
+        <FieldGroup className='flex-row'>
           <Field>
             <FieldLabel htmlFor='end-date-picker'>End date</FieldLabel>
             <Popover
@@ -125,13 +126,14 @@ export default function AddFastDialog() {
               >
                 <Calendar
                   mode='single'
-                  selected={endDate}
                   captionLayout='dropdown'
+                  selected={endDate}
                   defaultMonth={endDate}
                   onSelect={(date) => {
                     setEndDate(date)
                     setEndDatePopoverOpen(false)
                   }}
+                  disabled={{ after: new Date() }}
                 />
               </PopoverContent>
             </Popover>
