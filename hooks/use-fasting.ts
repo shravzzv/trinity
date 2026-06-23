@@ -60,6 +60,14 @@ export interface UseFastingResult {
    * session start time.
    */
   endFasting: () => void
+
+  /**
+   * Adds a new fast to the fasting history while ensuring the ascending
+   * order of the fasts.
+   *
+   * @param fast The new fast to add.
+   */
+  addFast: (fast: Fast) => void
 }
 
 const DEFAULT_FASTING_STATE: FastingState = {
@@ -119,6 +127,16 @@ export const useFasting = (): UseFastingResult => {
     })
   }
 
+  const addFast = (fast: Fast) => {
+    setFastingState((previous) => ({
+      ...previous,
+      fasts: [...previous.fasts, fast].sort(
+        (a, b) =>
+          new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime(),
+      ),
+    }))
+  }
+
   useEffect(() => {
     const hydrate = () => {
       try {
@@ -164,6 +182,7 @@ export const useFasting = (): UseFastingResult => {
   }, [fastingState, isHydrated])
 
   return {
+    addFast,
     isHydrated,
     updatePlanId,
     fasts: fastingState.fasts,

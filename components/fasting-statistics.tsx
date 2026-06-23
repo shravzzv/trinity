@@ -35,9 +35,13 @@ type Cadence = 'week' | 'month' | 'year' | 'all'
 
 interface FastingStatisticsProps {
   fasts: Fast[]
+  addFast: (fast: Fast) => void
 }
 
-export default function FastingStatistics({ fasts }: FastingStatisticsProps) {
+export default function FastingStatistics({
+  fasts,
+  addFast,
+}: FastingStatisticsProps) {
   const [cadence, setCadence] = useState<Cadence>('week')
 
   const filteredFasts = fasts.filter((fast) => {
@@ -180,7 +184,7 @@ export default function FastingStatistics({ fasts }: FastingStatisticsProps) {
             Edit fasts
           </Button>
 
-          <AddFastDialog />
+          <AddFastDialog fasts={fasts} addFast={addFast} />
         </div>
       </CardFooter>
     </Card>

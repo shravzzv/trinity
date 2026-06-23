@@ -19,9 +19,17 @@ import { format } from 'date-fns'
 import { Field, FieldGroup, FieldLabel } from './ui/field'
 import { Input } from './ui/input'
 import { Separator } from './ui/separator'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Alert, AlertTitle } from '@/components/ui/alert'
+import type { Fast } from '@/types/fasting'
+import { v4 as uuidv4 } from 'uuid'
+import { doesFastOverlap } from '@/lib/fasting'
 
-export default function AddFastDialog() {
+interface AddFastDialogProps {
+  fasts: Fast[]
+  addFast: (fast: Fast) => void
+}
+
+export default function AddFastDialog({ fasts, addFast }: AddFastDialogProps) {
   const [open, setOpen] = useState(false)
   const [startDatePopoverOpen, setStartDatePopoverOpen] = useState(false)
   const [endDatePopoverOpen, setEndDatePopoverOpen] = useState(false)
@@ -50,10 +58,6 @@ export default function AddFastDialog() {
     setEndedAt(endedAt)
   }
 
-  const doesFastOverlap = () => {
-    return false
-  }
-
   const errors: string[] = []
 
   if (startedAt >= endedAt) {
@@ -64,7 +68,7 @@ export default function AddFastDialog() {
     errors.push('The fast cannot end in the future.')
   }
 
-  if (doesFastOverlap()) {
+  if (doesFastOverlap(startedAt, endedAt, fasts)) {
     errors.push('The fast overlaps an existing fast.')
   }
 
@@ -76,9 +80,13 @@ export default function AddFastDialog() {
     }
 
     setOpen(false)
+    addFast({
+      id: uuidv4(),
+      startedAt: startedAt.toISOString(),
+      endedAt: endedAt.toISOString(),
+    })
     setShowErrors(false)
     resetForm()
-    console.log(`Started at ${startedAt} and ended at ${endedAt}.`)
   }
 
   const updateTime = (current: Date, value: string): Date => {
@@ -94,7 +102,13 @@ export default function AddFastDialog() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={(open) => setOpen(open)}>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        setOpen(open)
+        if (!open) setShowErrors(false)
+      }}
+    >
       <DialogTrigger asChild>
         <Button variant='secondary'>
           <Plus />
