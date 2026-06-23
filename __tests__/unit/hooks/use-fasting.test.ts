@@ -200,4 +200,79 @@ describe('useFasting', () => {
     expect(result.current.planId).toBe('20:4')
     expect(result.current.session).toEqual(originalSession)
   })
+
+  it('should create a completed fast when transitioning from fasting to eating', () => {
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2026-01-01T10:00:00.000Z'))
+
+    const { result } = renderHook(() => useFasting())
+
+    act(() => {
+      result.current.startFasting()
+    })
+
+    jest.setSystemTime(new Date('2026-01-01T18:00:00.000Z'))
+
+    act(() => {
+      result.current.endFasting()
+    })
+
+    expect(result.current.fasts).toHaveLength(1)
+
+    expect(result.current.fasts[0]).toEqual({
+      id: 'test-uuid',
+      startedAt: '2026-01-01T10:00:00.000Z',
+      endedAt: '2026-01-01T18:00:00.000Z',
+    })
+
+    expect(result.current.session?.status).toBe('eating')
+
+    jest.useRealTimers()
+  })
+
+  it('should add a fast to the fasting history', () => {
+    const { result } = renderHook(() => useFasting())
+
+    const fast = {
+      id: 'fast-1',
+      startedAt: '2026-01-01T10:00:00.000Z',
+      endedAt: '2026-01-01T18:00:00.000Z',
+    }
+
+    act(() => {
+      result.current.addFast(fast)
+    })
+
+    expect(result.current.fasts).toEqual([fast])
+  })
+
+  it('should keep fasts sorted by start date', () => {
+    const { result } = renderHook(() => useFasting())
+
+    act(() => {
+      result.current.addFast({
+        id: 'late',
+        startedAt: '2026-01-03T10:00:00.000Z',
+        endedAt: '2026-01-03T18:00:00.000Z',
+      })
+
+      result.current.addFast({
+        id: 'early',
+        startedAt: '2026-01-01T10:00:00.000Z',
+        endedAt: '2026-01-01T18:00:00.000Z',
+      })
+
+      result.current.addFast({
+        id: 'middle',
+        startedAt: '2026-01-02T10:00:00.000Z',
+        endedAt: '2026-01-02T18:00:00.000Z',
+      })
+    })
+
+    expect(result.current.fasts.map((fast) => fast.id)).toEqual([
+      'early',
+      'middle',
+      'late',
+    ])
+  })
 })
