@@ -35,37 +35,31 @@ export default function AddFastDialog({ fasts, addFast }: AddFastDialogProps) {
   const [endDatePopoverOpen, setEndDatePopoverOpen] = useState(false)
   const [showErrors, setShowErrors] = useState(false)
 
-  const [startedAt, setStartedAt] = useState<Date>(() => {
+  const getDefaultStartedAt = () => {
     const date = new Date()
     date.setHours(18, 0, 0)
     return date
-  })
+  }
 
-  const [endedAt, setEndedAt] = useState<Date>(() => {
+  const getDefaultEndedAt = () => {
     const date = new Date()
     date.setHours(17, 30, 0)
     return date
-  })
+  }
+
+  const [startedAt, setStartedAt] = useState<Date>(getDefaultStartedAt)
+  const [endedAt, setEndedAt] = useState<Date>(getDefaultEndedAt)
 
   const resetForm = () => {
-    const startedAt = new Date()
-    const endedAt = new Date()
-
-    startedAt.setHours(18, 0, 0)
-    endedAt.setHours(17, 30, 0)
-
-    setStartedAt(startedAt)
-    setEndedAt(endedAt)
+    setStartedAt(getDefaultStartedAt())
+    setEndedAt(getDefaultEndedAt())
   }
 
   const errors = getFastValidationErrors(startedAt, endedAt, fasts)
 
   const handleContinue = () => {
     setShowErrors(true)
-
-    if (errors.length !== 0) {
-      return
-    }
+    if (errors.length !== 0) return
 
     setOpen(false)
     addFast({
@@ -77,6 +71,7 @@ export default function AddFastDialog({ fasts, addFast }: AddFastDialogProps) {
     resetForm()
   }
 
+  // ! unsure about this naming. What is it updating exactly? Better name?
   const updateTime = (current: Date, value: string): Date => {
     const [hours, minutes] = value.split(':').map(Number)
 
@@ -128,7 +123,7 @@ export default function AddFastDialog({ fasts, addFast }: AddFastDialogProps) {
                   id='start-date-picker'
                   className='justify-between font-normal'
                 >
-                  {startedAt ? format(startedAt, 'PP') : 'Select date'}
+                  {format(startedAt, 'PP')}
                   <ChevronDownIcon />
                 </Button>
               </PopoverTrigger>
@@ -187,7 +182,7 @@ export default function AddFastDialog({ fasts, addFast }: AddFastDialogProps) {
                   id='end-date-picker'
                   className='justify-between font-normal'
                 >
-                  {endedAt ? format(endedAt, 'PP') : 'Select date'}
+                  {format(endedAt, 'PP')}
                   <ChevronDownIcon />
                 </Button>
               </PopoverTrigger>
