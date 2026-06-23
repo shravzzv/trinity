@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from './ui/button'
-import { ChevronDownIcon, Plus } from 'lucide-react'
+import { AlertCircle, ChevronDownIcon, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Calendar } from './ui/calendar'
@@ -19,16 +19,78 @@ import { format } from 'date-fns'
 import { Field, FieldGroup, FieldLabel } from './ui/field'
 import { Input } from './ui/input'
 import { Separator } from './ui/separator'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 export default function AddFastDialog() {
   const [open, setOpen] = useState(false)
   const [startDatePopoverOpen, setStartDatePopoverOpen] = useState(false)
   const [endDatePopoverOpen, setEndDatePopoverOpen] = useState(false)
-  const [startDate, setStartDate] = useState<Date>()
-  const [endDate, setEndDate] = useState<Date>()
+  const [showErrors, setShowErrors] = useState(false)
+
+  const [startedAt, setStartedAt] = useState<Date>(() => {
+    const date = new Date()
+    date.setHours(18, 0, 0)
+    return date
+  })
+
+  const [endedAt, setEndedAt] = useState<Date>(() => {
+    const date = new Date()
+    date.setHours(17, 30, 0)
+    return date
+  })
+
+  const resetForm = () => {
+    const startedAt = new Date()
+    const endedAt = new Date()
+
+    startedAt.setHours(18, 0, 0)
+    endedAt.setHours(17, 30, 0)
+
+    setStartedAt(startedAt)
+    setEndedAt(endedAt)
+  }
+
+  const doesFastOverlap = () => {
+    return false
+  }
+
+  const errors: string[] = []
+
+  if (startedAt >= endedAt) {
+    errors.push('The start time must be before the end time.')
+  }
+
+  if (endedAt > new Date()) {
+    errors.push('The fast cannot end in the future.')
+  }
+
+  if (doesFastOverlap()) {
+    errors.push('The fast overlaps an existing fast.')
+  }
 
   const handleContinue = () => {
+    setShowErrors(true)
+
+    if (errors.length !== 0) {
+      return
+    }
+
     setOpen(false)
+    setShowErrors(false)
+    resetForm()
+    console.log(`Started at ${startedAt} and ended at ${endedAt}.`)
+  }
+
+  const updateTime = (current: Date, value: string): Date => {
+    const [hours, minutes] = value.split(':').map(Number)
+
+    const next = new Date(current)
+    next.setHours(hours)
+    next.setMinutes(minutes)
+    next.setSeconds(0)
+    next.setMilliseconds(0)
+
+    return next
   }
 
   return (
@@ -64,7 +126,7 @@ export default function AddFastDialog() {
                   id='start-date-picker'
                   className='justify-between font-normal'
                 >
-                  {startDate ? format(startDate, 'PP') : 'Select date'}
+                  {startedAt ? format(startedAt, 'PP') : 'Select date'}
                   <ChevronDownIcon />
                 </Button>
               </PopoverTrigger>
@@ -76,10 +138,15 @@ export default function AddFastDialog() {
                 <Calendar
                   mode='single'
                   captionLayout='dropdown'
-                  selected={startDate}
-                  defaultMonth={startDate}
+                  selected={startedAt}
+                  defaultMonth={startedAt}
                   onSelect={(date) => {
-                    setStartDate(date)
+                    if (!date) return
+                    const next = new Date(date)
+                    next.setHours(startedAt.getHours())
+                    next.setMinutes(startedAt.getMinutes())
+                    next.setSeconds(startedAt.getSeconds())
+                    setStartedAt(next)
                     setStartDatePopoverOpen(false)
                   }}
                   disabled={{ after: new Date() }}
@@ -94,8 +161,11 @@ export default function AddFastDialog() {
               id='start-time-picker'
               type='time'
               step='1'
-              defaultValue='18:00:00'
               className='appearance-none pr-0 outline [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
+              value={format(startedAt, 'HH:mm:ss')}
+              onChange={(e) => {
+                setStartedAt(updateTime(startedAt, e.target.value))
+              }}
             />
           </Field>
         </FieldGroup>
@@ -115,7 +185,7 @@ export default function AddFastDialog() {
                   id='end-date-picker'
                   className='justify-between font-normal'
                 >
-                  {endDate ? format(endDate, 'PP') : 'Select date'}
+                  {endedAt ? format(endedAt, 'PP') : 'Select date'}
                   <ChevronDownIcon />
                 </Button>
               </PopoverTrigger>
@@ -127,10 +197,15 @@ export default function AddFastDialog() {
                 <Calendar
                   mode='single'
                   captionLayout='dropdown'
-                  selected={endDate}
-                  defaultMonth={endDate}
+                  selected={endedAt}
+                  defaultMonth={endedAt}
                   onSelect={(date) => {
-                    setEndDate(date)
+                    if (!date) return
+                    const next = new Date(date)
+                    next.setHours(endedAt.getHours())
+                    next.setMinutes(endedAt.getMinutes())
+                    next.setSeconds(endedAt.getSeconds())
+                    setEndedAt(next)
                     setEndDatePopoverOpen(false)
                   }}
                   disabled={{ after: new Date() }}
@@ -145,11 +220,29 @@ export default function AddFastDialog() {
               id='end-time-picker'
               type='time'
               step='1'
-              defaultValue='17:30:00'
               className='appearance-none pr-0 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
+              value={format(endedAt, 'HH:mm:ss')}
+              onChange={(e) => {
+                setEndedAt(updateTime(endedAt, e.target.value))
+              }}
             />
           </Field>
         </FieldGroup>
+
+        {showErrors && errors.length > 0 && (
+          <Alert variant='destructive'>
+            <AlertCircle />
+            <AlertTitle>Unable to add fast </AlertTitle>
+
+            <ul className='my-1 list-disc space-y-1 text-sm'>
+              {errors.map((error) => (
+                <li key={error} className=''>
+                  {error}
+                </li>
+              ))}
+            </ul>
+          </Alert>
+        )}
 
         <DialogFooter>
           <DialogClose asChild>
@@ -158,7 +251,13 @@ export default function AddFastDialog() {
             </Button>
           </DialogClose>
 
-          <Button onClick={handleContinue}>Continue</Button>
+          <Button
+            onClick={handleContinue}
+            disabled={showErrors && errors.length > 0}
+            className='disabled:cursor-not-allowed'
+          >
+            Continue
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
