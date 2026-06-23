@@ -98,7 +98,7 @@ export default function FastingStatistics({
           ? { day: 'numeric', month: 'short', year: 'numeric' }
           : { day: 'numeric', month: 'short' },
     ),
-    length: getFastDurationHours(fast).toFixed(),
+    length: getFastDurationHours(fast).toFixed(1),
   }))
 
   const chartConfig = {
