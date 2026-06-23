@@ -34,3 +34,69 @@ export const formatDuration = (ms: number): string => {
     seconds.toString().padStart(2, '0'),
   ].join(':')
 }
+
+/**
+ * Returns a new Date with its time components replaced.
+ *
+ * The original date is not mutated.
+ *
+ * @param date The date whose time should be replaced.
+ * @param hours The new hour value.
+ * @param minutes The new minute value.
+ * @param seconds The new second value.
+ * @returns A new Date with the specified time.
+ */
+export const replaceTime = (
+  date: Date,
+  hours: number,
+  minutes: number,
+  seconds: number,
+): Date => {
+  const result = new Date(date)
+  result.setHours(hours)
+  result.setMinutes(minutes)
+  result.setSeconds(seconds)
+  return result
+}
+
+/**
+ * Returns a new Date with its time replaced using the value from a
+ * HTML time input.
+ *
+ * Supports both `HH:mm` and `HH:mm:ss` formats.
+ *
+ * The original date is not mutated.
+ *
+ * @param date The date whose time should be replaced.
+ * @param inputValue A time string from an HTML time input.
+ * @returns A new Date with the parsed time applied.
+ */
+export const replaceTimeFromInputValue = (
+  date: Date,
+  inputValue: string,
+): Date => {
+  const [hours, minutes, seconds = 0] = inputValue.split(':').map(Number)
+  return replaceTime(date, hours, minutes, seconds)
+}
+
+/**
+ * Returns a new Date whose date components come from one Date and whose
+ * time components come from another Date.
+ *
+ * Useful when a user selects a new calendar date but the existing time
+ * should be preserved.
+ *
+ * The original dates are not mutated.
+ *
+ * @param targetDate The Date that provides the year, month, and day.
+ * @param sourceDate The Date that provides the time components.
+ * @returns A new Date containing the selected date and preserved time.
+ */
+export const copyTime = (targetDate: Date, sourceDate: Date): Date => {
+  return replaceTime(
+    targetDate,
+    sourceDate.getHours(),
+    sourceDate.getMinutes(),
+    sourceDate.getSeconds(),
+  )
+}

@@ -1,4 +1,9 @@
-import { formatDuration } from '@/lib/time'
+import {
+  formatDuration,
+  copyTime,
+  replaceTime,
+  replaceTimeFromInputValue,
+} from '@/lib/time'
 
 describe('formatDuration', () => {
   it('should format zero milliseconds', () => {
@@ -27,5 +32,84 @@ describe('formatDuration', () => {
 
   it('should support durations longer than 24 hours', () => {
     expect(formatDuration(90_061_000)).toBe('25:01:01')
+  })
+})
+
+describe('replaceTime', () => {
+  it('should replace the time components of a date', () => {
+    const date = new Date(2026, 5, 20, 10, 30, 45)
+    const result = replaceTime(date, 18, 0, 0)
+
+    expect(result).toEqual(new Date(2026, 5, 20, 18, 0, 0))
+  })
+
+  it('should not mutate the original date', () => {
+    const original = new Date(2026, 5, 20, 10, 30, 45)
+    replaceTime(original, 18, 0, 0)
+
+    expect(original).toEqual(new Date(2026, 5, 20, 10, 30, 45))
+  })
+})
+
+describe('replaceTimeFromInputValue', () => {
+  it('should replace the time from a HH:mm input value', () => {
+    const date = new Date(2026, 5, 20, 10, 30, 45)
+    const result = replaceTimeFromInputValue(date, '18:15')
+
+    expect(result).toEqual(new Date(2026, 5, 20, 18, 15, 0))
+  })
+
+  it('should replace the time from a HH:mm:ss input value', () => {
+    const date = new Date(2026, 5, 20, 10, 30, 45)
+    const result = replaceTimeFromInputValue(date, '18:15:30')
+
+    expect(result).toEqual(new Date(2026, 5, 20, 18, 15, 30))
+  })
+
+  it('should not mutate the original date', () => {
+    const original = new Date(2026, 5, 20, 10, 30, 45)
+    replaceTimeFromInputValue(original, '18:15')
+
+    expect(original).toEqual(new Date(2026, 5, 20, 10, 30, 45))
+  })
+})
+
+describe('copyTime', () => {
+  it('should copy the time from the source date', () => {
+    const targetDate = new Date(2026, 5, 20, 0, 0, 0)
+    const sourceDate = new Date(2026, 5, 22, 18, 15, 30)
+
+    const result = copyTime(targetDate, sourceDate)
+
+    expect(result).toEqual(new Date(2026, 5, 20, 18, 15, 30))
+  })
+
+  it('should preserve the target date components', () => {
+    const targetDate = new Date(2026, 5, 20, 0, 0, 0)
+    const sourceDate = new Date(2030, 0, 1, 18, 15, 30)
+
+    const result = copyTime(targetDate, sourceDate)
+
+    expect(result.getFullYear()).toBe(2026)
+    expect(result.getMonth()).toBe(5)
+    expect(result.getDate()).toBe(20)
+  })
+
+  it('should not mutate the target date', () => {
+    const targetDate = new Date(2026, 5, 20, 0, 0, 0)
+    const sourceDate = new Date(2026, 5, 22, 18, 15, 30)
+
+    copyTime(targetDate, sourceDate)
+
+    expect(targetDate).toEqual(new Date(2026, 5, 20, 0, 0, 0))
+  })
+
+  it('should not mutate the source date', () => {
+    const targetDate = new Date(2026, 5, 20, 0, 0, 0)
+    const sourceDate = new Date(2026, 5, 22, 18, 15, 30)
+
+    copyTime(targetDate, sourceDate)
+
+    expect(sourceDate).toEqual(new Date(2026, 5, 22, 18, 15, 30))
   })
 })
