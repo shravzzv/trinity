@@ -22,7 +22,7 @@ import { Separator } from './ui/separator'
 import { Alert, AlertTitle } from '@/components/ui/alert'
 import type { Fast } from '@/types/fasting'
 import { v4 as uuidv4 } from 'uuid'
-import { doesFastOverlap } from '@/lib/fasting'
+import { getFastValidationErrors } from '@/lib/fasting'
 
 interface AddFastDialogProps {
   fasts: Fast[]
@@ -58,19 +58,7 @@ export default function AddFastDialog({ fasts, addFast }: AddFastDialogProps) {
     setEndedAt(endedAt)
   }
 
-  const errors: string[] = []
-
-  if (startedAt >= endedAt) {
-    errors.push('The start time must be before the end time.')
-  }
-
-  if (endedAt > new Date()) {
-    errors.push('The fast cannot end in the future.')
-  }
-
-  if (doesFastOverlap(startedAt, endedAt, fasts)) {
-    errors.push('The fast overlaps an existing fast.')
-  }
+  const errors = getFastValidationErrors(startedAt, endedAt, fasts)
 
   const handleContinue = () => {
     setShowErrors(true)

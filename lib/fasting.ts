@@ -71,3 +71,40 @@ export const doesFastOverlap = (
     return startedAt < existingEndedAt && endedAt > existingStartedAt
   })
 }
+
+/**
+ * Returns any validation errors that prevent a candidate fast
+ * from being added to the fasting history.
+ *
+ * Validation rules:
+ *
+ * - The start time must occur before the end time.
+ * - The fast cannot end in the future.
+ * - The fast cannot overlap an existing fast.
+ *
+ * @param startedAt The proposed fast start time.
+ * @param endedAt The proposed fast end time.
+ * @param fasts Existing fasts in the fasting history.
+ * @returns A list of validation error messages. Returns an empty array when the fast is valid.
+ */
+export const getFastValidationErrors = (
+  startedAt: Date,
+  endedAt: Date,
+  fasts: Fast[],
+): string[] => {
+  const errors: string[] = []
+
+  if (startedAt >= endedAt) {
+    errors.push('The start time must be before the end time.')
+  }
+
+  if (endedAt > new Date()) {
+    errors.push('The fast cannot end in the future.')
+  }
+
+  if (doesFastOverlap(startedAt, endedAt, fasts)) {
+    errors.push('The fast overlaps an existing fast.')
+  }
+
+  return errors
+}

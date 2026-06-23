@@ -1,4 +1,8 @@
-import { getFastDurationHours, doesFastOverlap } from '@/lib/fasting'
+import {
+  getFastDurationHours,
+  doesFastOverlap,
+  getFastValidationErrors,
+} from '@/lib/fasting'
 import type { Fast } from '@/types/fasting'
 
 describe('getFastDurationHours', () => {
@@ -171,5 +175,76 @@ describe('doesFastOverlap', () => {
         fasts,
       ),
     ).toBe(true)
+  })
+})
+
+describe('getFastValidationErrors', () => {
+  it('should return an empty array when the fast is valid', () => {
+    expect(
+      getFastValidationErrors(
+        new Date(2026, 5, 20, 18, 0),
+        new Date(2026, 5, 21, 10, 0),
+        [],
+      ),
+    ).toEqual([])
+  })
+
+  it('should return an error when the start time is after the end time', () => {
+    expect(
+      getFastValidationErrors(
+        new Date(2026, 5, 21, 10, 0),
+        new Date(2026, 5, 20, 18, 0),
+        [],
+      ),
+    ).toContain('The start time must be before the end time.')
+  })
+
+  it('should return an error when the start time equals the end time', () => {
+    const date = new Date(2026, 5, 20, 18, 0)
+
+    expect(getFastValidationErrors(date, date, [])).toContain(
+      'The start time must be before the end time.',
+    )
+  })
+
+  it('should return an error when the fast ends in the future', () => {
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+
+    expect(getFastValidationErrors(new Date(), tomorrow, [])).toContain(
+      'The fast cannot end in the future.',
+    )
+  })
+
+  it('should return an error when the fast overlaps an existing fast', () => {
+    const fasts: Fast[] = [
+      {
+        id: '1',
+        startedAt: new Date(2026, 5, 20, 10, 0).toISOString(),
+        endedAt: new Date(2026, 5, 20, 20, 0).toISOString(),
+      },
+    ]
+
+    expect(
+      getFastValidationErrors(
+        new Date(2026, 5, 20, 12, 0),
+        new Date(2026, 5, 20, 18, 0),
+        fasts,
+      ),
+    ).toContain('The fast overlaps an existing fast.')
+  })
+
+  it('should return multiple errors when multiple validation rules fail', () => {
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+
+    const dayAfterTomorrow = new Date()
+    dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2)
+
+    const errors = getFastValidationErrors(dayAfterTomorrow, tomorrow, [])
+
+    expect(errors).toContain('The start time must be before the end time.')
+    expect(errors).toContain('The fast cannot end in the future.')
+    expect(errors).toHaveLength(2)
   })
 })
