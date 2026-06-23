@@ -1,4 +1,4 @@
-import { getFastDurationHours } from '@/lib/fasting'
+import { getFastDurationHours, doesFastOverlap } from '@/lib/fasting'
 import type { Fast } from '@/types/fasting'
 
 describe('getFastDurationHours', () => {
@@ -50,5 +50,126 @@ describe('getFastDurationHours', () => {
     }
 
     expect(getFastDurationHours(fast)).toBe(48)
+  })
+})
+
+describe('doesFastOverlap', () => {
+  const existingFast: Fast = {
+    id: '1',
+    startedAt: new Date(2026, 5, 20, 10, 0).toISOString(),
+    endedAt: new Date(2026, 5, 20, 20, 0).toISOString(),
+  }
+
+  it('should return false when there are no existing fasts', () => {
+    expect(
+      doesFastOverlap(
+        new Date(2026, 5, 20, 12, 0),
+        new Date(2026, 5, 20, 18, 0),
+        [],
+      ),
+    ).toBe(false)
+  })
+
+  it('should return false when the candidate fast is completely before an existing fast', () => {
+    expect(
+      doesFastOverlap(
+        new Date(2026, 5, 20, 6, 0),
+        new Date(2026, 5, 20, 9, 0),
+        [existingFast],
+      ),
+    ).toBe(false)
+  })
+
+  it('should return false when the candidate fast is completely after an existing fast', () => {
+    expect(
+      doesFastOverlap(
+        new Date(2026, 5, 20, 21, 0),
+        new Date(2026, 5, 20, 22, 0),
+        [existingFast],
+      ),
+    ).toBe(false)
+  })
+
+  it('should return false when the candidate fast starts exactly when an existing fast ends', () => {
+    expect(
+      doesFastOverlap(
+        new Date(2026, 5, 20, 20, 0),
+        new Date(2026, 5, 20, 22, 0),
+        [existingFast],
+      ),
+    ).toBe(false)
+  })
+
+  it('should return false when the candidate fast ends exactly when an existing fast starts', () => {
+    expect(
+      doesFastOverlap(
+        new Date(2026, 5, 20, 8, 0),
+        new Date(2026, 5, 20, 10, 0),
+        [existingFast],
+      ),
+    ).toBe(false)
+  })
+
+  it('should return true when the candidate fast overlaps the start of an existing fast', () => {
+    expect(
+      doesFastOverlap(
+        new Date(2026, 5, 20, 8, 0),
+        new Date(2026, 5, 20, 12, 0),
+        [existingFast],
+      ),
+    ).toBe(true)
+  })
+
+  it('should return true when the candidate fast overlaps the end of an existing fast', () => {
+    expect(
+      doesFastOverlap(
+        new Date(2026, 5, 20, 18, 0),
+        new Date(2026, 5, 20, 22, 0),
+        [existingFast],
+      ),
+    ).toBe(true)
+  })
+
+  it('should return true when the candidate fast is fully contained within an existing fast', () => {
+    expect(
+      doesFastOverlap(
+        new Date(2026, 5, 20, 12, 0),
+        new Date(2026, 5, 20, 18, 0),
+        [existingFast],
+      ),
+    ).toBe(true)
+  })
+
+  it('should return true when the candidate fast fully contains an existing fast', () => {
+    expect(
+      doesFastOverlap(
+        new Date(2026, 5, 20, 8, 0),
+        new Date(2026, 5, 20, 22, 0),
+        [existingFast],
+      ),
+    ).toBe(true)
+  })
+
+  it('should return true when the candidate fast overlaps any existing fast', () => {
+    const fasts: Fast[] = [
+      {
+        id: '1',
+        startedAt: new Date(2026, 5, 20, 10, 0).toISOString(),
+        endedAt: new Date(2026, 5, 20, 20, 0).toISOString(),
+      },
+      {
+        id: '2',
+        startedAt: new Date(2026, 5, 21, 10, 0).toISOString(),
+        endedAt: new Date(2026, 5, 21, 20, 0).toISOString(),
+      },
+    ]
+
+    expect(
+      doesFastOverlap(
+        new Date(2026, 5, 21, 15, 0),
+        new Date(2026, 5, 21, 22, 0),
+        fasts,
+      ),
+    ).toBe(true)
   })
 })
