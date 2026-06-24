@@ -24,14 +24,14 @@ interface FastListItemProps {
   fast: Fast
   fasts: Fast[]
   onDelete: () => void
-  onEdit: (startedAt: Date, endedAt: Date) => void
+  onUpdate: (startedAt: Date, endedAt: Date) => void
 }
 
 export default function FastListItem({
   fast,
   fasts,
   onDelete,
-  onEdit,
+  onUpdate,
 }: FastListItemProps) {
   return (
     <Card>
@@ -78,10 +78,8 @@ export default function FastListItem({
         <FastDialog
           dialogTitle='Edit past fast'
           dialogDescription='Adjust the start and end times for this completed fast. To keep your history accurate, fasts cannot overlap with existing entries.'
-          fasts={fasts}
-          onSubmit={(startedAt, endedAt) => {
-            onEdit(startedAt, endedAt)
-          }}
+          existingFasts={fasts.filter((f) => f.id !== fast.id)}
+          onSubmit={(startedAt, endedAt) => onUpdate(startedAt, endedAt)}
           submitLabel='Edit fast'
           triggerTitle='Edit'
           triggerIcon={Pen}

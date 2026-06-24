@@ -20,11 +20,13 @@ import { toast } from 'sonner'
 interface EditFastsSheetProps {
   fasts: Fast[]
   deleteFast: (id: string) => void
+  updateFast: (updatedFast: Fast) => void
 }
 
 export default function EditFastsSheet({
   fasts,
   deleteFast,
+  updateFast,
 }: EditFastsSheetProps) {
   const sortedFasts = [...fasts].sort(
     (a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
@@ -68,9 +70,13 @@ export default function EditFastsSheet({
                     deleteFast(fast.id)
                     toast.success('Fast deleted')
                   }}
-                  onEdit={(startedAt, endedAt) => {
-                    console.log(fast.id, startedAt, endedAt)
-                    toast.success('Fast edited')
+                  onUpdate={(startedAt, endedAt) => {
+                    updateFast({
+                      ...fast,
+                      startedAt: startedAt.toISOString(),
+                      endedAt: endedAt.toISOString(),
+                    })
+                    toast.success('Fast updated')
                   }}
                 />
               ))}

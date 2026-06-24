@@ -21,6 +21,7 @@ export default function Page() {
     updatePlanId,
     addFast,
     deleteFast,
+    updateFast,
   } = useFasting()
   const isLoading = !isHydrated
 
@@ -49,6 +50,7 @@ export default function Page() {
         fasts={fasts}
         addFast={addFast}
         deleteFast={deleteFast}
+        updateFast={updateFast}
       />
 
       <Button

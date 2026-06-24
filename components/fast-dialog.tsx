@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from './ui/button'
 import { AlertCircle, ChevronDownIcon, LucideIcon } from 'lucide-react'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Calendar } from './ui/calendar'
 import { format } from 'date-fns'
@@ -25,19 +25,60 @@ import { getFastValidationErrors } from '@/lib/fasting'
 import { copyTime, replaceTimeFromInputValue } from '@/lib/time'
 
 interface FastDialogProps {
-  fasts: Fast[]
+  /**
+   * Existing fasts used for overlap validation.
+   *
+   * When editing a fast, pass all fasts except the fast currently being edited.
+   */
+  existingFasts: Fast[]
+
+  /**
+   * Text displayed in the trigger button.
+   */
   triggerTitle: string
+
+  /**
+   * Icon displayed in the trigger button.
+   */
   triggerIcon: LucideIcon
+
+  /**
+   * Title displayed at the top of the dialog.
+   */
   dialogTitle: string
+
+  /**
+   * Supporting description displayed below the dialog title.
+   */
   dialogDescription: string
+
+  /**
+   * Initial start time shown when the dialog opens.
+   *
+   * When omitted, a sensible default is used.
+   */
   initialStartedAt?: Date
+
+  /**
+   * Initial end time shown when the dialog opens.
+   *
+   * When omitted, a sensible default is used.
+   */
   initialEndedAt?: Date
+
+  /**
+   * Label displayed on the submit button.
+   */
   submitLabel: string
+
+  /**
+   * Called after validation succeeds.
+   */
   onSubmit: (startedAt: Date, endedAt: Date) => void
 }
 
 export default function FastDialog({
-  fasts,
+  existingFasts,
   triggerTitle,
   triggerIcon,
   dialogTitle,
@@ -52,26 +93,26 @@ export default function FastDialog({
   const [endDatePopoverOpen, setEndDatePopoverOpen] = useState(false)
   const [showErrors, setShowErrors] = useState(false)
 
-  const getDefaultStartedAt = () => {
+  const getDefaultStartedAt = useCallback(() => {
     if (initialStartedAt) return new Date(initialStartedAt)
 
     const date = new Date()
     date.setHours(18, 0, 0)
     return date
-  }
+  }, [initialStartedAt])
 
-  const getDefaultEndedAt = () => {
+  const getDefaultEndedAt = useCallback(() => {
     if (initialEndedAt) return new Date(initialEndedAt)
 
     const date = new Date()
     date.setHours(17, 30, 0)
     return date
-  }
+  }, [initialEndedAt])
 
   const [startedAt, setStartedAt] = useState<Date>(getDefaultStartedAt)
   const [endedAt, setEndedAt] = useState<Date>(getDefaultEndedAt)
 
-  const errors = getFastValidationErrors(startedAt, endedAt, fasts)
+  const errors = getFastValidationErrors(startedAt, endedAt, existingFasts)
 
   const resetForm = () => {
     setStartedAt(getDefaultStartedAt())
@@ -89,6 +130,19 @@ export default function FastDialog({
   }
 
   const TriggerIcon = triggerIcon
+
+  /**
+   * Synchronizes the form state whenever the initial values change.
+   *
+   * This ensures the dialog reflects the latest fast being edited rather
+   * than retaining stale values from a previous render.
+   */
+  useEffect(() => {
+    ;(() => {
+      setStartedAt(getDefaultStartedAt())
+      setEndedAt(getDefaultEndedAt())
+    })()
+  }, [getDefaultEndedAt, getDefaultStartedAt])
 
   return (
     <Dialog

@@ -38,12 +38,14 @@ interface FastingStatisticsProps {
   fasts: Fast[]
   addFast: (fast: Fast) => void
   deleteFast: (id: string) => void
+  updateFast: (updatedFast: Fast) => void
 }
 
 export default function FastingStatistics({
   fasts,
   addFast,
   deleteFast,
+  updateFast,
 }: FastingStatisticsProps) {
   const [cadence, setCadence] = useState<Cadence>('week')
 
@@ -182,12 +184,16 @@ export default function FastingStatistics({
         </div>
 
         <div className='flex w-full items-center justify-center gap-2'>
-          <EditFastsSheet fasts={fasts} deleteFast={deleteFast} />
+          <EditFastsSheet
+            fasts={fasts}
+            deleteFast={deleteFast}
+            updateFast={updateFast}
+          />
 
           <FastDialog
             dialogTitle='Add past fast'
             dialogDescription='Manually add a completed fast to your fasting history. Choose a start and end time in the past. To keep your history accurate, fasts cannot overlap with existing entries.'
-            fasts={fasts}
+            existingFasts={fasts}
             onSubmit={(startedAt, endedAt) =>
               addFast({
                 id: uuidv4(),

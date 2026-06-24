@@ -75,6 +75,13 @@ export interface UseFastingResult {
    * @param id The id of the fast to delete
    */
   deleteFast: (id: string) => void
+
+  /**
+   * Updates a fast in the fasting history.
+   *
+   * @param updatedFast The updated fast.
+   */
+  updateFast: (updatedFast: Fast) => void
 }
 
 const DEFAULT_FASTING_STATE: FastingState = {
@@ -152,6 +159,18 @@ export const useFasting = (): UseFastingResult => {
     }))
   }
 
+  const updateFast = (updatedFast: Fast) => {
+    setFastingState((previous) => ({
+      ...previous,
+      fasts: previous.fasts
+        .map((fast) => (fast.id === updatedFast.id ? updatedFast : fast))
+        .sort(
+          (a, b) =>
+            new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime(),
+        ),
+    }))
+  }
+
   useEffect(() => {
     const hydrate = () => {
       try {
@@ -200,6 +219,7 @@ export const useFasting = (): UseFastingResult => {
     addFast,
     isHydrated,
     deleteFast,
+    updateFast,
     updatePlanId,
     fasts: fastingState.fasts,
     planId: fastingState.planId,
