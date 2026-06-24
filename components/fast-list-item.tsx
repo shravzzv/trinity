@@ -2,10 +2,22 @@
 
 import type { Fast } from '@/types/fasting'
 import { Button } from './ui/button'
-import { Flag, Pen, Play, Trash } from 'lucide-react'
+import { Flag, Pen, Play, Trash, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { formatDuration } from '@/lib/time'
 import { Card, CardContent, CardFooter } from './ui/card'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 interface FastListItemProps {
   fast: Fast
@@ -59,10 +71,35 @@ export default function FastListItem({ fast }: FastListItemProps) {
           Edit
         </Button>
 
-        <Button variant='destructive'>
-          <Trash />
-          Delete
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant='destructive'>
+              <Trash />
+              Delete
+            </Button>
+          </AlertDialogTrigger>
+
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogMedia className='bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive'>
+                <Trash2 />
+              </AlertDialogMedia>
+
+              <AlertDialogTitle>Delete fast?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This fast will be permanently removed from your fasting history.
+                This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction variant='destructive'>
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardFooter>
     </Card>
   )
