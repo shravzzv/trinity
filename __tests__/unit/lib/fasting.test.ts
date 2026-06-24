@@ -2,6 +2,7 @@ import {
   getFastDurationHours,
   doesFastOverlap,
   getFastValidationErrors,
+  filterFastsByCadence,
 } from '@/lib/fasting'
 import type { Fast } from '@/types/fasting'
 
@@ -246,5 +247,124 @@ describe('getFastValidationErrors', () => {
     expect(errors).toContain('The start time must be before the end time.')
     expect(errors).toContain('The fast cannot end in the future.')
     expect(errors).toHaveLength(2)
+  })
+})
+
+describe('filterFastsByCadence', () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2026-01-10T00:00:00.000Z'))
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
+  })
+
+  const fasts: Fast[] = [
+    {
+      id: 'week',
+      startedAt: '2026-01-05T00:00:00.000Z',
+      endedAt: '2026-01-05T16:00:00.000Z',
+    },
+    {
+      id: 'month',
+      startedAt: '2025-12-20T00:00:00.000Z',
+      endedAt: '2025-12-20T16:00:00.000Z',
+    },
+    {
+      id: 'year',
+      startedAt: '2025-06-01T00:00:00.000Z',
+      endedAt: '2025-06-01T16:00:00.000Z',
+    },
+    {
+      id: 'old',
+      startedAt: '2024-01-01T00:00:00.000Z',
+      endedAt: '2024-01-01T16:00:00.000Z',
+    },
+  ]
+
+  it('should return all fasts when cadence is all', () => {
+    expect(filterFastsByCadence(fasts, 'all')).toEqual(fasts)
+  })
+
+  it('should return only fasts from the last week', () => {
+    const result = filterFastsByCadence(fasts, 'week')
+
+    expect(result.map((fast) => fast.id)).toEqual(['week'])
+  })
+
+  it('should return only fasts from the last month', () => {
+    const result = filterFastsByCadence(fasts, 'month')
+
+    expect(result.map((fast) => fast.id)).toEqual(['week', 'month'])
+  })
+
+  it('should return only fasts from the last year', () => {
+    const result = filterFastsByCadence(fasts, 'year')
+
+    expect(result.map((fast) => fast.id)).toEqual(['week', 'month', 'year'])
+  })
+
+  it('should return an empty array when no fasts match the cadence', () => {
+    const result = filterFastsByCadence(
+      [
+        {
+          id: 'old',
+          startedAt: '2020-01-01T00:00:00.000Z',
+          endedAt: '2020-01-01T16:00:00.000Z',
+        },
+      ],
+      'week',
+    )
+
+    expect(result).toEqual([])
+  })
+
+  it('should include fasts exactly on the weekly cutoff boundary', () => {
+    const result = filterFastsByCadence(
+      [
+        {
+          id: 'boundary',
+          startedAt: '2026-01-03T00:00:00.000Z',
+          endedAt: '2026-01-03T16:00:00.000Z',
+        },
+      ],
+      'week',
+    )
+
+    expect(result).toHaveLength(1)
+    expect(result[0].id).toBe('boundary')
+  })
+
+  it('should include fasts exactly on the monthly cutoff boundary', () => {
+    const result = filterFastsByCadence(
+      [
+        {
+          id: 'boundary',
+          startedAt: '2025-12-10T00:00:00.000Z',
+          endedAt: '2025-12-10T16:00:00.000Z',
+        },
+      ],
+      'month',
+    )
+
+    expect(result).toHaveLength(1)
+    expect(result[0].id).toBe('boundary')
+  })
+
+  it('should include fasts exactly on the yearly cutoff boundary', () => {
+    const result = filterFastsByCadence(
+      [
+        {
+          id: 'boundary',
+          startedAt: '2025-01-10T00:00:00.000Z',
+          endedAt: '2025-01-10T16:00:00.000Z',
+        },
+      ],
+      'year',
+    )
+
+    expect(result).toHaveLength(1)
+    expect(result[0].id).toBe('boundary')
   })
 })

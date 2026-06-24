@@ -26,14 +26,12 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Clock3, Flame, Plus, Trophy } from 'lucide-react'
-import { Fast } from '@/types/fasting'
-import { getFastDurationHours } from '@/lib/fasting'
+import type { Fast, FastingStatisticsCadence } from '@/types/fasting'
+import { filterFastsByCadence, getFastDurationHours } from '@/lib/fasting'
 import EditFastsSheet from './edit-fasts-sheet'
 import FastDialog from './fast-dialog'
 import { v4 as uuidv4 } from 'uuid'
 import { toast } from 'sonner'
-
-type Cadence = 'week' | 'month' | 'year' | 'all'
 
 interface FastingStatisticsProps {
   fasts: Fast[]
@@ -48,31 +46,9 @@ export default function FastingStatistics({
   deleteFast,
   updateFast,
 }: FastingStatisticsProps) {
-  const [cadence, setCadence] = useState<Cadence>('week')
+  const [cadence, setCadence] = useState<FastingStatisticsCadence>('week')
 
-  const filteredFasts = fasts.filter((fast) => {
-    if (cadence === 'all') return true
-
-    const startedAt = new Date(fast.startedAt)
-    const cutoff = new Date()
-
-    switch (cadence) {
-      case 'week':
-        cutoff.setDate(cutoff.getDate() - 7)
-        break
-
-      case 'month':
-        cutoff.setMonth(cutoff.getMonth() - 1)
-        break
-
-      case 'year':
-        cutoff.setFullYear(cutoff.getFullYear() - 1)
-        break
-    }
-
-    return startedAt >= cutoff
-  })
-
+  const filteredFasts = filterFastsByCadence(fasts, cadence)
   const firstFast = filteredFasts[0]
   const lastFast = filteredFasts.at(-1)
 
@@ -122,7 +98,7 @@ export default function FastingStatistics({
         <CardAction>
           <Select
             value={cadence}
-            onValueChange={(v) => setCadence(v as Cadence)}
+            onValueChange={(v) => setCadence(v as FastingStatisticsCadence)}
           >
             <SelectTrigger>
               <SelectValue placeholder='Cadence' />

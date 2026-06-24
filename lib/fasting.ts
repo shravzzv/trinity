@@ -19,7 +19,7 @@
  * of the user interface.
  */
 
-import type { Fast } from '@/types/fasting'
+import type { Fast, FastingStatisticsCadence } from '@/types/fasting'
 
 /**
  * Calculates the duration of a completed fast in hours.
@@ -107,4 +107,52 @@ export const getFastValidationErrors = (
   }
 
   return errors
+}
+
+/**
+ * Filters fasts to those that fall within the selected statistics cadence.
+ *
+ * The comparison is based on each fast's `startedAt` timestamp relative
+ * to the current date and time.
+ *
+ * Cadence rules:
+ *
+ * - `week` — includes fasts started within the last 7 days.
+ * - `month` — includes fasts started within the last month.
+ * - `year` — includes fasts started within the last year.
+ * - `all` — includes every fast.
+ *
+ * Fasts whose start timestamp falls exactly on the calculated cutoff
+ * are included.
+ *
+ * @param fasts The fasting history to filter.
+ * @param cadence The time range to include.
+ * @returns A new array containing only the fasts that match the selected cadence.
+ */
+export const filterFastsByCadence = (
+  fasts: Fast[],
+  cadence: FastingStatisticsCadence,
+): Fast[] => {
+  return fasts.filter((fast) => {
+    if (cadence === 'all') return true
+
+    const startedAt = new Date(fast.startedAt)
+    const cutoff = new Date()
+
+    switch (cadence) {
+      case 'week':
+        cutoff.setDate(cutoff.getDate() - 7)
+        break
+
+      case 'month':
+        cutoff.setMonth(cutoff.getMonth() - 1)
+        break
+
+      case 'year':
+        cutoff.setFullYear(cutoff.getFullYear() - 1)
+        break
+    }
+
+    return startedAt >= cutoff
+  })
 }
