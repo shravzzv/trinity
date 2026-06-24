@@ -25,11 +25,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Clock3, Flame, Trophy } from 'lucide-react'
+import { Clock3, Flame, Plus, Trophy } from 'lucide-react'
 import { Fast } from '@/types/fasting'
 import { getFastDurationHours } from '@/lib/fasting'
-import AddFastDialog from './add-fast-dialog'
 import EditFastsSheet from './edit-fasts-sheet'
+import FastDialog from './fast-dialog'
+import { v4 as uuidv4 } from 'uuid'
 
 type Cadence = 'week' | 'month' | 'year' | 'all'
 
@@ -182,7 +183,22 @@ export default function FastingStatistics({
 
         <div className='flex w-full items-center justify-center gap-2'>
           <EditFastsSheet fasts={fasts} deleteFast={deleteFast} />
-          <AddFastDialog fasts={fasts} addFast={addFast} />
+
+          <FastDialog
+            dialogTitle='Add past fast'
+            dialogDescription='Manually add a completed fast to your fasting history. Choose a start and end time in the past. To keep your history accurate, fasts cannot overlap with existing entries.'
+            fasts={fasts}
+            onSubmit={(startedAt, endedAt) =>
+              addFast({
+                id: uuidv4(),
+                startedAt: startedAt.toISOString(),
+                endedAt: endedAt.toISOString(),
+              })
+            }
+            submitLabel='Add fast'
+            triggerTitle='Add fast'
+            triggerIcon={Plus}
+          />
         </div>
       </CardFooter>
     </Card>

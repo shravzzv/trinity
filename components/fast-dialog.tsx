@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from './ui/button'
-import { AlertCircle, ChevronDownIcon, Plus } from 'lucide-react'
+import { AlertCircle, ChevronDownIcon, LucideIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Calendar } from './ui/calendar'
@@ -21,33 +21,53 @@ import { Input } from './ui/input'
 import { Separator } from './ui/separator'
 import { Alert, AlertTitle } from '@/components/ui/alert'
 import type { Fast } from '@/types/fasting'
-import { v4 as uuidv4 } from 'uuid'
 import { getFastValidationErrors } from '@/lib/fasting'
 import { copyTime, replaceTimeFromInputValue } from '@/lib/time'
-import { toast } from 'sonner'
 
-interface AddFastDialogProps {
+interface FastDialogProps {
   fasts: Fast[]
-  addFast: (fast: Fast) => void
+  triggerTitle: string
+  triggerIcon: LucideIcon
+  dialogTitle: string
+  dialogDescription: string
+  initialStartedAt?: Date
+  initialEndedAt?: Date
+  submitLabel: string
+  onSubmit: (startedAt: Date, endedAt: Date) => void
 }
 
-const getDefaultStartedAt = () => {
-  const date = new Date()
-  date.setHours(18, 0, 0)
-  return date
-}
-
-const getDefaultEndedAt = () => {
-  const date = new Date()
-  date.setHours(17, 30, 0)
-  return date
-}
-
-export default function AddFastDialog({ fasts, addFast }: AddFastDialogProps) {
+export default function FastDialog({
+  fasts,
+  triggerTitle,
+  triggerIcon,
+  dialogTitle,
+  dialogDescription,
+  initialStartedAt,
+  initialEndedAt,
+  submitLabel,
+  onSubmit,
+}: FastDialogProps) {
   const [open, setOpen] = useState(false)
   const [startDatePopoverOpen, setStartDatePopoverOpen] = useState(false)
   const [endDatePopoverOpen, setEndDatePopoverOpen] = useState(false)
   const [showErrors, setShowErrors] = useState(false)
+
+  const getDefaultStartedAt = () => {
+    if (initialStartedAt) return new Date(initialStartedAt)
+
+    const date = new Date()
+    date.setHours(18, 0, 0)
+    return date
+  }
+
+  const getDefaultEndedAt = () => {
+    if (initialEndedAt) return new Date(initialEndedAt)
+
+    const date = new Date()
+    date.setHours(17, 30, 0)
+    return date
+  }
+
   const [startedAt, setStartedAt] = useState<Date>(getDefaultStartedAt)
   const [endedAt, setEndedAt] = useState<Date>(getDefaultEndedAt)
 
@@ -63,15 +83,12 @@ export default function AddFastDialog({ fasts, addFast }: AddFastDialogProps) {
     if (errors.length !== 0) return
 
     setOpen(false)
-    addFast({
-      id: uuidv4(),
-      startedAt: startedAt.toISOString(),
-      endedAt: endedAt.toISOString(),
-    })
-    toast.success('Fast added')
+    onSubmit(startedAt, endedAt)
     setShowErrors(false)
     resetForm()
   }
+
+  const TriggerIcon = triggerIcon
 
   return (
     <Dialog
@@ -83,20 +100,15 @@ export default function AddFastDialog({ fasts, addFast }: AddFastDialogProps) {
     >
       <DialogTrigger asChild>
         <Button variant='secondary'>
-          <Plus />
-          Add fast
+          <TriggerIcon />
+          {triggerTitle}
         </Button>
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add past fast</DialogTitle>
-
-          <DialogDescription>
-            Manually add a completed fast to your fasting history. Choose a
-            start and end time in the past. To keep your history accurate, fasts
-            cannot overlap with existing entries.
-          </DialogDescription>
+          <DialogTitle>{dialogTitle}</DialogTitle>
+          <DialogDescription>{dialogDescription}</DialogDescription>
         </DialogHeader>
 
         <FieldGroup className='flex-row'>
@@ -212,7 +224,7 @@ export default function AddFastDialog({ fasts, addFast }: AddFastDialogProps) {
         {showErrors && errors.length > 0 && (
           <Alert variant='destructive'>
             <AlertCircle />
-            <AlertTitle>Unable to add fast </AlertTitle>
+            <AlertTitle>Unable to {submitLabel.toLowerCase()}</AlertTitle>
 
             <ul className='my-1 list-disc space-y-1 text-sm'>
               {errors.map((error) => (
@@ -236,7 +248,7 @@ export default function AddFastDialog({ fasts, addFast }: AddFastDialogProps) {
             disabled={showErrors && errors.length > 0}
             className='disabled:cursor-not-allowed'
           >
-            Continue
+            {submitLabel}
           </Button>
         </DialogFooter>
       </DialogContent>
