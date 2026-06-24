@@ -24,6 +24,7 @@ import type { Fast } from '@/types/fasting'
 import { v4 as uuidv4 } from 'uuid'
 import { getFastValidationErrors } from '@/lib/fasting'
 import { copyTime, replaceTimeFromInputValue } from '@/lib/time'
+import { toast } from 'sonner'
 
 interface AddFastDialogProps {
   fasts: Fast[]
@@ -67,6 +68,7 @@ export default function AddFastDialog({ fasts, addFast }: AddFastDialogProps) {
       startedAt: startedAt.toISOString(),
       endedAt: endedAt.toISOString(),
     })
+    toast.success('Fast added')
     setShowErrors(false)
     resetForm()
   }
