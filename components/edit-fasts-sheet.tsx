@@ -15,6 +15,7 @@ import { Pen } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import type { Fast } from '@/types/fasting'
 import FastListItem from './fast-list-item'
+import { toast } from 'sonner'
 
 interface EditFastsSheetProps {
   fasts: Fast[]
@@ -62,7 +63,10 @@ export default function EditFastsSheet({
                 <FastListItem
                   key={fast.id}
                   fast={fast}
-                  onDelete={() => deleteFast(fast.id)}
+                  onDelete={() => {
+                    deleteFast(fast.id)
+                    toast.success('Fast deleted')
+                  }}
                 />
               ))}
             </div>
