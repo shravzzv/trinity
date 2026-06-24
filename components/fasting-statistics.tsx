@@ -31,6 +31,7 @@ import { getFastDurationHours } from '@/lib/fasting'
 import EditFastsSheet from './edit-fasts-sheet'
 import FastDialog from './fast-dialog'
 import { v4 as uuidv4 } from 'uuid'
+import { toast } from 'sonner'
 
 type Cadence = 'week' | 'month' | 'year' | 'all'
 
@@ -194,13 +195,14 @@ export default function FastingStatistics({
             dialogTitle='Add past fast'
             dialogDescription='Manually add a completed fast to your fasting history. Choose a start and end time in the past. To keep your history accurate, fasts cannot overlap with existing entries.'
             existingFasts={fasts}
-            onSubmit={(startedAt, endedAt) =>
+            onSubmit={(startedAt, endedAt) => {
               addFast({
                 id: uuidv4(),
                 startedAt: startedAt.toISOString(),
                 endedAt: endedAt.toISOString(),
               })
-            }
+              toast.success('Fast added')
+            }}
             submitLabel='Add fast'
             triggerTitle='Add fast'
             triggerIcon={Plus}
