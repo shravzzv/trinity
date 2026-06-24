@@ -86,7 +86,7 @@ export default function AddFastDialog({ fasts, addFast }: AddFastDialogProps) {
         </Button>
       </DialogTrigger>
 
-      <DialogContent onInteractOutside={(e) => e.preventDefault()}>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Add past fast</DialogTitle>
 
