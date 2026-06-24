@@ -179,7 +179,7 @@ export default function FastingStatistics({
         </div>
 
         <div className='flex w-full items-center justify-center gap-2'>
-          <EditFastsSheet />
+          <EditFastsSheet fasts={fasts} />
           <AddFastDialog fasts={fasts} addFast={addFast} />
         </div>
       </CardFooter>
