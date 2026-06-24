@@ -63,9 +63,14 @@ export default function EditFastsSheet({
                 <FastListItem
                   key={fast.id}
                   fast={fast}
+                  fasts={fasts}
                   onDelete={() => {
                     deleteFast(fast.id)
                     toast.success('Fast deleted')
+                  }}
+                  onEdit={(startedAt, endedAt) => {
+                    console.log(fast.id, startedAt, endedAt)
+                    toast.success('Fast edited')
                   }}
                 />
               ))}

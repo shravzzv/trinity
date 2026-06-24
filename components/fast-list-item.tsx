@@ -18,13 +18,21 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import FastDialog from './fast-dialog'
 
 interface FastListItemProps {
   fast: Fast
+  fasts: Fast[]
   onDelete: () => void
+  onEdit: (startedAt: Date, endedAt: Date) => void
 }
 
-export default function FastListItem({ fast, onDelete }: FastListItemProps) {
+export default function FastListItem({
+  fast,
+  fasts,
+  onDelete,
+  onEdit,
+}: FastListItemProps) {
   return (
     <Card>
       <CardContent className='space-y-4'>
@@ -67,10 +75,19 @@ export default function FastListItem({ fast, onDelete }: FastListItemProps) {
       </CardContent>
 
       <CardFooter className='justify-center gap-2'>
-        <Button variant='secondary'>
-          <Pen />
-          Edit
-        </Button>
+        <FastDialog
+          dialogTitle='Edit past fast'
+          dialogDescription='Adjust the start and end times for this completed fast. To keep your history accurate, fasts cannot overlap with existing entries.'
+          fasts={fasts}
+          onSubmit={(startedAt, endedAt) => {
+            onEdit(startedAt, endedAt)
+          }}
+          submitLabel='Edit fast'
+          triggerTitle='Edit'
+          triggerIcon={Pen}
+          initialStartedAt={new Date(fast.startedAt)}
+          initialEndedAt={new Date(fast.endedAt)}
+        />
 
         <AlertDialog>
           <AlertDialogTrigger asChild>
