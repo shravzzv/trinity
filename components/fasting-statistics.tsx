@@ -36,11 +36,13 @@ type Cadence = 'week' | 'month' | 'year' | 'all'
 interface FastingStatisticsProps {
   fasts: Fast[]
   addFast: (fast: Fast) => void
+  deleteFast: (id: string) => void
 }
 
 export default function FastingStatistics({
   fasts,
   addFast,
+  deleteFast,
 }: FastingStatisticsProps) {
   const [cadence, setCadence] = useState<Cadence>('week')
 
@@ -179,7 +181,7 @@ export default function FastingStatistics({
         </div>
 
         <div className='flex w-full items-center justify-center gap-2'>
-          <EditFastsSheet fasts={fasts} />
+          <EditFastsSheet fasts={fasts} deleteFast={deleteFast} />
           <AddFastDialog fasts={fasts} addFast={addFast} />
         </div>
       </CardFooter>

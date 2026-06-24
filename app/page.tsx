@@ -20,6 +20,7 @@ export default function Page() {
     startFasting,
     updatePlanId,
     addFast,
+    deleteFast,
   } = useFasting()
   const isLoading = !isHydrated
 
@@ -44,7 +45,11 @@ export default function Page() {
         </>
       )}
 
-      <FastingStatistics fasts={fasts} addFast={addFast} />
+      <FastingStatistics
+        fasts={fasts}
+        addFast={addFast}
+        deleteFast={deleteFast}
+      />
 
       <Button
         onClick={() => {

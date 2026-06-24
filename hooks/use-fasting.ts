@@ -68,6 +68,13 @@ export interface UseFastingResult {
    * @param fast The new fast to add.
    */
   addFast: (fast: Fast) => void
+
+  /**
+   * Deletes a fast from the fasting history.
+   *
+   * @param id The id of the fast to delete
+   */
+  deleteFast: (id: string) => void
 }
 
 const DEFAULT_FASTING_STATE: FastingState = {
@@ -87,6 +94,7 @@ const DEFAULT_FASTING_STATE: FastingState = {
  * - Persists state changes automatically.
  * - Exposes actions for starting fasting and eating sessions.
  * - Tracks the user's completed fasts.
+ * - Allows fasts to be added and removed.
  *
  * The hook initializes with a default fasting plan and no active session.
  * Once mounted, it attempts to hydrate state from persisted storage and
@@ -137,6 +145,13 @@ export const useFasting = (): UseFastingResult => {
     }))
   }
 
+  const deleteFast = (id: string) => {
+    setFastingState((previous) => ({
+      ...previous,
+      fasts: previous.fasts.filter((fast) => fast.id !== id),
+    }))
+  }
+
   useEffect(() => {
     const hydrate = () => {
       try {
@@ -184,6 +199,7 @@ export const useFasting = (): UseFastingResult => {
   return {
     addFast,
     isHydrated,
+    deleteFast,
     updatePlanId,
     fasts: fastingState.fasts,
     planId: fastingState.planId,

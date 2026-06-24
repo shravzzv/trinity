@@ -18,9 +18,13 @@ import FastListItem from './fast-list-item'
 
 interface EditFastsSheetProps {
   fasts: Fast[]
+  deleteFast: (id: string) => void
 }
 
-export default function EditFastsSheet({ fasts }: EditFastsSheetProps) {
+export default function EditFastsSheet({
+  fasts,
+  deleteFast,
+}: EditFastsSheetProps) {
   const sortedFasts = [...fasts].sort(
     (a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
   )
@@ -55,7 +59,11 @@ export default function EditFastsSheet({ fasts }: EditFastsSheetProps) {
           <ScrollArea className='min-h-0 flex-1 rounded-md'>
             <div className='space-y-2 px-6 py-1'>
               {sortedFasts.map((fast) => (
-                <FastListItem key={fast.id} fast={fast} />
+                <FastListItem
+                  key={fast.id}
+                  fast={fast}
+                  onDelete={() => deleteFast(fast.id)}
+                />
               ))}
             </div>
           </ScrollArea>

@@ -21,9 +21,10 @@ import {
 
 interface FastListItemProps {
   fast: Fast
+  onDelete: () => void
 }
 
-export default function FastListItem({ fast }: FastListItemProps) {
+export default function FastListItem({ fast, onDelete }: FastListItemProps) {
   return (
     <Card>
       <CardContent className='space-y-4'>
@@ -94,7 +95,7 @@ export default function FastListItem({ fast }: FastListItemProps) {
 
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction variant='destructive'>
+              <AlertDialogAction variant='destructive' onClick={onDelete}>
                 Delete
               </AlertDialogAction>
             </AlertDialogFooter>
