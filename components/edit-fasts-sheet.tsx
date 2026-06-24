@@ -43,6 +43,15 @@ export default function EditFastsSheet({ fasts }: EditFastsSheetProps) {
           </SheetDescription>
         </SheetHeader>
 
+        {sortedFasts.length === 0 ? (
+          <div className='flex min-h-0 flex-1 flex-col items-center justify-center px-6 text-center'>
+            <p className='font-medium'>No completed fasts yet.</p>
+            <p className='text-muted-foreground mt-1 text-sm'>
+              Completed fasts will appear here once you finish or manually add a
+              fast.
+            </p>
+          </div>
+        ) : (
           <ScrollArea className='min-h-0 flex-1 rounded-md'>
             <div className='space-y-2 px-6 py-1'>
               {sortedFasts.map((fast) => (
@@ -50,6 +59,7 @@ export default function EditFastsSheet({ fasts }: EditFastsSheetProps) {
               ))}
             </div>
           </ScrollArea>
+        )}
 
         <SheetFooter>
           <SheetClose asChild>
