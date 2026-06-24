@@ -52,16 +52,6 @@ export default function Page() {
         deleteFast={deleteFast}
         updateFast={updateFast}
       />
-
-      <Button
-        onClick={() => {
-          localStorage.clear()
-          location.reload()
-        }}
-      >
-        <BrushCleaning />
-        Clear storage
-      </Button>
     </main>
   )
 }
