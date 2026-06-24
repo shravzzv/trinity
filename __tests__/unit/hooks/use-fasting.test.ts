@@ -275,4 +275,117 @@ describe('useFasting', () => {
       'late',
     ])
   })
+
+  it('should delete a fast from the fasting history', () => {
+    const { result } = renderHook(() => useFasting())
+
+    act(() => {
+      result.current.addFast({
+        id: 'fast-1',
+        startedAt: '2026-01-01T10:00:00.000Z',
+        endedAt: '2026-01-01T18:00:00.000Z',
+      })
+
+      result.current.addFast({
+        id: 'fast-2',
+        startedAt: '2026-01-02T10:00:00.000Z',
+        endedAt: '2026-01-02T18:00:00.000Z',
+      })
+    })
+
+    act(() => {
+      result.current.deleteFast('fast-1')
+    })
+
+    expect(result.current.fasts).toEqual([
+      {
+        id: 'fast-2',
+        startedAt: '2026-01-02T10:00:00.000Z',
+        endedAt: '2026-01-02T18:00:00.000Z',
+      },
+    ])
+  })
+
+  it('should preserve other fasts when deleting a fast', () => {
+    const { result } = renderHook(() => useFasting())
+
+    act(() => {
+      result.current.addFast({
+        id: 'fast-1',
+        startedAt: '2026-01-01T10:00:00.000Z',
+        endedAt: '2026-01-01T18:00:00.000Z',
+      })
+
+      result.current.addFast({
+        id: 'fast-2',
+        startedAt: '2026-01-02T10:00:00.000Z',
+        endedAt: '2026-01-02T18:00:00.000Z',
+      })
+    })
+
+    act(() => {
+      result.current.deleteFast('fast-1')
+    })
+
+    expect(result.current.fasts.map((fast) => fast.id)).toEqual(['fast-2'])
+  })
+
+  it('should update an existing fast', () => {
+    const { result } = renderHook(() => useFasting())
+
+    act(() => {
+      result.current.addFast({
+        id: 'fast-1',
+        startedAt: '2026-01-01T10:00:00.000Z',
+        endedAt: '2026-01-01T18:00:00.000Z',
+      })
+    })
+
+    act(() => {
+      result.current.updateFast({
+        id: 'fast-1',
+        startedAt: '2026-01-01T12:00:00.000Z',
+        endedAt: '2026-01-01T20:00:00.000Z',
+      })
+    })
+
+    expect(result.current.fasts).toEqual([
+      {
+        id: 'fast-1',
+        startedAt: '2026-01-01T12:00:00.000Z',
+        endedAt: '2026-01-01T20:00:00.000Z',
+      },
+    ])
+  })
+
+  it('should keep fasts sorted after updating a fast', () => {
+    const { result } = renderHook(() => useFasting())
+
+    act(() => {
+      result.current.addFast({
+        id: 'early',
+        startedAt: '2026-01-01T10:00:00.000Z',
+        endedAt: '2026-01-01T18:00:00.000Z',
+      })
+
+      result.current.addFast({
+        id: 'late',
+        startedAt: '2026-01-03T10:00:00.000Z',
+        endedAt: '2026-01-03T18:00:00.000Z',
+      })
+    })
+
+    act(() => {
+      result.current.updateFast({
+        id: 'late',
+        startedAt: '2025-12-31T10:00:00.000Z',
+        endedAt: '2025-12-31T18:00:00.000Z',
+      })
+    })
+
+    expect(result.current.fasts.map((fast) => fast.id)).toEqual([
+      'late',
+      'early',
+    ])
+  })
 })
