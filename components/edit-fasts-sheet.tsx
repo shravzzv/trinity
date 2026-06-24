@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/sheet'
 import { Button } from './ui/button'
 import { Pen } from 'lucide-react'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 export default function EditFastsSheet() {
   return (
@@ -23,7 +24,7 @@ export default function EditFastsSheet() {
         </Button>
       </SheetTrigger>
 
-      <SheetContent>
+      <SheetContent className='flex flex-col'>
         <SheetHeader>
           <SheetTitle>Manage fasting history</SheetTitle>
           <SheetDescription>
@@ -32,7 +33,7 @@ export default function EditFastsSheet() {
           </SheetDescription>
         </SheetHeader>
 
-        <div className='no-scrollbar overflow-y-auto px-4'>
+        <ScrollArea className='min-h-0 flex-1 rounded-md border p-6'>
           {Array.from({ length: 10 }).map((_, index) => (
             <p key={index} className='mb-2 leading-relaxed'>
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
@@ -44,7 +45,7 @@ export default function EditFastsSheet() {
               sunt in culpa qui officia deserunt mollit anim id est laborum.
             </p>
           ))}
-        </div>
+        </ScrollArea>
 
         <SheetFooter>
           <SheetClose asChild>
