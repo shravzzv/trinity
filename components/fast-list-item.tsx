@@ -34,7 +34,7 @@ export default function FastListItem({ fast }: FastListItemProps) {
                 Started
               </p>
               <p className='font-medium'>
-                {format(new Date(fast.startedAt), 'PPP p')}
+                {format(new Date(fast.startedAt), 'EEE, PPP p')}
               </p>
             </div>
           </div>
@@ -46,7 +46,7 @@ export default function FastListItem({ fast }: FastListItemProps) {
                 Ended
               </p>
               <p className='font-medium'>
-                {format(new Date(fast.endedAt), 'PPP p')}
+                {format(new Date(fast.endedAt), 'EEE, PPP p')}
               </p>
             </div>
           </div>
