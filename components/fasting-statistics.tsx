@@ -16,7 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from './ui/card'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Select,
   SelectContent,
@@ -32,6 +32,7 @@ import EditFastsSheet from './edit-fasts-sheet'
 import FastDialog from './fast-dialog'
 import { v4 as uuidv4 } from 'uuid'
 import { toast } from 'sonner'
+import { FASTING_STATISTICS_CADENCE_STORAGE_KEY } from '@/constants/storage-keys'
 
 interface FastingStatisticsProps {
   fasts: Fast[]
@@ -47,6 +48,38 @@ export default function FastingStatistics({
   updateFast,
 }: FastingStatisticsProps) {
   const [cadence, setCadence] = useState<FastingStatisticsCadence>('week')
+
+  useEffect(() => {
+    const hydrateCadence = () => {
+      try {
+        const saved = localStorage.getItem(
+          FASTING_STATISTICS_CADENCE_STORAGE_KEY,
+        )
+
+        if (
+          saved === 'week' ||
+          saved === 'month' ||
+          saved === 'year' ||
+          saved === 'all'
+        ) {
+          setCadence(saved)
+        }
+      } catch (error) {
+        console.error('Hydrating fasting statistics cadence failed', error)
+        localStorage.removeItem(FASTING_STATISTICS_CADENCE_STORAGE_KEY)
+      }
+    }
+
+    hydrateCadence()
+  }, [])
+
+  useEffect(() => {
+    const syncCadence = () => {
+      localStorage.setItem(FASTING_STATISTICS_CADENCE_STORAGE_KEY, cadence)
+    }
+
+    syncCadence()
+  }, [cadence])
 
   const filteredFasts = filterFastsByCadence(fasts, cadence)
   const firstFast = filteredFasts[0]
