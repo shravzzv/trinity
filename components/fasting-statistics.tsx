@@ -25,11 +25,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Clock3, Flame, Pen, Trophy } from 'lucide-react'
+import { Clock3, Flame, Trophy } from 'lucide-react'
 import { Fast } from '@/types/fasting'
 import { getFastDurationHours } from '@/lib/fasting'
-import { Button } from './ui/button'
 import AddFastDialog from './add-fast-dialog'
+import EditFastsSheet from './edit-fasts-sheet'
 
 type Cadence = 'week' | 'month' | 'year' | 'all'
 
@@ -179,11 +179,7 @@ export default function FastingStatistics({
         </div>
 
         <div className='flex w-full items-center justify-center gap-2'>
-          <Button variant='secondary'>
-            <Pen />
-            Edit fasts
-          </Button>
-
+          <EditFastsSheet />
           <AddFastDialog fasts={fasts} addFast={addFast} />
         </div>
       </CardFooter>
