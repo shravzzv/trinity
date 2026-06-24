@@ -6,9 +6,7 @@ import FastingTimer from '@/components/fasting-timer'
 import Header from '@/components/header'
 import FastingPlanCardSkeleton from '@/components/skeletons/fasting-plan-card-skeleton'
 import FastingTimerSkeleton from '@/components/skeletons/fasting-timer-skeleton'
-import { Button } from '@/components/ui/button'
 import { useFasting } from '@/hooks/use-fasting'
-import { BrushCleaning } from 'lucide-react'
 
 export default function Page() {
   const {
