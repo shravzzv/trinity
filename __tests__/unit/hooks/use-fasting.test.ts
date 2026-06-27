@@ -1,6 +1,6 @@
 import { useFasting } from '@/hooks/use-fasting'
 import { renderHook, waitFor, act } from '@testing-library/react'
-import { STORAGE_KEY } from '@/constants/storage-keys'
+import { FASTING_STATE_STORAGE_KEY } from '@/constants/storage-keys'
 
 jest.mock('uuid')
 
@@ -26,7 +26,7 @@ describe('useFasting', () => {
 
   it('should hydrate from local storage', async () => {
     localStorage.setItem(
-      STORAGE_KEY,
+      FASTING_STATE_STORAGE_KEY,
       JSON.stringify({
         planId: '20:4',
         session: {
@@ -47,7 +47,7 @@ describe('useFasting', () => {
   })
 
   it('should fall back to default state when local storage contains invalid JSON', async () => {
-    localStorage.setItem(STORAGE_KEY, '{broken json')
+    localStorage.setItem(FASTING_STATE_STORAGE_KEY, '{broken json')
 
     const { result } = renderHook(() => useFasting())
 
@@ -62,7 +62,7 @@ describe('useFasting', () => {
   it('should remove corrupted local storage', async () => {
     const removeItemSpy = jest.spyOn(Storage.prototype, 'removeItem')
 
-    localStorage.setItem(STORAGE_KEY, '{broken json')
+    localStorage.setItem(FASTING_STATE_STORAGE_KEY, '{broken json')
 
     const { result } = renderHook(() => useFasting())
 
@@ -70,12 +70,12 @@ describe('useFasting', () => {
       expect(result.current.isHydrated).toBe(true)
     })
 
-    expect(removeItemSpy).toHaveBeenCalledWith(STORAGE_KEY)
+    expect(removeItemSpy).toHaveBeenCalledWith(FASTING_STATE_STORAGE_KEY)
   })
 
   it('should fall back to default state when session is invalid', async () => {
     localStorage.setItem(
-      STORAGE_KEY,
+      FASTING_STATE_STORAGE_KEY,
       JSON.stringify({
         planId: '16:8',
         session: {
@@ -119,7 +119,7 @@ describe('useFasting', () => {
     })
 
     expect(setItemSpy).toHaveBeenLastCalledWith(
-      STORAGE_KEY,
+      FASTING_STATE_STORAGE_KEY,
       expect.stringContaining('"planId":"20:4"'),
     )
   })
@@ -175,7 +175,7 @@ describe('useFasting', () => {
     })
 
     expect(setItemSpy).toHaveBeenCalledWith(
-      STORAGE_KEY,
+      FASTING_STATE_STORAGE_KEY,
       expect.stringContaining('"status":"fasting"'),
     )
   })

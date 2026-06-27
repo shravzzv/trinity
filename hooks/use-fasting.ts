@@ -1,6 +1,6 @@
 'use client'
 
-import { STORAGE_KEY } from '@/constants/storage-keys'
+import { FASTING_STATE_STORAGE_KEY } from '@/constants/storage-keys'
 import type {
   Fast,
   FastingPlanId,
@@ -174,7 +174,7 @@ export const useFasting = (): UseFastingResult => {
   useEffect(() => {
     const hydrate = () => {
       try {
-        const saved = localStorage.getItem(STORAGE_KEY)
+        const saved = localStorage.getItem(FASTING_STATE_STORAGE_KEY)
         if (!saved) return
 
         const state = JSON.parse(saved) as FastingState
@@ -195,7 +195,7 @@ export const useFasting = (): UseFastingResult => {
           'Hydrating fasting state from local storage failed',
           error,
         )
-        localStorage.removeItem(STORAGE_KEY)
+        localStorage.removeItem(FASTING_STATE_STORAGE_KEY)
         setFastingState(DEFAULT_FASTING_STATE)
       } finally {
         setIsHydrated(true)
@@ -209,7 +209,10 @@ export const useFasting = (): UseFastingResult => {
     if (!isHydrated) return
 
     const sync = () => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(fastingState))
+      localStorage.setItem(
+        FASTING_STATE_STORAGE_KEY,
+        JSON.stringify(fastingState),
+      )
     }
 
     sync()
