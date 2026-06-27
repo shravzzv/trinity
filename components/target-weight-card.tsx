@@ -23,23 +23,39 @@ import {
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { Skeleton } from './ui/skeleton'
+import { toast } from 'sonner'
 
 interface TargetWeightCardProps {
+  isLoading: boolean
   targetWeight: number | null
   update: (newTarget: number) => void
-  isLoading: boolean
 }
 
 export default function TargetWeightCard({
-  targetWeight,
   update,
   isLoading,
+  targetWeight,
 }: TargetWeightCardProps) {
   const [input, setInput] = useState<number | null>(null)
   const [open, setOpen] = useState(false)
+
+  const minValidWeightKg = 2
+  const maxValidWeightKg = 500
   const isValidWeight =
-    input !== null && Number.isFinite(input) && input >= 2 && input <= 500
+    input !== null &&
+    Number.isFinite(input) &&
+    input >= minValidWeightKg &&
+    input <= maxValidWeightKg
   const hasInvalidWeight = input !== null && !isValidWeight
+  const isDirty = !Object.is(input, targetWeight)
+
+  const handleSave = () => {
+    if (!isValidWeight || !isDirty || input === null) return
+
+    update(input)
+    setOpen(false)
+    toast.success(`Target weight ${targetWeight === null ? 'set' : 'updated'}`)
+  }
 
   return (
     <Card>
@@ -95,8 +111,8 @@ export default function TargetWeightCard({
                     id='target-weight'
                     type='number'
                     step={0.1}
-                    min={2}
-                    max={500}
+                    min={minValidWeightKg}
+                    max={maxValidWeightKg}
                     placeholder='Target weight'
                     autoFocus
                     aria-invalid={hasInvalidWeight}
@@ -106,6 +122,12 @@ export default function TargetWeightCard({
                         e.target.value === '' ? null : Number(e.target.value),
                       )
                     }
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        handleSave()
+                      }
+                    }}
                   />
 
                   <InputGroupAddon align='inline-end'>
@@ -130,12 +152,8 @@ export default function TargetWeightCard({
                 </DialogClose>
 
                 <Button
-                  disabled={hasInvalidWeight}
-                  onClick={() => {
-                    if (input === null) return
-                    update(input)
-                    setOpen(false)
-                  }}
+                  disabled={hasInvalidWeight || !isDirty}
+                  onClick={handleSave}
                 >
                   Save
                 </Button>
