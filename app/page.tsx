@@ -35,6 +35,7 @@ export default function Page() {
     updateTargetWeight,
     isHydrated: isWeightStateHydrated,
   } = useWeight()
+  const isWeightStateLoading = !isWeightStateHydrated
 
   return (
     <main className='mx-auto max-w-xl space-y-6 px-6 py-6'>
@@ -67,6 +68,7 @@ export default function Page() {
       <TargetWeightCard
         targetWeight={targetWeightKg}
         update={updateTargetWeight}
+        isLoading={isWeightStateLoading}
       />
       <WeightStatistics />
     </main>

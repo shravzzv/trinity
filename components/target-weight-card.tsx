@@ -22,15 +22,18 @@ import {
 } from '@/components/ui/input-group'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
+import { Skeleton } from './ui/skeleton'
 
 interface TargetWeightCardProps {
   targetWeight: number | null
   update: (newTarget: number) => void
+  isLoading: boolean
 }
 
 export default function TargetWeightCard({
   targetWeight,
   update,
+  isLoading,
 }: TargetWeightCardProps) {
   const [input, setInput] = useState<number | null>(null)
   const [open, setOpen] = useState(false)
@@ -53,8 +56,11 @@ export default function TargetWeightCard({
               else setInput(null)
             }}
           >
-            <DialogTrigger asChild>
-              <Button variant={targetWeight ? 'outline' : 'default'}>
+            <DialogTrigger asChild disabled={isLoading}>
+              <Button
+                variant={targetWeight ? 'outline' : 'default'}
+                disabled={isLoading}
+              >
                 {targetWeight ? (
                   <>
                     <Pen />
@@ -131,7 +137,7 @@ export default function TargetWeightCard({
                     setOpen(false)
                   }}
                 >
-                  Continue
+                  Save
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -140,7 +146,9 @@ export default function TargetWeightCard({
       </CardHeader>
 
       <CardContent>
-        {targetWeight ? (
+        {isLoading ? (
+          <Skeleton className='h-8 w-28 rounded-full' />
+        ) : targetWeight ? (
           <div className='flex items-center gap-2'>
             <Target className='text-muted-foreground size-5 shrink-0' />
             <p className='text-2xl font-semibold'>
