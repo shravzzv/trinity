@@ -103,14 +103,26 @@ export default function WeightStatistics({
 
   const hasInvalidWeight = weight !== null && !isValidWeight
 
-  const chartData = filterWeightEntriesByCadence(entries, cadence).map(
-    (entry) => ({
-      date: format(new Date(entry.recordedAt), 'MMM d'),
-      weightKg: entry.weightKg,
-    }),
-  )
+  const filteredWeightEntries = filterWeightEntriesByCadence(entries, cadence)
+  const lastWeightEntry = filteredWeightEntries.at(-1)
+  const currentWeight = lastWeightEntry?.weightKg
+  const heaviestWeight = null
+  const lowestWeight = null
+  const weightChange = null
 
-  const currentWeight = entries.at(-1)?.weightKg
+  const chartData = filteredWeightEntries.map((entry) => ({
+    date: new Date(entry.recordedAt).toLocaleDateString(
+      'en-US',
+      cadence === 'week'
+        ? { weekday: 'short' }
+        : cadence === 'all'
+          ? { day: 'numeric', month: 'short', year: 'numeric' }
+          : { day: 'numeric', month: 'short' },
+    ),
+    weightKg: entry.weightKg,
+  }))
+
+  const hasTargetReached = false
 
   const handleSave = () => {
     if (!isValidWeight || weight === null) return
@@ -151,8 +163,6 @@ export default function WeightStatistics({
 
     syncCadence()
   }, [cadence])
-
-  const hasTargetReached = false
 
   return (
     <Card>
@@ -335,7 +345,8 @@ export default function WeightStatistics({
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              interval={0}
+              minTickGap={12}
+              interval='preserveEnd'
               padding={{ left: 8, right: 8 }}
             />
             <ChartTooltip
