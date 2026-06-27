@@ -9,6 +9,7 @@ import FastingTimerSkeleton from '@/components/skeletons/fasting-timer-skeleton'
 import TargetWeightCard from '@/components/target-weight-card'
 import WeightStatistics from '@/components/weight-statistics'
 import { useFasting } from '@/hooks/use-fasting'
+import { useWeight } from '@/hooks/use-weight'
 
 export default function Page() {
   const {
@@ -16,20 +17,30 @@ export default function Page() {
     session,
     fasts,
     endFasting,
-    isHydrated,
     startFasting,
     updatePlanId,
     addFast,
     deleteFast,
     updateFast,
+    isHydrated: isFastingStateHydrated,
   } = useFasting()
-  const isLoading = !isHydrated
+  const isFastingStateLoading = !isFastingStateHydrated
+
+  const {
+    entries,
+    targetWeightKg,
+    addWeight,
+    updateWeight,
+    deleteWeight,
+    updateTargetWeight,
+    isHydrated: isWeightStateHydrated,
+  } = useWeight()
 
   return (
     <main className='mx-auto max-w-xl space-y-6 px-6 py-6'>
       <Header />
 
-      {isLoading ? (
+      {isFastingStateLoading ? (
         <>
           <FastingTimerSkeleton />
           <FastingPlanCardSkeleton />
@@ -53,7 +64,10 @@ export default function Page() {
         updateFast={updateFast}
       />
 
-      <TargetWeightCard />
+      <TargetWeightCard
+        targetWeight={targetWeightKg}
+        update={updateTargetWeight}
+      />
       <WeightStatistics />
     </main>
   )
