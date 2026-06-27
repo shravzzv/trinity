@@ -3,6 +3,7 @@
 import { WEIGHT_STATE_STORAGE_KEY } from '@/constants/storage-keys'
 import { sortWeightEntries } from '@/lib/weight'
 import type { WeightEntry, WeightState } from '@/types/weight'
+import { isSameDay } from 'date-fns'
 import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -87,17 +88,23 @@ export const useWeight = (): UseWeightResult => {
   const [isHydrated, setIsHydrated] = useState<boolean>(false)
 
   const addWeight = (weightKg: number, recordedAt: Date) => {
-    setWeightState((prev) => ({
-      ...prev,
-      entries: sortWeightEntries([
-        ...prev.entries,
-        {
-          id: uuidv4(),
-          recordedAt: recordedAt.toISOString(),
-          weightKg,
-        },
-      ]),
-    }))
+    setWeightState((prev) => {
+      const entriesWithoutSameDay = prev.entries.filter(
+        (entry) => !isSameDay(new Date(entry.recordedAt), recordedAt),
+      )
+
+      return {
+        ...prev,
+        entries: sortWeightEntries([
+          ...entriesWithoutSameDay,
+          {
+            id: uuidv4(),
+            recordedAt: recordedAt.toISOString(),
+            weightKg,
+          },
+        ]),
+      }
+    })
   }
 
   const deleteWeight = (id: string) => {
