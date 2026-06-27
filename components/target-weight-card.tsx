@@ -24,6 +24,7 @@ import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { Skeleton } from './ui/skeleton'
 import { toast } from 'sonner'
+import { MIN_TARGET_WEIGHT_KG, MAX_TARGET_WEIGHT_KG } from '@/constants/weight'
 
 interface TargetWeightCardProps {
   isLoading: boolean
@@ -39,13 +40,11 @@ export default function TargetWeightCard({
   const [input, setInput] = useState<number | null>(null)
   const [open, setOpen] = useState(false)
 
-  const minValidWeightKg = 2
-  const maxValidWeightKg = 500
   const isValidWeight =
     input !== null &&
     Number.isFinite(input) &&
-    input >= minValidWeightKg &&
-    input <= maxValidWeightKg
+    input >= MIN_TARGET_WEIGHT_KG &&
+    input <= MAX_TARGET_WEIGHT_KG
   const hasInvalidWeight = input !== null && !isValidWeight
   const isDirty = !Object.is(input, targetWeight)
 
@@ -111,8 +110,8 @@ export default function TargetWeightCard({
                     id='target-weight'
                     type='number'
                     step={0.1}
-                    min={minValidWeightKg}
-                    max={maxValidWeightKg}
+                    min={MIN_TARGET_WEIGHT_KG}
+                    max={MAX_TARGET_WEIGHT_KG}
                     placeholder='Target weight'
                     autoFocus
                     aria-invalid={hasInvalidWeight}
@@ -139,7 +138,7 @@ export default function TargetWeightCard({
                   className={cn(hasInvalidWeight && 'text-destructive')}
                 >
                   {hasInvalidWeight
-                    ? 'Weight must be between 2 and 500 kg.'
+                    ? `Weight must be between ${MIN_TARGET_WEIGHT_KG} and ${MAX_TARGET_WEIGHT_KG} kg.`
                     : 'Your progress will be tracked against this target.'}
                 </FieldDescription>
               </Field>
