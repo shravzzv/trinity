@@ -27,6 +27,7 @@ import {
 } from './ui/select'
 import {
   ArrowDownRight,
+  ArrowUpRight,
   ChevronDownIcon,
   MapPin,
   PartyPopper,
@@ -67,7 +68,11 @@ import { cn } from '@/lib/utils'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { format } from 'date-fns'
 import { Calendar } from './ui/calendar'
-import { filterWeightEntriesByCadence } from '@/lib/weight'
+import {
+  getTargetProgress,
+  getWeightStatistics,
+  formatWeight,
+} from '@/lib/weight'
 
 const chartConfig = {
   weights: {
@@ -85,8 +90,8 @@ interface WeightStatisticsProps {
 
 export default function WeightStatistics({
   isLoading,
-  addWeight,
   entries,
+  addWeight,
   targetWeight,
 }: WeightStatisticsProps) {
   const [recordedAt, setRecordedAt] = useState(new Date())
@@ -103,14 +108,17 @@ export default function WeightStatistics({
 
   const hasInvalidWeight = weight !== null && !isValidWeight
 
-  const filteredWeightEntries = filterWeightEntriesByCadence(entries, cadence)
-  const lastWeightEntry = filteredWeightEntries.at(-1)
-  const currentWeight = lastWeightEntry?.weightKg
-  const heaviestWeight = null
-  const lowestWeight = null
-  const weightChange = null
+  const {
+    filteredEntries,
+    currentWeight,
+    highestWeight,
+    lowestWeight,
+    weightChange,
+  } = getWeightStatistics(entries, cadence)
 
-  const chartData = filteredWeightEntries.map((entry) => ({
+  const targetProgress = getTargetProgress(currentWeight, targetWeight)
+
+  const chartData = filteredEntries.map((entry) => ({
     date: new Date(entry.recordedAt).toLocaleDateString(
       'en-US',
       cadence === 'week'
@@ -122,12 +130,10 @@ export default function WeightStatistics({
     weightKg: entry.weightKg,
   }))
 
-  const hasTargetReached = false
-
   const handleSave = () => {
     if (!isValidWeight || weight === null) return
 
-    addWeight(weight, recordedAt)
+    addWeight(Number(weight.toFixed(1)), recordedAt)
     setIsWeightDialogOpen(false)
     toast.success('Weight added')
   }
@@ -170,15 +176,24 @@ export default function WeightStatistics({
         <CardTitle>Weight statistics</CardTitle>
 
         <CardDescription className='flex items-center gap-2'>
-          {hasTargetReached ? (
+          {targetProgress ? (
             <>
-              <PartyPopper className='size-4 shrink-0' />
-              <span>Target {targetWeight} kg reached!</span>
+              {targetProgress.reached ? (
+                <PartyPopper className='size-4 shrink-0' />
+              ) : (
+                <Target className='size-4 shrink-0' />
+              )}
+
+              <span>
+                {targetProgress.reached
+                  ? `Target ${targetWeight!.toFixed(1)} kg reached!`
+                  : `${targetProgress.remainingWeight.toFixed(1)} kg remaining to reach ${targetWeight} kg.`}
+              </span>
             </>
           ) : (
             <>
-              <Target className='size-4 shrink-0' />
-              <span>1.4 kg remaining to reach {targetWeight} kg</span>
+              <Target className='size-4' />
+              <span>Set a target weight to track your progress.</span>
             </>
           )}
         </CardDescription>
@@ -391,24 +406,42 @@ export default function WeightStatistics({
         <div className='flex w-full flex-wrap items-center justify-evenly text-sm'>
           <div className='flex items-center gap-2'>
             <MapPin className='size-4' />
-            <span>{currentWeight} kg</span>
+            <span>{formatWeight(currentWeight)}</span>
           </div>
 
           <div className='flex items-center gap-2'>
-            <ArrowDownRight className='size-4' />
-            0.7 kg lost {cadence === 'all' ? 'all time' : `this ${cadence}`}
+            {weightChange === null ? (
+              <>
+                <ArrowDownRight className='size-4 opacity-40' />
+                <span>—</span>
+              </>
+            ) : (
+              <>
+                {weightChange < 0 ? (
+                  <ArrowDownRight className='size-4' />
+                ) : (
+                  <ArrowUpRight className='size-4' />
+                )}
+
+                <span>
+                  {Math.abs(weightChange).toFixed(1)} kg
+                  {weightChange < 0 ? ' lost' : ' gained'}{' '}
+                  {cadence === 'all' ? 'all time' : `this ${cadence}`}
+                </span>
+              </>
+            )}
           </div>
         </div>
 
         <div className='flex w-full flex-wrap items-center justify-evenly text-sm'>
           <div className='flex items-center gap-2'>
             <TrendingDown className='size-4' />
-            60.7 kg lowest
+            {formatWeight(lowestWeight)} lowest
           </div>
 
           <div className='flex items-center gap-2'>
             <TrendingUp className='size-4' />
-            80.4 kg highest
+            {formatWeight(highestWeight)} highest
           </div>
         </div>
 
