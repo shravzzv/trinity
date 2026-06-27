@@ -16,7 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from './ui/card'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Select,
   SelectContent,
@@ -37,6 +37,7 @@ import {
 } from 'lucide-react'
 import { Button } from './ui/button'
 import type { WeightStatisticsCadence } from '@/types/weight'
+import { WEIGHT_STATISTICS_CADENCE_STORAGE_KEY } from '@/constants/storage-keys'
 
 const chartData = [
   { date: 'Mon', weight: 61.8 },
@@ -57,6 +58,38 @@ const chartConfig = {
 
 export default function WeightStatistics() {
   const [cadence, setCadence] = useState<WeightStatisticsCadence>('week')
+
+  useEffect(() => {
+    const hydrateCadence = () => {
+      try {
+        const saved = localStorage.getItem(
+          WEIGHT_STATISTICS_CADENCE_STORAGE_KEY,
+        )
+
+        if (
+          saved === 'week' ||
+          saved === 'month' ||
+          saved === 'year' ||
+          saved === 'all'
+        ) {
+          setCadence(saved)
+        }
+      } catch (error) {
+        console.error('Hydrating weight statistics cadence failed', error)
+        localStorage.removeItem(WEIGHT_STATISTICS_CADENCE_STORAGE_KEY)
+      }
+    }
+
+    hydrateCadence()
+  }, [])
+
+  useEffect(() => {
+    const syncCadence = () => {
+      localStorage.setItem(WEIGHT_STATISTICS_CADENCE_STORAGE_KEY, cadence)
+    }
+
+    syncCadence()
+  }, [cadence])
 
   const hasTargetReached = false
 
