@@ -18,7 +18,7 @@
  * of the user interface.
  */
 
-import type { WeightEntry } from '@/types/weight'
+import type { WeightEntry, WeightStatisticsCadence } from '@/types/weight'
 
 /**
  * Returns the given weight entries sorted in ascending chronological order
@@ -35,4 +35,31 @@ export const sortWeightEntries = (entries: WeightEntry[]) => {
     (a, b) =>
       new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime(),
   )
+}
+
+export const filterWeightEntriesByCadence = (
+  entries: WeightEntry[],
+  cadence: WeightStatisticsCadence,
+): WeightEntry[] => {
+  if (cadence === 'all') {
+    return entries
+  }
+
+  const cutoff = new Date()
+
+  switch (cadence) {
+    case 'week':
+      cutoff.setDate(cutoff.getDate() - 7)
+      break
+
+    case 'month':
+      cutoff.setMonth(cutoff.getMonth() - 1)
+      break
+
+    case 'year':
+      cutoff.setFullYear(cutoff.getFullYear() - 1)
+      break
+  }
+
+  return entries.filter((entry) => new Date(entry.recordedAt) >= cutoff)
 }

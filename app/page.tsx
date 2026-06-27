@@ -70,7 +70,12 @@ export default function Page() {
         update={updateTargetWeight}
         isLoading={isWeightStateLoading}
       />
-      <WeightStatistics />
+      <WeightStatistics
+        entries={entries}
+        addWeight={addWeight}
+        targetWeight={targetWeightKg}
+        isLoading={isWeightStateLoading}
+      />
     </main>
   )
 }

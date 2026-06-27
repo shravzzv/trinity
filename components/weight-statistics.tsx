@@ -37,7 +37,7 @@ import {
   TrendingUp,
 } from 'lucide-react'
 import { Button } from './ui/button'
-import type { WeightStatisticsCadence } from '@/types/weight'
+import type { WeightEntry, WeightStatisticsCadence } from '@/types/weight'
 import { WEIGHT_STATISTICS_CADENCE_STORAGE_KEY } from '@/constants/storage-keys'
 import {
   Dialog,
@@ -67,16 +67,7 @@ import { cn } from '@/lib/utils'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { format } from 'date-fns'
 import { Calendar } from './ui/calendar'
-
-const chartData = [
-  { date: 'Mon', weight: 61.8 },
-  { date: 'Tue', weight: 51.6 },
-  { date: 'Wed', weight: 61.7 },
-  { date: 'Thu', weight: 51.4 },
-  { date: 'Fri', weight: 61.2 },
-  { date: 'Sat', weight: 51.3 },
-  { date: 'Sun', weight: 61.0 },
-]
+import { filterWeightEntriesByCadence } from '@/lib/weight'
 
 const chartConfig = {
   weights: {
@@ -87,12 +78,16 @@ const chartConfig = {
 
 interface WeightStatisticsProps {
   isLoading: boolean
+  entries: WeightEntry[]
+  targetWeight: number | null
   addWeight: (weightKg: number, recordedAt: Date) => void
 }
 
 export default function WeightStatistics({
   isLoading,
   addWeight,
+  entries,
+  targetWeight,
 }: WeightStatisticsProps) {
   const [recordedAt, setRecordedAt] = useState(new Date())
   const [weight, setWeight] = useState<number | null>(null)
@@ -107,6 +102,15 @@ export default function WeightStatistics({
     weight <= MAX_TARGET_WEIGHT_KG
 
   const hasInvalidWeight = weight !== null && !isValidWeight
+
+  const chartData = filterWeightEntriesByCadence(entries, cadence).map(
+    (entry) => ({
+      date: format(new Date(entry.recordedAt), 'MMM d'),
+      weightKg: entry.weightKg,
+    }),
+  )
+
+  const currentWeight = entries.at(-1)?.weightKg
 
   const handleSave = () => {
     if (!isValidWeight || weight === null) return
@@ -159,12 +163,12 @@ export default function WeightStatistics({
           {hasTargetReached ? (
             <>
               <PartyPopper className='size-4 shrink-0' />
-              <span>Target 58 kg reached</span>
+              <span>Target {targetWeight} kg reached!</span>
             </>
           ) : (
             <>
               <Target className='size-4 shrink-0' />
-              <span>1.4 kg remaining to reach 58 kg</span>
+              <span>1.4 kg remaining to reach {targetWeight} kg</span>
             </>
           )}
         </CardDescription>
@@ -182,7 +186,10 @@ export default function WeightStatistics({
             }}
           >
             <DialogTrigger asChild disabled={isLoading}>
-              <Button className='size-8 p-0 md:w-auto md:gap-1.5 md:px-3'>
+              <Button
+                className='size-8 p-0 md:w-auto md:gap-1.5 md:px-3'
+                disabled={isLoading}
+              >
                 <Plus />
                 <span className='hidden md:inline'>Add</span>
               </Button>
@@ -319,6 +326,7 @@ export default function WeightStatistics({
             margin={{
               left: 12,
               right: 12,
+              top: 20,
             }}
           >
             <CartesianGrid vertical={false} />
@@ -328,13 +336,14 @@ export default function WeightStatistics({
               axisLine={false}
               tickMargin={8}
               interval={0}
+              padding={{ left: 8, right: 8 }}
             />
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent indicator='line' />}
             />
             <Area
-              dataKey='weight'
+              dataKey='weightKg'
               type='natural'
               fill='var(--color-weights)'
               fillOpacity={0.35}
@@ -352,7 +361,7 @@ export default function WeightStatistics({
             >
               {cadence === 'week' && (
                 <LabelList
-                  dataKey='weight'
+                  dataKey='weightKg'
                   position='top'
                   offset={8}
                   className='fill-foreground'
@@ -371,7 +380,7 @@ export default function WeightStatistics({
         <div className='flex w-full flex-wrap items-center justify-evenly text-sm'>
           <div className='flex items-center gap-2'>
             <MapPin className='size-4' />
-            <span>60.1 kg</span>
+            <span>{currentWeight} kg</span>
           </div>
 
           <div className='flex items-center gap-2'>
