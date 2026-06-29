@@ -4,6 +4,7 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   reactCompiler: true,
   allowedDevOrigins: [
+    '192.168.0.100',
     '192.168.0.101',
     '192.168.0.102',
     '192.168.0.103',
