@@ -59,13 +59,17 @@ interface WeightStatisticsProps {
   entries: WeightEntry[]
   targetWeight: number | null
   addWeight: (weightKg: number, recordedAt: Date) => void
+  updateWeight: (updatedWeightEntry: WeightEntry) => void
+  deleteWeight: (id: string) => void
 }
 
 export default function WeightStatistics({
   isLoading,
   entries,
-  addWeight,
   targetWeight,
+  addWeight,
+  updateWeight,
+  deleteWeight,
 }: WeightStatisticsProps) {
   const [cadence, setCadence] = useState<WeightStatisticsCadence>('week')
 
@@ -292,7 +296,11 @@ export default function WeightStatistics({
         </div>
 
         <div className='flex w-full items-center justify-center gap-2'>
-          <EditWeightsSheet weightEntries={entries} />
+          <EditWeightsSheet
+            weightEntries={entries}
+            updateWeight={updateWeight}
+            deleteWeight={deleteWeight}
+          />
         </div>
       </CardFooter>
     </Card>

@@ -14,14 +14,19 @@ import { Button } from './ui/button'
 import { Pen } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import type { WeightEntry } from '@/types/weight'
-import { format } from 'date-fns'
+import WeightListItem from './weight-list-item'
+import { toast } from 'sonner'
 
 interface EditWeightsSheetProps {
   weightEntries: WeightEntry[]
+  deleteWeight: (id: string) => void
+  updateWeight: (updatedWeightEntry: WeightEntry) => void
 }
 
 export default function EditWeightsSheet({
   weightEntries,
+  updateWeight,
+  deleteWeight,
 }: EditWeightsSheetProps) {
   const sortedWeightEntries = [...weightEntries].sort(
     (a, b) =>
@@ -57,9 +62,23 @@ export default function EditWeightsSheet({
           <ScrollArea className='min-h-0 flex-1 rounded-md'>
             <div className='space-y-2 px-6 py-1'>
               {sortedWeightEntries.map((entry) => (
-                <p key={entry.id}>
-                  {entry.weightKg} kg, {format(entry.recordedAt, 'EEE, PPP')}
-                </p>
+                <WeightListItem
+                  key={entry.id}
+                  entry={entry}
+                  onUpdate={(weightKg, recordedAt) => {
+                    const newWeight: WeightEntry = {
+                      ...entry,
+                      weightKg,
+                      recordedAt: recordedAt.toISOString(),
+                    }
+                    updateWeight(newWeight)
+                    toast.success('Weight updated')
+                  }}
+                  onDelete={() => {
+                    deleteWeight(entry.id)
+                    toast.success('Weight deleted')
+                  }}
+                />
               ))}
             </div>
           </ScrollArea>

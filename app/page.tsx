@@ -73,6 +73,8 @@ export default function Page() {
       <WeightStatistics
         entries={entries}
         addWeight={addWeight}
+        updateWeight={updateWeight}
+        deleteWeight={deleteWeight}
         targetWeight={targetWeightKg}
         isLoading={isWeightStateLoading}
       />
