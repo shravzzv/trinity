@@ -28,7 +28,6 @@ import {
 import {
   ArrowDownRight,
   ArrowUpRight,
-  ChevronDownIcon,
   MapPin,
   PartyPopper,
   Pen,
@@ -41,38 +40,12 @@ import { Button } from './ui/button'
 import type { WeightEntry, WeightStatisticsCadence } from '@/types/weight'
 import { WEIGHT_STATISTICS_CADENCE_STORAGE_KEY } from '@/constants/storage-keys'
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from '@/components/ui/field'
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-  InputGroupText,
-} from '@/components/ui/input-group'
-import { MAX_TARGET_WEIGHT_KG, MIN_TARGET_WEIGHT_KG } from '@/constants/weight'
-import { toast } from 'sonner'
-import { cn } from '@/lib/utils'
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
-import { format } from 'date-fns'
-import { Calendar } from './ui/calendar'
-import {
   getTargetProgress,
   getWeightStatistics,
   formatWeight,
 } from '@/lib/weight'
+import WeightDialog from './weight-dialog'
+import { toast } from 'sonner'
 
 const chartConfig = {
   weights: {
@@ -94,19 +67,7 @@ export default function WeightStatistics({
   addWeight,
   targetWeight,
 }: WeightStatisticsProps) {
-  const [recordedAt, setRecordedAt] = useState(new Date())
-  const [weight, setWeight] = useState<number | null>(null)
-  const [isWeightDialogOpen, setIsWeightDialogOpen] = useState(false)
   const [cadence, setCadence] = useState<WeightStatisticsCadence>('week')
-  const [isRecordedAtPopoverOpen, setIsRecordedAtPopoverOpen] = useState(false)
-
-  const isValidWeight =
-    weight !== null &&
-    Number.isFinite(weight) &&
-    weight >= MIN_TARGET_WEIGHT_KG &&
-    weight <= MAX_TARGET_WEIGHT_KG
-
-  const hasInvalidWeight = weight !== null && !isValidWeight
 
   const {
     filteredEntries,
@@ -129,14 +90,6 @@ export default function WeightStatistics({
     ),
     weightKg: entry.weightKg,
   }))
-
-  const handleSave = () => {
-    if (!isValidWeight || weight === null) return
-
-    addWeight(Number(weight.toFixed(1)), recordedAt)
-    setIsWeightDialogOpen(false)
-    toast.success('Weight added')
-  }
 
   useEffect(() => {
     const hydrateCadence = () => {
@@ -199,130 +152,23 @@ export default function WeightStatistics({
         </CardDescription>
 
         <CardAction className='flex items-center gap-2'>
-          <Dialog
-            open={isWeightDialogOpen}
-            onOpenChange={(open) => {
-              setIsWeightDialogOpen(open)
-
-              if (open) {
-                setWeight(null)
-                setRecordedAt(new Date())
-              }
+          <WeightDialog
+            dialogTitle='Add weight'
+            dialogDescription='Record your body weight for a specific date. You can edit or remove this entry later.'
+            submitLabel='Save'
+            onSave={(weightKg, recordedAt) => {
+              addWeight(weightKg, recordedAt)
+              toast.success('Weight added')
             }}
           >
-            <DialogTrigger asChild disabled={isLoading}>
-              <Button
-                className='size-8 p-0 md:w-auto md:gap-1.5 md:px-3'
-                disabled={isLoading}
-              >
-                <Plus />
-                <span className='hidden md:inline'>Add</span>
-              </Button>
-            </DialogTrigger>
-
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add weight</DialogTitle>
-
-                <DialogDescription>
-                  Record your body weight for a specific date. You can edit or
-                  remove this entry later.
-                </DialogDescription>
-              </DialogHeader>
-
-              <FieldGroup className='flex flex-row'>
-                <Field data-invalid={hasInvalidWeight}>
-                  <FieldLabel htmlFor='weight'>Weight</FieldLabel>
-
-                  <InputGroup>
-                    <InputGroupInput
-                      id='weight'
-                      type='number'
-                      step={0.1}
-                      min={MIN_TARGET_WEIGHT_KG}
-                      max={MAX_TARGET_WEIGHT_KG}
-                      placeholder='Weight'
-                      autoFocus
-                      aria-invalid={hasInvalidWeight}
-                      value={weight ?? ''}
-                      onChange={(e) =>
-                        setWeight(
-                          e.target.value === '' ? null : Number(e.target.value),
-                        )
-                      }
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault()
-                          handleSave()
-                        }
-                      }}
-                    />
-
-                    <InputGroupAddon align='inline-end'>
-                      <InputGroupText>kg</InputGroupText>
-                    </InputGroupAddon>
-                  </InputGroup>
-
-                  {hasInvalidWeight && (
-                    <FieldDescription
-                      className={cn(!isValidWeight && 'text-destructive')}
-                    >
-                      Weight must be between {MIN_TARGET_WEIGHT_KG} and{' '}
-                      {MAX_TARGET_WEIGHT_KG} kg.
-                    </FieldDescription>
-                  )}
-                </Field>
-
-                <Field>
-                  <FieldLabel htmlFor='recordedAt'>Date</FieldLabel>
-
-                  <Popover
-                    open={isRecordedAtPopoverOpen}
-                    onOpenChange={setIsRecordedAtPopoverOpen}
-                  >
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant='outline'
-                        id='start-date-picker'
-                        className='justify-between font-normal'
-                      >
-                        {format(recordedAt, 'PP')}
-                        <ChevronDownIcon />
-                      </Button>
-                    </PopoverTrigger>
-
-                    <PopoverContent
-                      className='w-auto overflow-hidden p-0'
-                      align='start'
-                    >
-                      <Calendar
-                        mode='single'
-                        selected={recordedAt}
-                        onSelect={(date) => {
-                          if (!date) return
-                          setRecordedAt(date)
-                          setIsRecordedAtPopoverOpen(false)
-                        }}
-                        disabled={{ after: new Date() }}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </Field>
-              </FieldGroup>
-
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant='outline' type='button'>
-                    Close
-                  </Button>
-                </DialogClose>
-
-                <Button disabled={!isValidWeight} onClick={handleSave}>
-                  Save
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+            <Button
+              className='size-8 p-0 md:w-auto md:gap-1.5 md:px-3'
+              disabled={isLoading}
+            >
+              <Plus />
+              <span className='hidden md:inline'>Add</span>
+            </Button>
+          </WeightDialog>
 
           <Select
             value={cadence}
