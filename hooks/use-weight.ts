@@ -100,7 +100,7 @@ export const useWeight = (): UseWeightResult => {
           {
             id: uuidv4(),
             recordedAt: recordedAt.toISOString(),
-            weightKg,
+            weightKg: Number(weightKg.toFixed(1)),
           },
         ]),
       }
