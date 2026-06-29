@@ -115,8 +115,8 @@ export default function FastDialog({
 
   const handleOpenChange = (open: boolean) => {
     setDialogOpen(open)
-    if (!open) setShowErrors(false)
-    else resetForm()
+    resetForm()
+    setShowErrors(false)
   }
 
   const getDefaultStartedAt = useCallback(() => {
