@@ -33,6 +33,7 @@ import FastDialog from './fast-dialog'
 import { v4 as uuidv4 } from 'uuid'
 import { toast } from 'sonner'
 import { FASTING_STATISTICS_CADENCE_STORAGE_KEY } from '@/constants/storage-keys'
+import { Button } from './ui/button'
 
 interface FastingStatisticsProps {
   fasts: Fast[]
@@ -213,9 +214,12 @@ export default function FastingStatistics({
               toast.success('Fast added')
             }}
             submitLabel='Add fast'
-            triggerTitle='Add fast'
-            triggerIcon={Plus}
-          />
+          >
+            <Button variant='secondary'>
+              <Plus />
+              Add fast
+            </Button>
+          </FastDialog>
         </div>
       </CardFooter>
     </Card>

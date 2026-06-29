@@ -11,8 +11,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from './ui/button'
-import { AlertCircle, ChevronDownIcon, LucideIcon } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { AlertCircle, ChevronDownIcon } from 'lucide-react'
+import { useCallback, useState } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Calendar } from './ui/calendar'
 import { format } from 'date-fns'
@@ -31,16 +31,6 @@ interface FastDialogProps {
    * When editing a fast, pass all fasts except the fast currently being edited.
    */
   existingFasts: Fast[]
-
-  /**
-   * Text displayed in the trigger button.
-   */
-  triggerTitle: string
-
-  /**
-   * Icon displayed in the trigger button.
-   */
-  triggerIcon: LucideIcon
 
   /**
    * Title displayed at the top of the dialog.
@@ -75,23 +65,59 @@ interface FastDialogProps {
    * Called after validation succeeds.
    */
   onSubmit: (startedAt: Date, endedAt: Date) => void
+
+  /**
+   * Controls whether the dialog is open.
+   *
+   * If omitted, the dialog manages its own open state.
+   */
+  open?: boolean
+
+  /**
+   * Called whenever the dialog requests that its open state changes.
+   *
+   * Used when the dialog is controlled externally.
+   */
+  onOpenChange?: (open: boolean) => void
+
+  /**
+   * Interactive element that opens the dialog.
+   *
+   * Rendered as the dialog trigger.
+   */
+  children?: React.ReactNode
 }
 
 export default function FastDialog({
   existingFasts,
-  triggerTitle,
-  triggerIcon,
   dialogTitle,
   dialogDescription,
   initialStartedAt,
   initialEndedAt,
   submitLabel,
   onSubmit,
+  open,
+  onOpenChange,
+  children,
 }: FastDialogProps) {
-  const [open, setOpen] = useState(false)
   const [startDatePopoverOpen, setStartDatePopoverOpen] = useState(false)
   const [endDatePopoverOpen, setEndDatePopoverOpen] = useState(false)
   const [showErrors, setShowErrors] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+
+  const isControlled = open !== undefined && onOpenChange !== undefined
+  const dialogOpen = isControlled ? open : internalOpen
+
+  const setDialogOpen = (next: boolean) => {
+    if (isControlled) onOpenChange?.(next)
+    else setInternalOpen(next)
+  }
+
+  const handleOpenChange = (open: boolean) => {
+    setDialogOpen(open)
+    if (!open) setShowErrors(false)
+    else resetForm()
+  }
 
   const getDefaultStartedAt = useCallback(() => {
     if (initialStartedAt) return new Date(initialStartedAt)
@@ -123,41 +149,15 @@ export default function FastDialog({
     setShowErrors(true)
     if (errors.length !== 0) return
 
-    setOpen(false)
+    setDialogOpen(false)
     onSubmit(startedAt, endedAt)
     setShowErrors(false)
     resetForm()
   }
 
-  const TriggerIcon = triggerIcon
-
-  /**
-   * Synchronizes the form state whenever the initial values change.
-   *
-   * This ensures the dialog reflects the latest fast being edited rather
-   * than retaining stale values from a previous render.
-   */
-  useEffect(() => {
-    ;(() => {
-      setStartedAt(getDefaultStartedAt())
-      setEndedAt(getDefaultEndedAt())
-    })()
-  }, [getDefaultEndedAt, getDefaultStartedAt])
-
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(open) => {
-        setOpen(open)
-        if (!open) setShowErrors(false)
-      }}
-    >
-      <DialogTrigger asChild>
-        <Button variant='secondary'>
-          <TriggerIcon />
-          {triggerTitle}
-        </Button>
-      </DialogTrigger>
+    <Dialog open={dialogOpen} onOpenChange={handleOpenChange}>
+      {children && <DialogTrigger asChild>{children}</DialogTrigger>}
 
       <DialogContent>
         <DialogHeader>
