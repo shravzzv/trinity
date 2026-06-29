@@ -137,7 +137,7 @@ export default function WeightStatistics({
                 <Target className='size-4 shrink-0' />
               )}
 
-              <span>
+              <span className='flex-1'>
                 {targetProgress.reached
                   ? `Target ${targetWeight!.toFixed(1)} kg reached!`
                   : `${targetProgress.remainingWeight.toFixed(1)} kg remaining to reach ${targetWeight} kg.`}
