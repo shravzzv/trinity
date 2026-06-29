@@ -50,7 +50,7 @@ export default function WeightListItem({
     <Card>
       <CardHeader>
         <CardTitle>{formatWeight(weightKg)}</CardTitle>
-        <CardDescription>{format(recordedAt, 'EEE, PPP')}</CardDescription>
+        <CardDescription>{format(recordedAt, 'EEE, PP')}</CardDescription>
 
         <CardAction>
           <DropdownMenu>
