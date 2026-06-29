@@ -89,16 +89,18 @@ export const useWeight = (): UseWeightResult => {
 
   const addWeight = (weightKg: number, recordedAt: Date) => {
     setWeightState((prev) => {
-      const entriesWithoutSameDay = prev.entries.filter(
-        (entry) => !isSameDay(new Date(entry.recordedAt), recordedAt),
+      const existingEntry = prev.entries.find((entry) =>
+        isSameDay(new Date(entry.recordedAt), recordedAt),
       )
 
       return {
         ...prev,
         entries: sortWeightEntries([
-          ...entriesWithoutSameDay,
+          ...prev.entries.filter(
+            (entry) => !isSameDay(new Date(entry.recordedAt), recordedAt),
+          ),
           {
-            id: uuidv4(),
+            id: existingEntry?.id ?? uuidv4(),
             recordedAt: recordedAt.toISOString(),
             weightKg: Number(weightKg.toFixed(1)),
           },

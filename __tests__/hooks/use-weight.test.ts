@@ -215,6 +215,28 @@ describe('useWeight', () => {
     expect(result.current.entries.map((e) => e.weightKg)).toEqual([62, 61, 60])
   })
 
+  it('should preserve the id when replacing a weight entry recorded on the same day', () => {
+    const { result } = renderHook(() => useWeight())
+
+    act(() => {
+      result.current.addWeight(61, new Date('2026-01-01T10:00:00.000Z'))
+    })
+
+    expect(result.current.entries).toHaveLength(1)
+    expect(result.current.entries[0].id).toBe('test-uuid')
+
+    act(() => {
+      result.current.addWeight(60.5, new Date('2026-01-01T18:00:00.000Z'))
+    })
+
+    expect(result.current.entries).toHaveLength(1)
+    expect(result.current.entries[0]).toEqual({
+      id: 'test-uuid',
+      recordedAt: '2026-01-01T18:00:00.000Z',
+      weightKg: 60.5,
+    })
+  })
+
   it('should delete a weight entry', () => {
     const { result } = renderHook(() => useWeight())
 
