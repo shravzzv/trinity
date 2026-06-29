@@ -2,10 +2,10 @@
 
 import type { Fast } from '@/types/fasting'
 import { Button } from './ui/button'
-import { Flag, Pen, Play, Trash, Trash2 } from 'lucide-react'
+import { EllipsisVertical, Flag, Pen, Play, Trash, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { formatDuration } from '@/lib/time'
-import { Card, CardContent, CardFooter } from './ui/card'
+import { Card, CardContent } from './ui/card'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,9 +16,15 @@ import {
   AlertDialogHeader,
   AlertDialogMedia,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import FastDialog from './fast-dialog'
+import { useState } from 'react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu'
 
 interface FastListItemProps {
   fast: Fast
@@ -33,8 +39,11 @@ export default function FastListItem({
   onDelete,
   onUpdate,
 }: FastListItemProps) {
+  const [deleting, setDeleting] = useState(false)
+  const [editing, setEditing] = useState(false)
+
   return (
-    <Card>
+    <Card className='relative'>
       <CardContent className='space-y-4'>
         <div className='text-center'>
           <p className='text-2xl font-semibold'>
@@ -74,49 +83,65 @@ export default function FastListItem({
         </div>
       </CardContent>
 
-      <CardFooter className='justify-center gap-2'>
-        <FastDialog
-          dialogTitle='Edit past fast'
-          dialogDescription='Adjust the start and end times for this completed fast. To keep your history accurate, fasts cannot overlap with existing entries.'
-          existingFasts={fasts.filter((f) => f.id !== fast.id)}
-          onSubmit={(startedAt, endedAt) => onUpdate(startedAt, endedAt)}
-          submitLabel='Edit fast'
-          triggerTitle='Edit'
-          triggerIcon={Pen}
-          initialStartedAt={new Date(fast.startedAt)}
-          initialEndedAt={new Date(fast.endedAt)}
-        />
+      <div className='absolute top-8 right-4'>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant='ghost' size='icon-sm'>
+              <EllipsisVertical />
+            </Button>
+          </DropdownMenuTrigger>
 
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant='destructive'>
+          <DropdownMenuContent>
+            <DropdownMenuItem onSelect={() => setEditing(true)}>
+              <Pen />
+              Edit
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              variant='destructive'
+              onSelect={() => setDeleting(true)}
+            >
               <Trash />
               Delete
-            </Button>
-          </AlertDialogTrigger>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogMedia className='bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive'>
-                <Trash2 />
-              </AlertDialogMedia>
+      <FastDialog
+        dialogTitle='Edit past fast'
+        dialogDescription='Adjust the start and end times for this completed fast. To keep your history accurate, fasts cannot overlap with existing entries.'
+        existingFasts={fasts.filter((f) => f.id !== fast.id)}
+        onSubmit={onUpdate}
+        submitLabel='Edit fast'
+        initialStartedAt={new Date(fast.startedAt)}
+        initialEndedAt={new Date(fast.endedAt)}
+        open={editing}
+        onOpenChange={setEditing}
+      />
 
-              <AlertDialogTitle>Delete fast?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This fast will be permanently removed from your fasting history.
-                This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
+      <AlertDialog open={deleting} onOpenChange={setDeleting}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className='bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive'>
+              <Trash2 />
+            </AlertDialogMedia>
 
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction variant='destructive' onClick={onDelete}>
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </CardFooter>
+            <AlertDialogTitle>Delete fast?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This fast will be permanently removed from your fasting history.
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant='destructive' onClick={onDelete}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   )
 }
