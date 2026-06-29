@@ -30,7 +30,6 @@ import {
   ArrowUpRight,
   MapPin,
   PartyPopper,
-  Pen,
   Plus,
   Target,
   TrendingDown,
@@ -46,6 +45,7 @@ import {
 } from '@/lib/weight'
 import WeightDialog from './weight-dialog'
 import { toast } from 'sonner'
+import EditWeightsSheet from './edit-weights-sheet'
 
 const chartConfig = {
   weights: {
@@ -292,10 +292,7 @@ export default function WeightStatistics({
         </div>
 
         <div className='flex w-full items-center justify-center gap-2'>
-          <Button variant='secondary'>
-            <Pen />
-            Edit weights
-          </Button>
+          <EditWeightsSheet weightEntries={entries} />
         </div>
       </CardFooter>
     </Card>
