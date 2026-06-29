@@ -260,4 +260,61 @@ describe('WeightDialog', () => {
       screen.getByRole('button', { name: /jan 10, 2026/i }),
     ).toBeInTheDocument()
   })
+
+  it('renders when controlled by the open prop', () => {
+    render(
+      <WeightDialog
+        open
+        onOpenChange={jest.fn()}
+        dialogTitle='Add weight'
+        dialogDescription='Record your body weight.'
+        submitLabel='Save'
+        onSave={jest.fn()}
+      />,
+    )
+
+    expect(
+      screen.getByRole('heading', { name: 'Add weight' }),
+    ).toBeInTheDocument()
+  })
+
+  it('requests to close after saving when controlled', async () => {
+    const onOpenChange = jest.fn()
+    const onSave = jest.fn()
+
+    const { user } = renderComponent({
+      open: true,
+      onOpenChange,
+      onSave,
+      children: undefined,
+    })
+
+    const input = screen.getByLabelText(/^weight$/i)
+
+    await user.type(input, '72.5')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    expect(onSave).toHaveBeenCalled()
+    expect(onOpenChange).toHaveBeenCalledWith(false)
+  })
+
+  it('requests to close when dismissed in controlled mode', async () => {
+    const onOpenChange = jest.fn()
+
+    const { user } = renderComponent({
+      open: true,
+      onOpenChange,
+      children: undefined,
+    })
+
+    const dialog = screen.getByRole('dialog')
+
+    const closeButton = within(dialog)
+      .getAllByRole('button', { name: /^close$/i })
+      .at(-1)!
+
+    await user.click(closeButton)
+
+    expect(onOpenChange).toHaveBeenCalledWith(false)
+  })
 })

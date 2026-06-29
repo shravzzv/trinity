@@ -43,6 +43,20 @@ interface WeightDialogProps {
   submitLabel: string
 
   /**
+   * Controls whether the dialog is open.
+   *
+   * If omitted, the dialog manages its own open state.
+   */
+  open?: boolean
+
+  /**
+   * Called whenever the dialog requests that its open state changes.
+   *
+   * Used when the dialog is controlled externally.
+   */
+  onOpenChange?: (open: boolean) => void
+
+  /**
    * Called after the entered weight passes validation and the
    * user submits the form.
    */
@@ -67,7 +81,7 @@ interface WeightDialogProps {
    *
    * Rendered as the dialog trigger.
    */
-  children: React.ReactNode
+  children?: React.ReactNode
 }
 
 export default function WeightDialog({
@@ -77,14 +91,16 @@ export default function WeightDialog({
   initialWeight,
   initialRecordedAt,
   children,
+  open,
   onSave,
+  onOpenChange,
 }: WeightDialogProps) {
   const [weight, setWeight] = useState<number | null>(initialWeight ?? null)
   const [recordedAt, setRecordedAt] = useState<Date>(
     initialRecordedAt ?? new Date(),
   )
   const [isRecordedAtPopoverOpen, setIsRecordedAtPopoverOpen] = useState(false)
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
 
   const isValidWeight =
     weight !== null &&
@@ -94,26 +110,34 @@ export default function WeightDialog({
 
   const hasInvalidWeight = weight !== null && !isValidWeight
 
+  const isControlled = open !== undefined && onOpenChange !== undefined
+  const dialogOpen = isControlled ? open : internalOpen
+
+  const setDialogOpen = (next: boolean) => {
+    if (isControlled) onOpenChange?.(next)
+    else setInternalOpen(next)
+  }
+
+  const handleOpenChange = (open: boolean) => {
+    setDialogOpen(open)
+
+    if (open) {
+      setWeight(initialWeight ?? null)
+      setRecordedAt(initialRecordedAt ?? new Date())
+      setIsRecordedAtPopoverOpen(false)
+    }
+  }
+
   const handleSave = () => {
     if (!isValidWeight || weight === null) return
 
     onSave(weight, recordedAt)
-    setOpen(false)
+    setDialogOpen(false)
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(open) => {
-        setOpen(open)
-
-        if (open) {
-          setWeight(initialWeight ?? null)
-          setRecordedAt(initialRecordedAt ?? new Date())
-        }
-      }}
-    >
-      <DialogTrigger asChild>{children}</DialogTrigger>
+    <Dialog open={dialogOpen} onOpenChange={handleOpenChange}>
+      {children && <DialogTrigger asChild>{children}</DialogTrigger>}
 
       <DialogContent>
         <DialogHeader>
