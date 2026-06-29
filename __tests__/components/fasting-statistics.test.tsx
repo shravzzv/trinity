@@ -146,7 +146,6 @@ describe('FastingStatistics', () => {
     expect(FastDialog).toHaveBeenCalledWith(
       expect.objectContaining({
         existingFasts: fasts,
-        triggerTitle: 'Add fast',
         submitLabel: 'Add fast',
       }),
       undefined,
