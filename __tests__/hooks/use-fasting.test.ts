@@ -20,7 +20,7 @@ describe('useFasting', () => {
   it('should return the default state before hydration', () => {
     const { result } = renderHook(() => useFasting())
 
-    expect(result.current.planId).toBe('16:8')
+    expect(result.current.planId).toBeNull()
     expect(result.current.session).toBeNull()
   })
 
@@ -55,7 +55,7 @@ describe('useFasting', () => {
       expect(result.current.isHydrated).toBe(true)
     })
 
-    expect(result.current.planId).toBe('16:8')
+    expect(result.current.planId).toBeNull()
     expect(result.current.session).toBeNull()
   })
 
@@ -91,7 +91,7 @@ describe('useFasting', () => {
       expect(result.current.isHydrated).toBe(true)
     })
 
-    expect(result.current.planId).toBe('16:8')
+    expect(result.current.planId).toBeNull()
     expect(result.current.session).toBeNull()
   })
 
