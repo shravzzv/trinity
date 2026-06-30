@@ -156,3 +156,18 @@ export const filterFastsByCadence = (
     return startedAt >= cutoff
   })
 }
+
+/**
+ * Returns a new array of fasts sorted by their start time in ascending order
+ * (oldest first).
+ *
+ * The original array is not modified.
+ *
+ * @param fasts The fasts to sort.
+ * @returns A new array sorted chronologically by each fast's `startedAt` timestamp.
+ */
+export const sortFasts = (fasts: Fast[]) => {
+  return [...fasts].sort(
+    (a, b) => new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime(),
+  )
+}

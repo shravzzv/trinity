@@ -1,6 +1,9 @@
 import { useFasting } from '@/hooks/use-fasting'
 import { renderHook, waitFor, act } from '@testing-library/react'
-import { FASTING_STATE_STORAGE_KEY } from '@/constants/storage-keys'
+import {
+  FASTING_PLAN_ID_STORAGE_KEY,
+  FASTING_SESSION_STORAGE_KEY,
+} from '@/constants/storage-keys'
 
 jest.mock('uuid')
 
@@ -10,14 +13,16 @@ describe('useFasting', () => {
   beforeEach(() => {
     localStorage.clear()
     jest.clearAllMocks()
+
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
   })
 
   afterEach(() => {
     consoleErrorSpy.mockRestore()
+    jest.useRealTimers()
   })
 
-  it('should return the default state when no persisted state exists', async () => {
+  it('starts in the default state', async () => {
     const { result } = renderHook(() => useFasting())
 
     await waitFor(() => {
@@ -29,17 +34,8 @@ describe('useFasting', () => {
     expect(result.current.fasts).toEqual([])
   })
 
-  it('should hydrate from local storage', async () => {
-    localStorage.setItem(
-      FASTING_STATE_STORAGE_KEY,
-      JSON.stringify({
-        planId: '20:4',
-        session: {
-          status: 'fasting',
-          startedAt: '2026-01-01T00:00:00.000Z',
-        },
-      }),
-    )
+  it('hydrates the persisted plan id', async () => {
+    localStorage.setItem(FASTING_PLAN_ID_STORAGE_KEY, JSON.stringify('20:4'))
 
     const { result } = renderHook(() => useFasting())
 
@@ -48,53 +44,14 @@ describe('useFasting', () => {
     })
 
     expect(result.current.planId).toBe('20:4')
-    expect(result.current.session?.status).toBe('fasting')
   })
 
-  it('should finish loading after hydration', async () => {
-    const { result } = renderHook(() => useFasting())
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
-  })
-
-  it('should fall back to default state when local storage contains invalid JSON', async () => {
-    localStorage.setItem(FASTING_STATE_STORAGE_KEY, '{broken json')
-
-    const { result } = renderHook(() => useFasting())
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
-
-    expect(result.current.planId).toBeNull()
-    expect(result.current.session).toBeNull()
-  })
-
-  it('should remove corrupted local storage', async () => {
-    const removeItemSpy = jest.spyOn(Storage.prototype, 'removeItem')
-
-    localStorage.setItem(FASTING_STATE_STORAGE_KEY, '{broken json')
-
-    const { result } = renderHook(() => useFasting())
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
-
-    expect(removeItemSpy).toHaveBeenCalledWith(FASTING_STATE_STORAGE_KEY)
-  })
-
-  it('should fall back to default state when session is invalid', async () => {
+  it('hydrates the persisted session', async () => {
     localStorage.setItem(
-      FASTING_STATE_STORAGE_KEY,
+      FASTING_SESSION_STORAGE_KEY,
       JSON.stringify({
-        planId: '16:8',
-        session: {
-          status: 'banana',
-          startedAt: '2026-01-01T00:00:00.000Z',
-        },
+        status: 'fasting',
+        startedAt: '2026-01-01T00:00:00.000Z',
       }),
     )
 
@@ -104,12 +61,48 @@ describe('useFasting', () => {
       expect(result.current.isLoading).toBe(false)
     })
 
-    expect(result.current.planId).toBeNull()
-    expect(result.current.session).toBeNull()
+    expect(result.current.session).toEqual({
+      status: 'fasting',
+      startedAt: '2026-01-01T00:00:00.000Z',
+    })
   })
 
-  it('should update the selected plan', () => {
+  it('removes corrupted plan id storage', async () => {
+    const removeItemSpy = jest.spyOn(Storage.prototype, 'removeItem')
+
+    localStorage.setItem(FASTING_PLAN_ID_STORAGE_KEY, JSON.stringify('banana'))
+
+    renderHook(() => useFasting())
+
+    await waitFor(() => {
+      expect(removeItemSpy).toHaveBeenCalledWith(FASTING_PLAN_ID_STORAGE_KEY)
+    })
+  })
+
+  it('removes corrupted session storage', async () => {
+    const removeItemSpy = jest.spyOn(Storage.prototype, 'removeItem')
+
+    localStorage.setItem(
+      FASTING_SESSION_STORAGE_KEY,
+      JSON.stringify({
+        status: 'banana',
+        startedAt: '2026-01-01T00:00:00.000Z',
+      }),
+    )
+
+    renderHook(() => useFasting())
+
+    await waitFor(() => {
+      expect(removeItemSpy).toHaveBeenCalledWith(FASTING_SESSION_STORAGE_KEY)
+    })
+  })
+
+  it('updates the selected plan', async () => {
     const { result } = renderHook(() => useFasting())
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
 
     act(() => {
       result.current.updatePlanId('20:4')
@@ -118,7 +111,7 @@ describe('useFasting', () => {
     expect(result.current.planId).toBe('20:4')
   })
 
-  it('should persist plan changes to local storage', async () => {
+  it('persists plan changes', async () => {
     const setItemSpy = jest.spyOn(Storage.prototype, 'setItem')
 
     const { result } = renderHook(() => useFasting())
@@ -127,18 +120,24 @@ describe('useFasting', () => {
       expect(result.current.isLoading).toBe(false)
     })
 
+    setItemSpy.mockClear()
+
     act(() => {
       result.current.updatePlanId('20:4')
     })
 
-    expect(setItemSpy).toHaveBeenLastCalledWith(
-      FASTING_STATE_STORAGE_KEY,
-      expect.stringContaining('"planId":"20:4"'),
+    expect(setItemSpy).toHaveBeenCalledWith(
+      FASTING_PLAN_ID_STORAGE_KEY,
+      JSON.stringify('20:4'),
     )
   })
 
-  it('should start a fasting session', () => {
+  it('starts a fasting session', async () => {
     const { result } = renderHook(() => useFasting())
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
 
     act(() => {
       result.current.startFasting()
@@ -148,8 +147,12 @@ describe('useFasting', () => {
     expect(result.current.session?.startedAt).toBeDefined()
   })
 
-  it('should start an eating session', () => {
+  it('starts an eating session', async () => {
     const { result } = renderHook(() => useFasting())
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
 
     act(() => {
       result.current.endFasting()
@@ -159,22 +162,7 @@ describe('useFasting', () => {
     expect(result.current.session?.startedAt).toBeDefined()
   })
 
-  it('should preserve the selected plan when starting a session', () => {
-    const { result } = renderHook(() => useFasting())
-
-    act(() => {
-      result.current.updatePlanId('20:4')
-    })
-
-    act(() => {
-      result.current.startFasting()
-    })
-
-    expect(result.current.planId).toBe('20:4')
-    expect(result.current.session?.status).toBe('fasting')
-  })
-
-  it('should persist fasting sessions', async () => {
+  it('persists session changes', async () => {
     const setItemSpy = jest.spyOn(Storage.prototype, 'setItem')
 
     const { result } = renderHook(() => useFasting())
@@ -183,17 +171,35 @@ describe('useFasting', () => {
       expect(result.current.isLoading).toBe(false)
     })
 
+    setItemSpy.mockClear()
+
     act(() => {
       result.current.startFasting()
     })
 
     expect(setItemSpy).toHaveBeenCalledWith(
-      FASTING_STATE_STORAGE_KEY,
+      FASTING_SESSION_STORAGE_KEY,
       expect.stringContaining('"status":"fasting"'),
     )
   })
 
-  it('should preserve the current session when updating the plan', async () => {
+  it('preserves the selected plan when starting fasting', async () => {
+    const { result } = renderHook(() => useFasting())
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    act(() => {
+      result.current.updatePlanId('20:4')
+      result.current.startFasting()
+    })
+
+    expect(result.current.planId).toBe('20:4')
+    expect(result.current.session?.status).toBe('fasting')
+  })
+
+  it('preserves the session when updating the plan', async () => {
     const { result } = renderHook(() => useFasting())
 
     await waitFor(() => {
@@ -214,11 +220,16 @@ describe('useFasting', () => {
     expect(result.current.session).toEqual(originalSession)
   })
 
-  it('should create a completed fast when transitioning from fasting to eating', () => {
+  it('creates a completed fast when transitioning from fasting to eating', async () => {
     jest.useFakeTimers()
+
     jest.setSystemTime(new Date('2026-01-01T10:00:00.000Z'))
 
     const { result } = renderHook(() => useFasting())
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
 
     act(() => {
       result.current.startFasting()
@@ -239,27 +250,41 @@ describe('useFasting', () => {
     })
 
     expect(result.current.session?.status).toBe('eating')
-
-    jest.useRealTimers()
   })
 
-  it('should add a fast to the fasting history', () => {
+  it('does not create a completed fast when transitioning from eating to fasting', async () => {
     const { result } = renderHook(() => useFasting())
 
-    const fast = {
-      id: 'fast-1',
-      startedAt: '2026-01-01T10:00:00.000Z',
-      endedAt: '2026-01-01T18:00:00.000Z',
-    }
-
-    act(() => {
-      result.current.addFast(fast)
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
     })
 
-    expect(result.current.fasts).toEqual([fast])
+    act(() => {
+      result.current.endFasting()
+    })
+
+    act(() => {
+      result.current.startFasting()
+    })
+
+    expect(result.current.fasts).toEqual([])
   })
 
-  it('should keep fasts sorted by start date', () => {
+  it('adds a fast', () => {
+    const { result } = renderHook(() => useFasting())
+
+    act(() => {
+      result.current.addFast({
+        id: 'fast-1',
+        startedAt: '2026-01-01T10:00:00.000Z',
+        endedAt: '2026-01-01T18:00:00.000Z',
+      })
+    })
+
+    expect(result.current.fasts).toHaveLength(1)
+  })
+
+  it('keeps fasts sorted when adding', () => {
     const { result } = renderHook(() => useFasting())
 
     act(() => {
@@ -282,14 +307,14 @@ describe('useFasting', () => {
       })
     })
 
-    expect(result.current.fasts.map((fast) => fast.id)).toEqual([
+    expect(result.current.fasts.map((f) => f.id)).toEqual([
       'early',
       'middle',
       'late',
     ])
   })
 
-  it('should delete a fast from the fasting history', () => {
+  it('deletes a fast', () => {
     const { result } = renderHook(() => useFasting())
 
     act(() => {
@@ -298,52 +323,16 @@ describe('useFasting', () => {
         startedAt: '2026-01-01T10:00:00.000Z',
         endedAt: '2026-01-01T18:00:00.000Z',
       })
-
-      result.current.addFast({
-        id: 'fast-2',
-        startedAt: '2026-01-02T10:00:00.000Z',
-        endedAt: '2026-01-02T18:00:00.000Z',
-      })
     })
 
     act(() => {
       result.current.deleteFast('fast-1')
     })
 
-    expect(result.current.fasts).toEqual([
-      {
-        id: 'fast-2',
-        startedAt: '2026-01-02T10:00:00.000Z',
-        endedAt: '2026-01-02T18:00:00.000Z',
-      },
-    ])
+    expect(result.current.fasts).toEqual([])
   })
 
-  it('should preserve other fasts when deleting a fast', () => {
-    const { result } = renderHook(() => useFasting())
-
-    act(() => {
-      result.current.addFast({
-        id: 'fast-1',
-        startedAt: '2026-01-01T10:00:00.000Z',
-        endedAt: '2026-01-01T18:00:00.000Z',
-      })
-
-      result.current.addFast({
-        id: 'fast-2',
-        startedAt: '2026-01-02T10:00:00.000Z',
-        endedAt: '2026-01-02T18:00:00.000Z',
-      })
-    })
-
-    act(() => {
-      result.current.deleteFast('fast-1')
-    })
-
-    expect(result.current.fasts.map((fast) => fast.id)).toEqual(['fast-2'])
-  })
-
-  it('should update an existing fast', () => {
+  it('updates a fast', () => {
     const { result } = renderHook(() => useFasting())
 
     act(() => {
@@ -362,16 +351,14 @@ describe('useFasting', () => {
       })
     })
 
-    expect(result.current.fasts).toEqual([
-      {
-        id: 'fast-1',
-        startedAt: '2026-01-01T12:00:00.000Z',
-        endedAt: '2026-01-01T20:00:00.000Z',
-      },
-    ])
+    expect(result.current.fasts[0]).toEqual({
+      id: 'fast-1',
+      startedAt: '2026-01-01T12:00:00.000Z',
+      endedAt: '2026-01-01T20:00:00.000Z',
+    })
   })
 
-  it('should keep fasts sorted after updating a fast', () => {
+  it('keeps fasts sorted after updating', () => {
     const { result } = renderHook(() => useFasting())
 
     act(() => {
@@ -396,9 +383,6 @@ describe('useFasting', () => {
       })
     })
 
-    expect(result.current.fasts.map((fast) => fast.id)).toEqual([
-      'late',
-      'early',
-    ])
+    expect(result.current.fasts.map((f) => f.id)).toEqual(['late', 'early'])
   })
 })

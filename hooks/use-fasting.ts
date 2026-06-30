@@ -1,12 +1,15 @@
 'use client'
 
 import { fastingPlans } from '@/constants/fasting-plans'
-import { FASTING_STATE_STORAGE_KEY } from '@/constants/storage-keys'
+import {
+  FASTING_PLAN_ID_STORAGE_KEY,
+  FASTING_SESSION_STORAGE_KEY,
+} from '@/constants/storage-keys'
+import { sortFasts } from '@/lib/fasting'
 import type {
   Fast,
   FastingPlanId,
   FastingSession,
-  FastingState,
   FastingStatus,
 } from '@/types/fasting'
 import { useEffect, useState } from 'react'
@@ -82,12 +85,6 @@ export interface UseFastingResult {
   updateFast: (updatedFast: Fast) => void
 }
 
-const DEFAULT_FASTING_STATE: FastingState = {
-  planId: null,
-  session: null,
-  fasts: [],
-}
-
 /**
  * Manages the fasting domain state for the application.
  *
@@ -108,97 +105,94 @@ const DEFAULT_FASTING_STATE: FastingState = {
  * @returns The current fasting state and actions for updating it.
  */
 export const useFasting = (): UseFastingResult => {
-  const [fastingState, setFastingState] = useState<FastingState>(
-    DEFAULT_FASTING_STATE,
-  )
+  const [fasts, setFasts] = useState<Fast[]>([])
+  const [planId, setPlanId] = useState<FastingPlanId | null>(null)
+  const [session, setSession] = useState<FastingSession | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  const updatePlanId = (planId: FastingPlanId) => {
-    setFastingState((p) => ({ ...p, planId }))
-  }
+  const updatePlanId = (planId: FastingPlanId) => setPlanId(planId)
 
   const startSession = (status: FastingStatus) => {
-    setFastingState((previous) => {
-      const now = new Date().toISOString()
-      const fasts =
-        previous.session?.status === 'fasting' && status === 'eating'
-          ? [
-              ...previous.fasts,
-              {
-                id: uuidv4(),
-                startedAt: previous.session.startedAt,
-                endedAt: now,
-              },
-            ]
-          : previous.fasts
+    const now = new Date().toISOString()
 
-      return {
-        ...previous,
-        fasts,
-        session: { status, startedAt: now },
-      }
-    })
+    if (session?.status === 'fasting' && status === 'eating') {
+      addFast({ id: uuidv4(), startedAt: session.startedAt, endedAt: now })
+    }
+
+    setSession({ status, startedAt: now })
   }
 
   const addFast = (fast: Fast) => {
-    setFastingState((previous) => ({
-      ...previous,
-      fasts: [...previous.fasts, fast].sort(
-        (a, b) =>
-          new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime(),
-      ),
-    }))
+    setFasts((prev) => sortFasts([...prev, fast]))
   }
 
   const deleteFast = (id: string) => {
-    setFastingState((previous) => ({
-      ...previous,
-      fasts: previous.fasts.filter((fast) => fast.id !== id),
-    }))
+    setFasts((prev) => prev.filter((fast) => fast.id !== id))
   }
 
   const updateFast = (updatedFast: Fast) => {
-    setFastingState((previous) => ({
-      ...previous,
-      fasts: previous.fasts
-        .map((fast) => (fast.id === updatedFast.id ? updatedFast : fast))
-        .sort(
-          (a, b) =>
-            new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime(),
-        ),
-    }))
+    setFasts((prev) =>
+      sortFasts(
+        prev.map((fast) => (fast.id === updatedFast.id ? updatedFast : fast)),
+      ),
+    )
+  }
+
+  const hydratePlanId = () => {
+    try {
+      const saved = localStorage.getItem(FASTING_PLAN_ID_STORAGE_KEY)
+      if (!saved) return
+
+      const planId = JSON.parse(saved) as FastingPlanId | null
+
+      const isValidPlanId =
+        planId === null || fastingPlans.some((plan) => plan.id === planId)
+
+      if (!isValidPlanId) {
+        throw Error('Fasting plan id in local storage corrupted')
+      }
+
+      setPlanId(planId)
+    } catch (error) {
+      console.error(
+        'Hydrating fasting plan id from local storage failed',
+        error,
+      )
+      localStorage.removeItem(FASTING_PLAN_ID_STORAGE_KEY)
+    }
+  }
+
+  const hydrateSession = () => {
+    try {
+      const saved = localStorage.getItem(FASTING_SESSION_STORAGE_KEY)
+      if (!saved) return
+
+      const session = JSON.parse(saved) as FastingSession
+
+      const isValidSession =
+        session === null ||
+        (typeof session.startedAt === 'string' &&
+          (session.status === 'fasting' || session.status === 'eating'))
+
+      if (!isValidSession) {
+        throw Error('Fasting session in local storage corrupted')
+      }
+
+      setSession(session)
+    } catch (error) {
+      console.error(
+        'Hydrating fasting session from local storage failed',
+        error,
+      )
+      localStorage.removeItem(FASTING_SESSION_STORAGE_KEY)
+    }
   }
 
   useEffect(() => {
     const hydrate = () => {
       try {
-        const saved = localStorage.getItem(FASTING_STATE_STORAGE_KEY)
-        if (!saved) return
-
-        const state = JSON.parse(saved) as FastingState
-
-        const isValidSession =
-          state.session === null ||
-          (typeof state.session.startedAt === 'string' &&
-            (state.session.status === 'fasting' ||
-              state.session.status === 'eating'))
-
-        const isValidPlan =
-          state.planId === null ||
-          fastingPlans.some((plan) => plan.id === state.planId)
-
-        if (!isValidSession || !isValidPlan) {
-          throw Error('Local storage was corrupted')
-        }
-
-        setFastingState(state)
-      } catch (error) {
-        console.error(
-          'Hydrating fasting state from local storage failed',
-          error,
-        )
-        localStorage.removeItem(FASTING_STATE_STORAGE_KEY)
-        setFastingState(DEFAULT_FASTING_STATE)
+        hydratePlanId()
+        hydrateSession()
       } finally {
         setIsLoading(false)
       }
@@ -210,25 +204,32 @@ export const useFasting = (): UseFastingResult => {
   useEffect(() => {
     if (isLoading) return
 
-    const sync = () => {
-      localStorage.setItem(
-        FASTING_STATE_STORAGE_KEY,
-        JSON.stringify(fastingState),
-      )
+    const syncPlanId = () => {
+      localStorage.setItem(FASTING_PLAN_ID_STORAGE_KEY, JSON.stringify(planId))
     }
 
-    sync()
-  }, [fastingState, isLoading])
+    syncPlanId()
+  }, [isLoading, planId])
+
+  useEffect(() => {
+    if (isLoading) return
+
+    const syncSession = () => {
+      localStorage.setItem(FASTING_SESSION_STORAGE_KEY, JSON.stringify(session))
+    }
+
+    syncSession()
+  }, [isLoading, session])
 
   return {
-    addFast,
+    fasts,
+    planId,
+    session,
     isLoading,
+    addFast,
     deleteFast,
     updateFast,
     updatePlanId,
-    fasts: fastingState.fasts,
-    planId: fastingState.planId,
-    session: fastingState.session,
     endFasting: () => startSession('eating'),
     startFasting: () => startSession('fasting'),
   }

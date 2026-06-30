@@ -3,6 +3,7 @@ import {
   doesFastOverlap,
   getFastValidationErrors,
   filterFastsByCadence,
+  sortFasts,
 } from '@/lib/fasting'
 import type { Fast } from '@/types/fasting'
 
@@ -366,5 +367,50 @@ describe('filterFastsByCadence', () => {
 
     expect(result).toHaveLength(1)
     expect(result[0].id).toBe('boundary')
+  })
+})
+
+describe('sortFasts', () => {
+  it('sorts fasts by ascending start time', () => {
+    const fasts = [
+      {
+        id: '2',
+        startedAt: '2026-01-02T18:00:00Z',
+        endedAt: '2026-01-03T10:00:00Z',
+      },
+      {
+        id: '1',
+        startedAt: '2026-01-01T18:00:00Z',
+        endedAt: '2026-01-02T10:00:00Z',
+      },
+      {
+        id: '3',
+        startedAt: '2026-01-03T18:00:00Z',
+        endedAt: '2026-01-04T10:00:00Z',
+      },
+    ]
+
+    expect(sortFasts(fasts).map((f) => f.id)).toEqual(['1', '2', '3'])
+  })
+
+  it('does not mutate the input array', () => {
+    const fasts = [
+      {
+        id: '2',
+        startedAt: '2026-01-02T18:00:00Z',
+        endedAt: '2026-01-03T10:00:00Z',
+      },
+      {
+        id: '1',
+        startedAt: '2026-01-01T18:00:00Z',
+        endedAt: '2026-01-02T10:00:00Z',
+      },
+    ]
+
+    const original = [...fasts]
+
+    sortFasts(fasts)
+
+    expect(fasts).toEqual(original)
   })
 })
