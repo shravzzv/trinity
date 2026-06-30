@@ -23,9 +23,8 @@ export default function Page() {
     addFast,
     deleteFast,
     updateFast,
-    isHydrated: isFastingStateHydrated,
+    isLoading: isFastingStateLoading,
   } = useFasting()
-  const isFastingStateLoading = !isFastingStateHydrated
 
   const {
     entries,
@@ -72,6 +71,7 @@ export default function Page() {
         update={updateTargetWeight}
         isLoading={isWeightStateLoading}
       />
+
       <WeightStatistics
         entries={entries}
         addWeight={addWeight}

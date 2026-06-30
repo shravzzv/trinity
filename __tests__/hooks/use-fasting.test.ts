@@ -17,11 +17,16 @@ describe('useFasting', () => {
     consoleErrorSpy.mockRestore()
   })
 
-  it('should return the default state before hydration', () => {
+  it('should return the default state when no persisted state exists', async () => {
     const { result } = renderHook(() => useFasting())
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
 
     expect(result.current.planId).toBeNull()
     expect(result.current.session).toBeNull()
+    expect(result.current.fasts).toEqual([])
   })
 
   it('should hydrate from local storage', async () => {
@@ -39,11 +44,19 @@ describe('useFasting', () => {
     const { result } = renderHook(() => useFasting())
 
     await waitFor(() => {
-      expect(result.current.isHydrated).toBe(true)
+      expect(result.current.isLoading).toBe(false)
     })
 
     expect(result.current.planId).toBe('20:4')
     expect(result.current.session?.status).toBe('fasting')
+  })
+
+  it('should finish loading after hydration', async () => {
+    const { result } = renderHook(() => useFasting())
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
   })
 
   it('should fall back to default state when local storage contains invalid JSON', async () => {
@@ -52,7 +65,7 @@ describe('useFasting', () => {
     const { result } = renderHook(() => useFasting())
 
     await waitFor(() => {
-      expect(result.current.isHydrated).toBe(true)
+      expect(result.current.isLoading).toBe(false)
     })
 
     expect(result.current.planId).toBeNull()
@@ -67,7 +80,7 @@ describe('useFasting', () => {
     const { result } = renderHook(() => useFasting())
 
     await waitFor(() => {
-      expect(result.current.isHydrated).toBe(true)
+      expect(result.current.isLoading).toBe(false)
     })
 
     expect(removeItemSpy).toHaveBeenCalledWith(FASTING_STATE_STORAGE_KEY)
@@ -88,7 +101,7 @@ describe('useFasting', () => {
     const { result } = renderHook(() => useFasting())
 
     await waitFor(() => {
-      expect(result.current.isHydrated).toBe(true)
+      expect(result.current.isLoading).toBe(false)
     })
 
     expect(result.current.planId).toBeNull()
@@ -111,7 +124,7 @@ describe('useFasting', () => {
     const { result } = renderHook(() => useFasting())
 
     await waitFor(() => {
-      expect(result.current.isHydrated).toBe(true)
+      expect(result.current.isLoading).toBe(false)
     })
 
     act(() => {
@@ -167,7 +180,7 @@ describe('useFasting', () => {
     const { result } = renderHook(() => useFasting())
 
     await waitFor(() => {
-      expect(result.current.isHydrated).toBe(true)
+      expect(result.current.isLoading).toBe(false)
     })
 
     act(() => {
@@ -184,7 +197,7 @@ describe('useFasting', () => {
     const { result } = renderHook(() => useFasting())
 
     await waitFor(() => {
-      expect(result.current.isHydrated).toBe(true)
+      expect(result.current.isLoading).toBe(false)
     })
 
     act(() => {

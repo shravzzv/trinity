@@ -36,12 +36,9 @@ export interface UseFastingResult {
   fasts: Fast[]
 
   /**
-   * Whether the fasting state has been restored from persisted storage.
-   *
-   * Useful for preventing hydration mismatches and displaying loading
-   * placeholders while the initial state is being restored.
+   * Whether the fasting state is currently being restored or synchronized.
    */
-  isHydrated: boolean
+  isLoading: boolean
 
   /**
    * Updates the selected fasting plan.
@@ -114,7 +111,7 @@ export const useFasting = (): UseFastingResult => {
   const [fastingState, setFastingState] = useState<FastingState>(
     DEFAULT_FASTING_STATE,
   )
-  const [isHydrated, setIsHydrated] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   const updatePlanId = (planId: FastingPlanId) => {
     setFastingState((p) => ({ ...p, planId }))
@@ -203,7 +200,7 @@ export const useFasting = (): UseFastingResult => {
         localStorage.removeItem(FASTING_STATE_STORAGE_KEY)
         setFastingState(DEFAULT_FASTING_STATE)
       } finally {
-        setIsHydrated(true)
+        setIsLoading(false)
       }
     }
 
@@ -211,7 +208,7 @@ export const useFasting = (): UseFastingResult => {
   }, [])
 
   useEffect(() => {
-    if (!isHydrated) return
+    if (isLoading) return
 
     const sync = () => {
       localStorage.setItem(
@@ -221,11 +218,11 @@ export const useFasting = (): UseFastingResult => {
     }
 
     sync()
-  }, [fastingState, isHydrated])
+  }, [fastingState, isLoading])
 
   return {
     addFast,
-    isHydrated,
+    isLoading,
     deleteFast,
     updateFast,
     updatePlanId,
