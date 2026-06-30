@@ -2,7 +2,7 @@ export const FASTING_PLAN_ID_STORAGE_KEY = 'trinity-fasting-plan-id'
 
 export const FASTING_SESSION_STORAGE_KEY = 'trinity-fasting-session'
 
-export const WEIGHT_STATE_STORAGE_KEY = 'trinity-weight-state'
+export const TARGET_WEIGHT_KG_STORAGE_KEY = 'trinity-target-weight-kg'
 
 export const FASTING_STATISTICS_CADENCE_STORAGE_KEY =
   'trinity-fasting-statistics-cadence'

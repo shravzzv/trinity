@@ -1,11 +1,17 @@
 'use client'
 
-import { WEIGHT_STATE_STORAGE_KEY } from '@/constants/storage-keys'
+import { TARGET_WEIGHT_KG_STORAGE_KEY } from '@/constants/storage-keys'
 import { sortWeightEntries } from '@/lib/weight'
-import type { WeightEntry, WeightState } from '@/types/weight'
+import type { WeightEntry } from '@/types/weight'
 import { isSameDay } from 'date-fns'
 import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
+import {
+  getWeightEntries as getWeightEntriesFromIdxDB,
+  addWeightEntry as addWeightEntryToIdxDB,
+  updateWeightEntry as updateWeightEntryInIdxDB,
+  deleteWeightEntry as deleteWeightEntryFromIdxDB,
+} from '@/lib/indexed-db'
 
 /**
  * The public API exposed by {@link useWeight}.
@@ -29,21 +35,21 @@ interface UseWeightResult {
    * @param weightKg The recorded body weight in kilograms.
    * @param recordedAt When the weight was recorded.
    */
-  addWeight: (weightKg: number, recordedAt: Date) => void
+  addWeightEntry: (weightKg: number, recordedAt: Date) => Promise<void>
 
   /**
    * Deletes a recorded weight entry.
    *
    * @param id The id of the weight entry to delete.
    */
-  deleteWeight: (id: string) => void
+  deleteWeightEntry: (id: string) => Promise<void>
 
   /**
    * Updates an existing weight entry.
    *
    * @param updatedWeightEntry The updated weight entry.
    */
-  updateWeight: (updatedWeightEntry: WeightEntry) => void
+  updateWeightEntry: (updatedWeightEntry: WeightEntry) => Promise<void>
 
   /**
    * Updates the user's target body weight.
@@ -56,11 +62,6 @@ interface UseWeightResult {
    * Whether the weight state is currently being restored or synchronized.
    */
   isLoading: boolean
-}
-
-const DEFAULT_WEIGHT_STATE: WeightState = {
-  entries: [],
-  targetWeightKg: null,
 }
 
 /**
@@ -80,84 +81,112 @@ const DEFAULT_WEIGHT_STATE: WeightState = {
  * @returns The current weight state and actions for updating it.
  */
 export const useWeight = (): UseWeightResult => {
-  const [weightState, setWeightState] =
-    useState<WeightState>(DEFAULT_WEIGHT_STATE)
   const [isLoading, setIsLoading] = useState(true)
+  const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([])
+  const [targetWeightKg, setTargetWeightKg] = useState<number | null>(null)
 
-  const addWeight = (weightKg: number, recordedAt: Date) => {
-    setWeightState((prev) => {
-      const existingEntry = prev.entries.find((entry) =>
-        isSameDay(new Date(entry.recordedAt), recordedAt),
-      )
+  const addWeightEntry = async (weightKg: number, recordedAt: Date) => {
+    const previousEntries = weightEntries
 
-      return {
-        ...prev,
-        entries: sortWeightEntries([
-          ...prev.entries.filter(
-            (entry) => !isSameDay(new Date(entry.recordedAt), recordedAt),
-          ),
-          {
-            id: existingEntry?.id ?? uuidv4(),
-            recordedAt: recordedAt.toISOString(),
-            weightKg: Number(weightKg.toFixed(1)),
-          },
-        ]),
-      }
-    })
+    const existingEntry = previousEntries.find((entry) =>
+      isSameDay(new Date(entry.recordedAt), recordedAt),
+    )
+
+    const entry: WeightEntry = {
+      id: existingEntry?.id ?? uuidv4(),
+      recordedAt: recordedAt.toISOString(),
+      weightKg: Number(weightKg.toFixed(1)),
+    }
+
+    setWeightEntries(
+      sortWeightEntries([
+        ...previousEntries.filter(
+          (e) => !isSameDay(new Date(e.recordedAt), recordedAt),
+        ),
+        entry,
+      ]),
+    )
+
+    try {
+      if (existingEntry) await updateWeightEntryInIdxDB(entry)
+      else await addWeightEntryToIdxDB(entry)
+    } catch (error) {
+      setWeightEntries(previousEntries)
+      throw Error('Failed to save the weight', { cause: error })
+    }
   }
 
-  const deleteWeight = (id: string) => {
-    setWeightState((prev) => ({
-      ...prev,
-      entries: prev.entries.filter((w) => w.id !== id),
-    }))
+  const deleteWeightEntry = async (id: string) => {
+    const previousEntries = weightEntries
+
+    setWeightEntries((prev) => prev.filter((entry) => entry.id !== id))
+
+    try {
+      await deleteWeightEntryFromIdxDB(id)
+    } catch (error) {
+      setWeightEntries(previousEntries)
+      throw Error('Failed to delete the weight', { cause: error })
+    }
   }
 
-  const updateWeight = (updatedWeightEntry: WeightEntry) => {
-    setWeightState((prev) => ({
-      ...prev,
-      entries: sortWeightEntries(
-        prev.entries.map((entry) =>
+  const updateWeightEntry = async (updatedWeightEntry: WeightEntry) => {
+    const previousEntries = weightEntries
+
+    setWeightEntries((prev) =>
+      sortWeightEntries(
+        prev.map((entry) =>
           entry.id === updatedWeightEntry.id ? updatedWeightEntry : entry,
         ),
       ),
-    }))
+    )
+
+    try {
+      await updateWeightEntryInIdxDB(updatedWeightEntry)
+    } catch (error) {
+      setWeightEntries(previousEntries)
+      throw Error('Failed to update the weight', { cause: error })
+    }
   }
 
   const updateTargetWeight = (newTargetWeightKg: number) => {
-    setWeightState((prev) => ({ ...prev, targetWeightKg: newTargetWeightKg }))
+    setTargetWeightKg(newTargetWeightKg)
+  }
+
+  const hydrateTargetWeightKg = () => {
+    try {
+      const saved = localStorage.getItem(TARGET_WEIGHT_KG_STORAGE_KEY)
+      if (!saved) return
+
+      const targetWeightKg = JSON.parse(saved) as number | null
+
+      const isValidTargetWeightKg =
+        targetWeightKg === null || typeof targetWeightKg === 'number'
+
+      if (!isValidTargetWeightKg) {
+        throw Error('Target weight in local storage corrupted')
+      }
+
+      setTargetWeightKg(targetWeightKg)
+    } catch (error) {
+      console.error('Hydrating target weight from local storage failed', error)
+      localStorage.removeItem(TARGET_WEIGHT_KG_STORAGE_KEY)
+    }
+  }
+
+  const hydrateWeightEntries = async () => {
+    try {
+      const entries = await getWeightEntriesFromIdxDB()
+      setWeightEntries(entries)
+    } catch (error) {
+      console.error('Hydrating weight entries failed', error)
+    }
   }
 
   useEffect(() => {
-    const hydrate = () => {
+    const hydrate = async () => {
       try {
-        const saved = localStorage.getItem(WEIGHT_STATE_STORAGE_KEY)
-        if (!saved) return
-
-        const state = JSON.parse(saved) as WeightState
-
-        const isValidEntries =
-          Array.isArray(state.entries) &&
-          state.entries.every(
-            (entry) =>
-              typeof entry.id === 'string' &&
-              typeof entry.recordedAt === 'string' &&
-              typeof entry.weightKg === 'number',
-          )
-
-        const isValidTargetWeight =
-          state.targetWeightKg === null ||
-          typeof state.targetWeightKg === 'number'
-
-        if (!isValidEntries || !isValidTargetWeight) {
-          throw Error('Local storage was corrupted')
-        }
-
-        setWeightState({ ...state, entries: sortWeightEntries(state.entries) })
-      } catch (error) {
-        console.error('Hydrating weight state from local storage failed', error)
-        localStorage.removeItem(WEIGHT_STATE_STORAGE_KEY)
-        setWeightState(DEFAULT_WEIGHT_STATE)
+        hydrateTargetWeightKg()
+        await hydrateWeightEntries()
       } finally {
         setIsLoading(false)
       }
@@ -169,23 +198,23 @@ export const useWeight = (): UseWeightResult => {
   useEffect(() => {
     if (isLoading) return
 
-    const sync = () => {
+    const syncTargetWeightKg = () => {
       localStorage.setItem(
-        WEIGHT_STATE_STORAGE_KEY,
-        JSON.stringify(weightState),
+        TARGET_WEIGHT_KG_STORAGE_KEY,
+        JSON.stringify(targetWeightKg),
       )
     }
 
-    sync()
-  }, [isLoading, weightState])
+    syncTargetWeightKg()
+  }, [isLoading, targetWeightKg])
 
   return {
     isLoading,
-    addWeight,
-    updateWeight,
-    deleteWeight,
+    targetWeightKg,
+    addWeightEntry,
+    updateWeightEntry,
+    deleteWeightEntry,
     updateTargetWeight,
-    entries: weightState.entries,
-    targetWeightKg: weightState.targetWeightKg,
+    entries: weightEntries,
   }
 }

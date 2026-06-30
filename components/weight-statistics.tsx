@@ -59,9 +59,9 @@ interface WeightStatisticsProps {
   isLoading: boolean
   entries: WeightEntry[]
   targetWeight: number | null
-  addWeight: (weightKg: number, recordedAt: Date) => void
-  updateWeight: (updatedWeightEntry: WeightEntry) => void
-  deleteWeight: (id: string) => void
+  addWeight: (weightKg: number, recordedAt: Date) => Promise<void>
+  updateWeight: (updatedWeightEntry: WeightEntry) => Promise<void>
+  deleteWeight: (id: string) => Promise<void>
 }
 
 export default function WeightStatistics({
@@ -130,6 +130,15 @@ export default function WeightStatistics({
     weightKg: entry.weightKg,
   }))
 
+  const handleAddWeight = async (weightKg: number, recordedAt: Date) => {
+    try {
+      await addWeight(weightKg, recordedAt)
+      toast.success('Weight added')
+    } catch (error) {
+      if (error instanceof Error) toast.error(error.message)
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -165,10 +174,7 @@ export default function WeightStatistics({
             dialogTitle='Add weight'
             dialogDescription='Record your body weight for a specific date. You can edit or remove this entry later.'
             submitLabel='Save'
-            onSave={(weightKg, recordedAt) => {
-              addWeight(weightKg, recordedAt)
-              toast.success('Weight added')
-            }}
+            onSave={handleAddWeight}
           >
             <Button
               className='size-8 p-0 md:w-auto md:gap-1.5 md:px-3'

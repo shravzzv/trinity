@@ -27,9 +27,9 @@ export default function Page() {
   const {
     entries,
     targetWeightKg,
-    addWeight,
-    updateWeight,
-    deleteWeight,
+    addWeightEntry,
+    updateWeightEntry,
+    deleteWeightEntry,
     updateTargetWeight,
     isLoading: isWeightStateLoading,
   } = useWeight()
@@ -62,17 +62,17 @@ export default function Page() {
       />
 
       <TargetWeightCard
-        targetWeight={targetWeightKg}
         update={updateTargetWeight}
+        targetWeight={targetWeightKg}
         isLoading={isWeightStateLoading}
       />
 
       <WeightStatistics
         entries={entries}
-        addWeight={addWeight}
-        updateWeight={updateWeight}
-        deleteWeight={deleteWeight}
+        addWeight={addWeightEntry}
         targetWeight={targetWeightKg}
+        updateWeight={updateWeightEntry}
+        deleteWeight={deleteWeightEntry}
         isLoading={isWeightStateLoading}
       />
 

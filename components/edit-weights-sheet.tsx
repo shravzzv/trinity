@@ -19,8 +19,8 @@ import { toast } from 'sonner'
 
 interface EditWeightsSheetProps {
   weightEntries: WeightEntry[]
-  deleteWeight: (id: string) => void
-  updateWeight: (updatedWeightEntry: WeightEntry) => void
+  deleteWeight: (id: string) => Promise<void>
+  updateWeight: (updatedWeightEntry: WeightEntry) => Promise<void>
 }
 
 export default function EditWeightsSheet({
@@ -32,6 +32,34 @@ export default function EditWeightsSheet({
     (a, b) =>
       new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime(),
   )
+
+  const handleUpdateWeight = async (
+    weightKg: number,
+    recordedAt: Date,
+    entry: WeightEntry,
+  ) => {
+    const newWeight: WeightEntry = {
+      ...entry,
+      weightKg,
+      recordedAt: recordedAt.toISOString(),
+    }
+
+    try {
+      await updateWeight(newWeight)
+      toast.success('Weight updated')
+    } catch (error) {
+      if (error instanceof Error) toast.error(error.message)
+    }
+  }
+
+  const handleDeleteWeight = async (id: string) => {
+    try {
+      await deleteWeight(id)
+      toast.success('Weight deleted')
+    } catch (error) {
+      if (error instanceof Error) toast.error(error.message)
+    }
+  }
 
   return (
     <Sheet>
@@ -65,19 +93,10 @@ export default function EditWeightsSheet({
                 <WeightListItem
                   key={entry.id}
                   entry={entry}
-                  onUpdate={(weightKg, recordedAt) => {
-                    const newWeight: WeightEntry = {
-                      ...entry,
-                      weightKg,
-                      recordedAt: recordedAt.toISOString(),
-                    }
-                    updateWeight(newWeight)
-                    toast.success('Weight updated')
-                  }}
-                  onDelete={() => {
-                    deleteWeight(entry.id)
-                    toast.success('Weight deleted')
-                  }}
+                  onUpdate={(weightKg, recordedAt) =>
+                    handleUpdateWeight(weightKg, recordedAt, entry)
+                  }
+                  onDelete={() => handleDeleteWeight(entry.id)}
                 />
               ))}
             </div>

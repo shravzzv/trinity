@@ -1,6 +1,7 @@
 import { type IDBPDatabase, openDB, type DBSchema } from 'idb'
 import type { Fast } from '@/types/fasting'
 import { INDEXED_DB_NAME, INDEXED_DB_VERSION } from '@/constants/storage-keys'
+import type { WeightEntry } from '@/types/weight'
 
 /**
  * Application database schema.
@@ -17,7 +18,18 @@ interface TrinityDB extends DBSchema {
       startedAt: string
     }
   }
+
+  weightEntries: {
+    key: string
+    value: WeightEntry
+    indexes: {
+      recordedAt: string
+    }
+  }
 }
+
+const FASTS_STORE_NAME = 'fasts'
+const WEIGHT_ENTRIES_STORE_NAME = 'weightEntries'
 
 /**
  * Lazily initialized database connection.
@@ -43,11 +55,20 @@ const getDb = () => {
   if (!dbPromise) {
     dbPromise = openDB<TrinityDB>(INDEXED_DB_NAME, INDEXED_DB_VERSION, {
       upgrade(db) {
-        const store = db.createObjectStore('fasts', {
+        const fastsStore = db.createObjectStore(FASTS_STORE_NAME, {
           keyPath: 'id',
         })
 
-        store.createIndex('startedAt', 'startedAt')
+        fastsStore.createIndex('startedAt', 'startedAt')
+
+        const weightEntriesStore = db.createObjectStore(
+          WEIGHT_ENTRIES_STORE_NAME,
+          {
+            keyPath: 'id',
+          },
+        )
+
+        weightEntriesStore.createIndex('recordedAt', 'recordedAt')
       },
     })
   }
@@ -62,7 +83,7 @@ const getDb = () => {
  */
 export const getFasts = async () => {
   const db = await getDb()
-  return db.getAll('fasts')
+  return db.getAll(FASTS_STORE_NAME)
 }
 
 /**
@@ -72,7 +93,7 @@ export const getFasts = async () => {
  */
 export const addFast = async (fast: Fast) => {
   const db = await getDb()
-  await db.add('fasts', fast)
+  await db.add(FASTS_STORE_NAME, fast)
 }
 
 /**
@@ -84,7 +105,7 @@ export const addFast = async (fast: Fast) => {
  */
 export const updateFast = async (fast: Fast) => {
   const db = await getDb()
-  await db.put('fasts', fast)
+  await db.put(FASTS_STORE_NAME, fast)
 }
 
 /**
@@ -94,5 +115,45 @@ export const updateFast = async (fast: Fast) => {
  */
 export const deleteFast = async (id: string) => {
   const db = await getDb()
-  await db.delete('fasts', id)
+  await db.delete(FASTS_STORE_NAME, id)
+}
+
+/**
+ * Returns all recorded weight entries.
+ *
+ * @returns A promise that resolves to all stored weight entries.
+ */
+export const getWeightEntries = async () => {
+  const db = await getDb()
+  return db.getAll(WEIGHT_ENTRIES_STORE_NAME)
+}
+
+/**
+ * Persists a new weight entry.
+ *
+ * @param entry The weight entry to add.
+ */
+export const addWeightEntry = async (entry: WeightEntry) => {
+  const db = await getDb()
+  await db.add(WEIGHT_ENTRIES_STORE_NAME, entry)
+}
+
+/**
+ * Updates an existing weight entry.
+ *
+ * @param entry The updated weight entry.
+ */
+export const updateWeightEntry = async (entry: WeightEntry) => {
+  const db = await getDb()
+  await db.put(WEIGHT_ENTRIES_STORE_NAME, entry)
+}
+
+/**
+ * Deletes a weight entry.
+ *
+ * @param id The identifier of the weight entry to delete.
+ */
+export const deleteWeightEntry = async (id: string) => {
+  const db = await getDb()
+  await db.delete(WEIGHT_ENTRIES_STORE_NAME, id)
 }
