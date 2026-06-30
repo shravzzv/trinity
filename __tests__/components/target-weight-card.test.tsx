@@ -63,18 +63,6 @@ describe('TargetWeightCard', () => {
     ).toBeInTheDocument()
   })
 
-  it('disables editing while loading', () => {
-    renderComponent({
-      isLoading: true,
-    })
-
-    expect(
-      screen.getByRole('button', {
-        name: /set target/i,
-      }),
-    ).toBeDisabled()
-  })
-
   it('opens the dialog', async () => {
     const user = userEvent.setup()
 

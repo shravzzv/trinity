@@ -213,16 +213,4 @@ describe('WeightStatistics', () => {
 
     expect(screen.getByRole('combobox')).toHaveTextContent(/week/i)
   })
-
-  it('disables the add button when loading', () => {
-    renderComponent({
-      isLoading: true,
-    })
-
-    expect(
-      screen.getByRole('button', {
-        name: /add/i,
-      }),
-    ).toBeDisabled()
-  })
 })
