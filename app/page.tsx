@@ -33,9 +33,8 @@ export default function Page() {
     updateWeight,
     deleteWeight,
     updateTargetWeight,
-    isHydrated: isWeightStateHydrated,
+    isLoading: isWeightStateLoading,
   } = useWeight()
-  const isWeightStateLoading = !isWeightStateHydrated
 
   return (
     <main className='mx-auto max-w-xl space-y-6 px-6 py-6'>

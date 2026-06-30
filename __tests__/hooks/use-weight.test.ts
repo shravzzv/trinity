@@ -42,7 +42,7 @@ describe('useWeight', () => {
     const { result } = renderHook(() => useWeight())
 
     await waitFor(() => {
-      expect(result.current.isHydrated).toBe(true)
+      expect(result.current.isLoading).toBe(false)
     })
 
     expect(result.current.targetWeightKg).toBe(58)
@@ -83,7 +83,7 @@ describe('useWeight', () => {
     const { result } = renderHook(() => useWeight())
 
     await waitFor(() => {
-      expect(result.current.isHydrated).toBe(true)
+      expect(result.current.isLoading).toBe(false)
     })
 
     expect(result.current.entries.map((e) => e.id)).toEqual([
@@ -99,7 +99,7 @@ describe('useWeight', () => {
     const { result } = renderHook(() => useWeight())
 
     await waitFor(() => {
-      expect(result.current.isHydrated).toBe(true)
+      expect(result.current.isLoading).toBe(false)
     })
 
     expect(result.current.entries).toEqual([])
@@ -114,7 +114,7 @@ describe('useWeight', () => {
     const { result } = renderHook(() => useWeight())
 
     await waitFor(() => {
-      expect(result.current.isHydrated).toBe(true)
+      expect(result.current.isLoading).toBe(false)
     })
 
     expect(removeItemSpy).toHaveBeenCalledWith(WEIGHT_STATE_STORAGE_KEY)
@@ -132,7 +132,7 @@ describe('useWeight', () => {
     const { result } = renderHook(() => useWeight())
 
     await waitFor(() => {
-      expect(result.current.isHydrated).toBe(true)
+      expect(result.current.isLoading).toBe(false)
     })
 
     expect(result.current.entries).toEqual([])
@@ -151,7 +151,7 @@ describe('useWeight', () => {
     const { result } = renderHook(() => useWeight())
 
     await waitFor(() => {
-      expect(result.current.isHydrated).toBe(true)
+      expect(result.current.isLoading).toBe(false)
     })
 
     expect(result.current.entries).toEqual([])
@@ -174,7 +174,7 @@ describe('useWeight', () => {
     const { result } = renderHook(() => useWeight())
 
     await waitFor(() => {
-      expect(result.current.isHydrated).toBe(true)
+      expect(result.current.isLoading).toBe(false)
     })
 
     act(() => {
@@ -292,7 +292,7 @@ describe('useWeight', () => {
     const { result } = renderHook(() => useWeight())
 
     await waitFor(() => {
-      expect(result.current.isHydrated).toBe(true)
+      expect(result.current.isLoading).toBe(false)
     })
 
     act(() => {
@@ -316,7 +316,7 @@ describe('useWeight', () => {
     const { result } = renderHook(() => useWeight())
 
     await waitFor(() => {
-      expect(result.current.isHydrated).toBe(true)
+      expect(result.current.isLoading).toBe(false)
     })
 
     act(() => {

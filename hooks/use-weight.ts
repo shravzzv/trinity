@@ -53,12 +53,9 @@ interface UseWeightResult {
   updateTargetWeight: (targetWeightKg: number) => void
 
   /**
-   * Whether the weight state has been restored from persisted storage.
-   *
-   * Useful for preventing hydration mismatches and displaying loading
-   * placeholders while the initial state is being restored.
+   * Whether the weight state is currently being restored or synchronized.
    */
-  isHydrated: boolean
+  isLoading: boolean
 }
 
 const DEFAULT_WEIGHT_STATE: WeightState = {
@@ -85,7 +82,7 @@ const DEFAULT_WEIGHT_STATE: WeightState = {
 export const useWeight = (): UseWeightResult => {
   const [weightState, setWeightState] =
     useState<WeightState>(DEFAULT_WEIGHT_STATE)
-  const [isHydrated, setIsHydrated] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   const addWeight = (weightKg: number, recordedAt: Date) => {
     setWeightState((prev) => {
@@ -162,7 +159,7 @@ export const useWeight = (): UseWeightResult => {
         localStorage.removeItem(WEIGHT_STATE_STORAGE_KEY)
         setWeightState(DEFAULT_WEIGHT_STATE)
       } finally {
-        setIsHydrated(true)
+        setIsLoading(false)
       }
     }
 
@@ -170,7 +167,7 @@ export const useWeight = (): UseWeightResult => {
   }, [])
 
   useEffect(() => {
-    if (!isHydrated) return
+    if (isLoading) return
 
     const sync = () => {
       localStorage.setItem(
@@ -180,11 +177,11 @@ export const useWeight = (): UseWeightResult => {
     }
 
     sync()
-  }, [isHydrated, weightState])
+  }, [isLoading, weightState])
 
   return {
+    isLoading,
     addWeight,
-    isHydrated,
     updateWeight,
     deleteWeight,
     updateTargetWeight,
