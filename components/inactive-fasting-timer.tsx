@@ -29,7 +29,7 @@ export default function InactiveFastingTimer({
           ) : (
             <FastingPlanDialog
               dialogTitle='Select your fasting plan'
-              dialogDescription='Select a plan that best matches your routine.'
+              dialogDescription='Choose the fasting schedule that best matches your routine. You can change it later at any time.'
               selectedPlanId={null}
               onSubmit={(selectedPlanId) => {
                 updatePlanId(selectedPlanId)

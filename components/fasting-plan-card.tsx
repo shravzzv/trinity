@@ -34,8 +34,12 @@ export default function FastingPlanCard({
 
         <CardAction>
           <FastingPlanDialog
-            dialogTitle='Edit your fasting plan'
-            dialogDescription=' Update the fasting schedule to match your routine.'
+            dialogTitle={`${planId ? 'Edit' : 'Select'} your fasting plan`}
+            dialogDescription={
+              planId
+                ? 'Choose the fasting schedule that best matches your current routine.'
+                : 'Choose the fasting schedule that best matches your routine. You can change it later at any time.'
+            }
             selectedPlanId={planId}
             allowClose={!!planId}
             onSubmit={(selectedPlanId) => {
