@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils'
 import { Skeleton } from './ui/skeleton'
 import { toast } from 'sonner'
 import { MIN_TARGET_WEIGHT_KG, MAX_TARGET_WEIGHT_KG } from '@/constants/weight'
+import TargetWeightCardSkeleton from './skeletons/target-weight-card-skeleton'
 
 interface TargetWeightCardProps {
   isLoading: boolean
@@ -39,6 +40,8 @@ export default function TargetWeightCard({
 }: TargetWeightCardProps) {
   const [input, setInput] = useState<number | null>(null)
   const [open, setOpen] = useState(false)
+
+  if (isLoading) return <TargetWeightCardSkeleton />
 
   const isValidWeight =
     input !== null &&

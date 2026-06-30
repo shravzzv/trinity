@@ -34,8 +34,10 @@ import { v4 as uuidv4 } from 'uuid'
 import { toast } from 'sonner'
 import { FASTING_STATISTICS_CADENCE_STORAGE_KEY } from '@/constants/storage-keys'
 import { Button } from './ui/button'
+import FastingStatisticsSkeleton from './skeletons/fasting-statistics-skeleton'
 
 interface FastingStatisticsProps {
+  isLoading: boolean
   fasts: Fast[]
   addFast: (fast: Fast) => void
   deleteFast: (id: string) => void
@@ -47,6 +49,7 @@ export default function FastingStatistics({
   addFast,
   deleteFast,
   updateFast,
+  isLoading,
 }: FastingStatisticsProps) {
   const [cadence, setCadence] = useState<FastingStatisticsCadence>('week')
 
@@ -81,6 +84,8 @@ export default function FastingStatistics({
 
     syncCadence()
   }, [cadence])
+
+  if (isLoading) return <FastingStatisticsSkeleton />
 
   const filteredFasts = filterFastsByCadence(fasts, cadence)
   const firstFast = filteredFasts[0]

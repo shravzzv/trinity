@@ -15,16 +15,21 @@ import { UseFastingResult } from '@/hooks/use-fasting'
 import { pluralize } from '@/lib/strings'
 import { toast } from 'sonner'
 import FastingPlanDialog from './fasting-plan-dialog'
+import FastingPlanCardSkeleton from './skeletons/fasting-plan-card-skeleton'
 
 interface FastingPlanCardProps {
+  isLoading: boolean
   planId: FastingPlanId | null
   updatePlanId: UseFastingResult['updatePlanId']
 }
 
 export default function FastingPlanCard({
   planId,
+  isLoading,
   updatePlanId,
 }: FastingPlanCardProps) {
+  if (isLoading) return <FastingPlanCardSkeleton />
+
   const selectedPlan = fastingPlans.find((p) => p.id === planId)
 
   return (

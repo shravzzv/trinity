@@ -46,6 +46,7 @@ import {
 import WeightDialog from './weight-dialog'
 import { toast } from 'sonner'
 import EditWeightsSheet from './edit-weights-sheet'
+import WeightStatisticsSkeleton from './skeletons/weight-statistics-skeleton'
 
 const chartConfig = {
   weights: {
@@ -72,28 +73,6 @@ export default function WeightStatistics({
   deleteWeight,
 }: WeightStatisticsProps) {
   const [cadence, setCadence] = useState<WeightStatisticsCadence>('week')
-
-  const {
-    filteredEntries,
-    currentWeight,
-    highestWeight,
-    lowestWeight,
-    weightChange,
-  } = getWeightStatistics(entries, cadence)
-
-  const targetProgress = getTargetProgress(currentWeight, targetWeight)
-
-  const chartData = filteredEntries.map((entry) => ({
-    date: new Date(entry.recordedAt).toLocaleDateString(
-      'en-US',
-      cadence === 'week'
-        ? { weekday: 'short' }
-        : cadence === 'all'
-          ? { day: 'numeric', month: 'short', year: 'numeric' }
-          : { day: 'numeric', month: 'short' },
-    ),
-    weightKg: entry.weightKg,
-  }))
 
   useEffect(() => {
     const hydrateCadence = () => {
@@ -126,6 +105,30 @@ export default function WeightStatistics({
 
     syncCadence()
   }, [cadence])
+
+  if (isLoading) return <WeightStatisticsSkeleton />
+
+  const {
+    filteredEntries,
+    currentWeight,
+    highestWeight,
+    lowestWeight,
+    weightChange,
+  } = getWeightStatistics(entries, cadence)
+
+  const targetProgress = getTargetProgress(currentWeight, targetWeight)
+
+  const chartData = filteredEntries.map((entry) => ({
+    date: new Date(entry.recordedAt).toLocaleDateString(
+      'en-US',
+      cadence === 'week'
+        ? { weekday: 'short' }
+        : cadence === 'all'
+          ? { day: 'numeric', month: 'short', year: 'numeric' }
+          : { day: 'numeric', month: 'short' },
+    ),
+    weightKg: entry.weightKg,
+  }))
 
   return (
     <Card>

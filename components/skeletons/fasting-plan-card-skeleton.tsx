@@ -21,7 +21,7 @@ export default function FastingPlanCardSkeleton() {
       <CardContent>
         <div className='space-y-2'>
           <Skeleton className='h-10 w-24 rounded-2xl' />
-          <Skeleton className='h-4 w-full rounded-2xl' />
+          <Skeleton className='h-4 w-[70%] rounded-2xl' />
         </div>
       </CardContent>
     </Card>
