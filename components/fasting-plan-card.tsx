@@ -8,32 +8,16 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Button } from './ui/button'
-import { Pen } from 'lucide-react'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import {
-  Field,
-  FieldContent,
-  FieldDescription,
-  FieldLabel,
-  FieldTitle,
-} from '@/components/ui/field'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { useState } from 'react'
+import { Goal, Pen } from 'lucide-react'
 import { fastingPlans } from '@/constants/fasting-plans'
 import { FastingPlanId } from '@/types/fasting'
 import { UseFastingResult } from '@/hooks/use-fasting'
 import { pluralize } from '@/lib/strings'
 import { toast } from 'sonner'
+import FastingPlanDialog from './fasting-plan-dialog'
 
 interface FastingPlanCardProps {
-  planId: FastingPlanId
+  planId: FastingPlanId | null
   updatePlanId: UseFastingResult['updatePlanId']
 }
 
@@ -41,17 +25,7 @@ export default function FastingPlanCard({
   planId,
   updatePlanId,
 }: FastingPlanCardProps) {
-  const [draftPlanId, setDraftPlanId] = useState<FastingPlanId>(planId)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-
-  const selectedPlan =
-    fastingPlans.find((p) => p.id === planId) ?? fastingPlans[0]
-
-  const handleSave = () => {
-    updatePlanId(draftPlanId)
-    setIsDialogOpen(false)
-    toast.success('Fasting plan updated')
-  }
+  const selectedPlan = fastingPlans.find((p) => p.id === planId)
 
   return (
     <Card>
@@ -59,77 +33,49 @@ export default function FastingPlanCard({
         <CardTitle>Fasting plan</CardTitle>
 
         <CardAction>
-          <Dialog
-            open={isDialogOpen}
-            onOpenChange={(open) => {
-              if (open) setDraftPlanId(planId)
-              setIsDialogOpen(open)
+          <FastingPlanDialog
+            dialogTitle='Edit your fasting plan'
+            dialogDescription=' Update the fasting schedule to match your routine.'
+            selectedPlanId={planId}
+            allowClose={!!planId}
+            onSubmit={(selectedPlanId) => {
+              updatePlanId(selectedPlanId)
+              toast.success('Fasting plan updated')
             }}
           >
-            <DialogTrigger asChild>
+            {planId ? (
               <Button variant='outline'>
                 <Pen />
                 Edit
               </Button>
-            </DialogTrigger>
-
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Select your fasting plan</DialogTitle>
-                <DialogDescription>
-                  Choose the fasting schedule that best matches your routine.
-                </DialogDescription>
-              </DialogHeader>
-
-              <RadioGroup
-                value={draftPlanId}
-                onValueChange={(v) => setDraftPlanId(v as FastingPlanId)}
-                className='max-h-[50vh] max-w-sm overflow-y-auto'
-              >
-                {fastingPlans.map((fastingPlan) => (
-                  <div key={fastingPlan.id}>
-                    <FieldLabel htmlFor={fastingPlan.id}>
-                      <Field orientation='horizontal'>
-                        <FieldContent>
-                          <FieldTitle>{fastingPlan.title}</FieldTitle>
-
-                          <FieldDescription>
-                            {pluralize(fastingPlan.fastingHours, 'hour')}{' '}
-                            fasting with{' '}
-                            {pluralize(fastingPlan.eatingHours, 'hour')} eating
-                            window.
-                          </FieldDescription>
-                        </FieldContent>
-
-                        <RadioGroupItem
-                          id={fastingPlan.id}
-                          value={fastingPlan.id}
-                        />
-                      </Field>
-                    </FieldLabel>
-                  </div>
-                ))}
-              </RadioGroup>
-
-              <Button onClick={handleSave} disabled={planId === draftPlanId}>
-                Save
+            ) : (
+              <Button>
+                <Goal />
+                Select plan
               </Button>
-            </DialogContent>
-          </Dialog>
+            )}
+          </FastingPlanDialog>
         </CardAction>
       </CardHeader>
 
       <CardContent>
-        <div className='space-y-2'>
-          <p className='bg-primary text-primary-foreground w-fit rounded-full px-4 py-1 text-xl font-medium'>
-            {selectedPlan.title}
-          </p>
+        {planId && selectedPlan ? (
+          <div className='space-y-2'>
+            <p className='bg-primary text-primary-foreground w-fit rounded-full px-4 py-1 text-xl font-medium'>
+              {selectedPlan.title}
+            </p>
 
+            <p className='text-muted-foreground text-sm'>
+              {pluralize(selectedPlan.fastingHours, 'hour')} fasting with{' '}
+              {pluralize(selectedPlan.eatingHours, 'hour')} eating window.
+            </p>
+          </div>
+        ) : (
           <p className='text-muted-foreground text-sm'>
-            {pluralize(selectedPlan.fastingHours, 'hour')} fasting with{' '}
-            {pluralize(selectedPlan.eatingHours, 'hour')} eating window.
+            You haven&apos;t selected a fasting plan yet. You can update it here
+            once selected.
           </p>
-        </div>
+        )}
       </CardContent>
     </Card>
   )

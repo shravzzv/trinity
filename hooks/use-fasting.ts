@@ -1,5 +1,6 @@
 'use client'
 
+import { fastingPlans } from '@/constants/fasting-plans'
 import { FASTING_STATE_STORAGE_KEY } from '@/constants/storage-keys'
 import type {
   Fast,
@@ -18,9 +19,9 @@ export interface UseFastingResult {
   /**
    * The currently selected fasting plan.
    *
-   * Defaults to `"16:8"` when no saved preference exists.
+   * Is `null` by default. This is required domain data for the app.
    */
-  planId: FastingPlanId
+  planId: FastingPlanId | null
 
   /**
    * The user's active fasting session.
@@ -85,7 +86,7 @@ export interface UseFastingResult {
 }
 
 const DEFAULT_FASTING_STATE: FastingState = {
-  planId: '16:8',
+  planId: null,
   session: null,
   fasts: [],
 }
@@ -185,7 +186,11 @@ export const useFasting = (): UseFastingResult => {
             (state.session.status === 'fasting' ||
               state.session.status === 'eating'))
 
-        if (typeof state.planId !== 'string' || !isValidSession) {
+        const isValidPlan =
+          state.planId === null ||
+          fastingPlans.some((plan) => plan.id === state.planId)
+
+        if (!isValidSession || !isValidPlan) {
           throw Error('Local storage was corrupted')
         }
 

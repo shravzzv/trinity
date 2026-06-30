@@ -7,6 +7,7 @@ import Header from '@/components/header'
 import FastingPlanCardSkeleton from '@/components/skeletons/fasting-plan-card-skeleton'
 import FastingTimerSkeleton from '@/components/skeletons/fasting-timer-skeleton'
 import TargetWeightCard from '@/components/target-weight-card'
+import { Button } from '@/components/ui/button'
 import WeightStatistics from '@/components/weight-statistics'
 import { useFasting } from '@/hooks/use-fasting'
 import { useWeight } from '@/hooks/use-weight'
@@ -53,6 +54,7 @@ export default function Page() {
             session={session}
             endFasting={endFasting}
             startFasting={startFasting}
+            updatePlanId={updatePlanId}
           />
           <FastingPlanCard planId={planId} updatePlanId={updatePlanId} />
         </>
@@ -78,6 +80,15 @@ export default function Page() {
         targetWeight={targetWeightKg}
         isLoading={isWeightStateLoading}
       />
+
+      <Button
+        onClick={() => {
+          localStorage.clear()
+          location.reload()
+        }}
+      >
+        Clear storage
+      </Button>
     </main>
   )
 }
