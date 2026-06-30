@@ -19,8 +19,8 @@ import { toast } from 'sonner'
 
 interface EditFastsSheetProps {
   fasts: Fast[]
-  deleteFast: (id: string) => void
-  updateFast: (updatedFast: Fast) => void
+  deleteFast: (id: string) => Promise<void>
+  updateFast: (updatedFast: Fast) => Promise<void>
 }
 
 export default function EditFastsSheet({
@@ -31,6 +31,32 @@ export default function EditFastsSheet({
   const sortedFasts = [...fasts].sort(
     (a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
   )
+
+  const handleDeleteFast = async (id: string) => {
+    try {
+      await deleteFast(id)
+      toast.success('Fast deleted')
+    } catch (error) {
+      if (error instanceof Error) toast.error(error.message)
+    }
+  }
+
+  const handleUpdateFast = async (
+    startedAt: Date,
+    endedAt: Date,
+    fast: Fast,
+  ) => {
+    try {
+      await updateFast({
+        ...fast,
+        startedAt: startedAt.toISOString(),
+        endedAt: endedAt.toISOString(),
+      })
+      toast.success('Fast updated')
+    } catch (error) {
+      if (error instanceof Error) toast.error(error.message)
+    }
+  }
 
   return (
     <Sheet>
@@ -66,18 +92,10 @@ export default function EditFastsSheet({
                   key={fast.id}
                   fast={fast}
                   fasts={fasts}
-                  onDelete={() => {
-                    deleteFast(fast.id)
-                    toast.success('Fast deleted')
-                  }}
-                  onUpdate={(startedAt, endedAt) => {
-                    updateFast({
-                      ...fast,
-                      startedAt: startedAt.toISOString(),
-                      endedAt: endedAt.toISOString(),
-                    })
-                    toast.success('Fast updated')
-                  }}
+                  onDelete={() => handleDeleteFast(fast.id)}
+                  onUpdate={(startedAt, endedAt) =>
+                    handleUpdateFast(startedAt, endedAt, fast)
+                  }
                 />
               ))}
             </div>

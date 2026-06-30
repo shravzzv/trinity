@@ -56,8 +56,8 @@ export default function Page() {
       <FastingStatistics
         fasts={fasts}
         addFast={addFast}
-        deleteFast={deleteFast}
         updateFast={updateFast}
+        deleteFast={deleteFast}
         isLoading={isFastingStateLoading}
       />
 

@@ -14,6 +14,12 @@ import type {
 } from '@/types/fasting'
 import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
+import {
+  getFasts as getFastsFromIdxDB,
+  addFast as addFastToIdxDB,
+  updateFast as updateFastInIdxDB,
+  deleteFast as deleteFastFromIdxDB,
+} from '@/lib/indexed-db'
 
 /**
  * The public API exposed by {@link useFasting}.
@@ -54,35 +60,45 @@ export interface UseFastingResult {
    * Starts a fasting session and records the current timestamp as the
    * session start time.
    */
-  startFasting: () => void
+  startFasting: () => Promise<void>
 
   /**
-   * Starts an eating session and records the current timestamp as the
-   * session start time.
-   */
-  endFasting: () => void
-
-  /**
-   * Adds a new fast to the fasting history while ensuring the ascending
-   * order of the fasts.
+   * Ends the current fasting session and begins an eating session.
    *
-   * @param fast The new fast to add.
+   * If a fasting session is active, a completed fast is recorded and
+   * persisted before the returned promise resolves.
    */
-  addFast: (fast: Fast) => void
+  endFasting: () => Promise<void>
 
   /**
-   * Deletes a fast from the fasting history.
+   * Optimistically adds a completed fast to the fasting history.
    *
-   * @param id The id of the fast to delete
+   * If persistence fails, the optimistic update is rolled back and the
+   * returned promise rejects.
+   *
+   * @param fast The completed fast to add.
    */
-  deleteFast: (id: string) => void
+  addFast: (fast: Fast) => Promise<void>
 
   /**
-   * Updates a fast in the fasting history.
+   * Optimistically deletes a completed fast.
+   *
+   * If persistence fails, the optimistic update is rolled back and the
+   * returned promise rejects.
+   *
+   * @param id The identifier of the fast to delete.
+   */
+  deleteFast: (id: string) => Promise<void>
+
+  /**
+   * Optimistically updates a completed fast.
+   *
+   * If persistence fails, the optimistic update is rolled back and the
+   * returned promise rejects.
    *
    * @param updatedFast The updated fast.
    */
-  updateFast: (updatedFast: Fast) => void
+  updateFast: (updatedFast: Fast) => Promise<void>
 }
 
 /**
@@ -112,30 +128,84 @@ export const useFasting = (): UseFastingResult => {
 
   const updatePlanId = (planId: FastingPlanId) => setPlanId(planId)
 
-  const startSession = (status: FastingStatus) => {
+  const startSession = async (status: FastingStatus) => {
     const now = new Date().toISOString()
 
     if (session?.status === 'fasting' && status === 'eating') {
-      addFast({ id: uuidv4(), startedAt: session.startedAt, endedAt: now })
+      await addFast({
+        id: uuidv4(),
+        startedAt: session.startedAt,
+        endedAt: now,
+      })
     }
 
     setSession({ status, startedAt: now })
   }
 
-  const addFast = (fast: Fast) => {
+  /**
+   * Optimistically adds a completed fast.
+   *
+   * The fasting history is updated immediately for responsiveness. If the
+   * database write fails, the previous state is restored and the returned
+   * promise rejects.
+   *
+   * @param fast The completed fast to add.
+   */
+  const addFast = async (fast: Fast) => {
+    const previousFasts = fasts
+
     setFasts((prev) => sortFasts([...prev, fast]))
+
+    try {
+      await addFastToIdxDB(fast)
+    } catch (error) {
+      setFasts(previousFasts)
+      throw Error('Failed to save the fast', { cause: error })
+    }
   }
 
-  const deleteFast = (id: string) => {
+  /**
+   * Optimistically deletes a fast from the state.
+   *
+   * @param id The id of the deleted fast.
+   */
+  const deleteFast = async (id: string) => {
+    const previousFasts = fasts
+
     setFasts((prev) => prev.filter((fast) => fast.id !== id))
+
+    try {
+      await deleteFastFromIdxDB(id)
+    } catch (error) {
+      setFasts(previousFasts)
+      throw Error('Failed to delete the fast', { cause: error })
+    }
   }
 
-  const updateFast = (updatedFast: Fast) => {
+  /**
+   * Optimistically updates a fast.
+   *
+   * The fasting history is updated immediately for responsiveness. If the
+   * database write fails, the previous state is restored and the returned
+   * promise rejects.
+   *
+   * @param updatedFast The updated fast to update.
+   */
+  const updateFast = async (updatedFast: Fast) => {
+    const previousFasts = fasts
+
     setFasts((prev) =>
       sortFasts(
         prev.map((fast) => (fast.id === updatedFast.id ? updatedFast : fast)),
       ),
     )
+
+    try {
+      await updateFastInIdxDB(updatedFast)
+    } catch (error) {
+      setFasts(previousFasts)
+      throw Error('Failed to update the fast', { cause: error })
+    }
   }
 
   const hydratePlanId = () => {
@@ -188,11 +258,21 @@ export const useFasting = (): UseFastingResult => {
     }
   }
 
+  const hydrateFasts = async () => {
+    try {
+      const fasts = await getFastsFromIdxDB()
+      setFasts(fasts)
+    } catch (error) {
+      console.error('Hydrating fasts failed', error)
+    }
+  }
+
   useEffect(() => {
-    const hydrate = () => {
+    const hydrate = async () => {
       try {
         hydratePlanId()
         hydrateSession()
+        await hydrateFasts()
       } finally {
         setIsLoading(false)
       }

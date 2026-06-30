@@ -9,7 +9,7 @@ import { type UseFastingResult } from '@/hooks/use-fasting'
 
 interface InactiveFastingTimerProps {
   hasPlan: boolean
-  startFasting: () => void
+  startFasting: () => Promise<void>
   updatePlanId: UseFastingResult['updatePlanId']
 }
 

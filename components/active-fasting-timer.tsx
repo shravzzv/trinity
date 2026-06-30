@@ -33,8 +33,8 @@ import { toast } from 'sonner'
 interface ActiveFastingTimerProps {
   planId: FastingPlanId
   session: FastingSession
-  endFasting: () => void
-  startFasting: () => void
+  startFasting: () => Promise<void>
+  endFasting: () => Promise<void>
 }
 
 export default function ActiveFastingTimer({
@@ -79,13 +79,17 @@ export default function ActiveFastingTimer({
   const hasExceededSessionLength = remainingMs < 0
   const excessMs = elapsedMs - sessionLengthMs
 
-  const handleContinue = () => {
-    if (isFasting) {
-      endFasting()
-      toast.success('Fast ended')
-    } else {
-      startFasting()
-      toast.success('Fast started')
+  const handleContinue = async () => {
+    try {
+      if (isFasting) {
+        await endFasting()
+        toast.success('Fast ended')
+      } else {
+        await startFasting()
+        toast.success('Fast started')
+      }
+    } catch (error) {
+      if (error instanceof Error) toast.error(error.message)
     }
   }
 

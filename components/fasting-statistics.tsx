@@ -39,9 +39,9 @@ import FastingStatisticsSkeleton from './skeletons/fasting-statistics-skeleton'
 interface FastingStatisticsProps {
   isLoading: boolean
   fasts: Fast[]
-  addFast: (fast: Fast) => void
-  deleteFast: (id: string) => void
-  updateFast: (updatedFast: Fast) => void
+  addFast: (fast: Fast) => Promise<void>
+  deleteFast: (id: string) => Promise<void>
+  updateFast: (updatedFast: Fast) => Promise<void>
 }
 
 export default function FastingStatistics({
@@ -129,6 +129,19 @@ export default function FastingStatistics({
     },
   } satisfies ChartConfig
 
+  const handleAddFast = async (startedAt: Date, endedAt: Date) => {
+    try {
+      await addFast({
+        id: uuidv4(),
+        startedAt: startedAt.toISOString(),
+        endedAt: endedAt.toISOString(),
+      })
+      toast.success('Fast added')
+    } catch (error) {
+      if (error instanceof Error) toast.error(error.message)
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -210,14 +223,7 @@ export default function FastingStatistics({
             dialogTitle='Add past fast'
             dialogDescription='Manually add a completed fast to your fasting history. Choose a start and end time in the past. To keep your history accurate, fasts cannot overlap with existing entries.'
             existingFasts={fasts}
-            onSubmit={(startedAt, endedAt) => {
-              addFast({
-                id: uuidv4(),
-                startedAt: startedAt.toISOString(),
-                endedAt: endedAt.toISOString(),
-              })
-              toast.success('Fast added')
-            }}
+            onSubmit={handleAddFast}
             submitLabel='Add fast'
           >
             <Button variant='secondary'>
