@@ -149,8 +149,10 @@ export default function WeightStatistics({
             </>
           ) : (
             <>
-              <Target className='size-4' />
-              <span>Set a target weight to track your progress.</span>
+              <Target className='size-4 shrink-0' />
+              <span className='flex-1'>
+                Set a target weight to track your progress.
+              </span>
             </>
           )}
         </CardDescription>
