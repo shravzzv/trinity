@@ -4,6 +4,7 @@ import { fastingPlans } from '@/constants/fasting-plans'
 import {
   FASTING_PLAN_ID_STORAGE_KEY,
   FASTING_SESSION_STORAGE_KEY,
+  PREFERRED_FAST_START_TIME_STORAGE_KEY,
 } from '@/constants/storage-keys'
 import { sortFasts } from '@/lib/fasting'
 import type {
@@ -272,6 +273,45 @@ export const useFasting = (): UseFastingResult => {
     }
   }
 
+  const hydratePreferredFastStartTime = () => {
+    try {
+      const saved = localStorage.getItem(PREFERRED_FAST_START_TIME_STORAGE_KEY)
+      if (!saved) return
+
+      const preferredFastStartTime = JSON.parse(saved) as PreferredFastStartTime
+
+      const isObject =
+        typeof preferredFastStartTime === 'object' &&
+        preferredFastStartTime !== null
+
+      const hasValidHour =
+        Number.isInteger(preferredFastStartTime?.hour) &&
+        preferredFastStartTime.hour >= 0 &&
+        preferredFastStartTime.hour <= 23
+
+      const hasValidMinute =
+        Number.isInteger(preferredFastStartTime?.minute) &&
+        preferredFastStartTime.minute >= 0 &&
+        preferredFastStartTime.minute <= 59
+
+      const isValidPreferredFastStartTime =
+        preferredFastStartTime === null ||
+        (isObject && hasValidHour && hasValidMinute)
+
+      if (!isValidPreferredFastStartTime) {
+        throw Error('Preferred fast start time in local storage corrupted')
+      }
+
+      setPreferredFastStartTime(preferredFastStartTime)
+    } catch (error) {
+      console.error(
+        'Hydrating preferred fast start time from local storage failed',
+        error,
+      )
+      localStorage.removeItem(PREFERRED_FAST_START_TIME_STORAGE_KEY)
+    }
+  }
+
   const hydrateSession = () => {
     try {
       const saved = localStorage.getItem(FASTING_SESSION_STORAGE_KEY)
@@ -312,6 +352,7 @@ export const useFasting = (): UseFastingResult => {
       try {
         hydratePlanId()
         hydrateSession()
+        hydratePreferredFastStartTime()
         await hydrateFasts()
       } finally {
         setIsLoading(false)
@@ -340,6 +381,19 @@ export const useFasting = (): UseFastingResult => {
 
     syncSession()
   }, [isLoading, session])
+
+  useEffect(() => {
+    if (isLoading) return
+
+    const syncPreferredFastStartTime = () => {
+      localStorage.setItem(
+        PREFERRED_FAST_START_TIME_STORAGE_KEY,
+        JSON.stringify(preferredFastStartTime),
+      )
+    }
+
+    syncPreferredFastStartTime()
+  }, [isLoading, preferredFastStartTime])
 
   return {
     fasts,
