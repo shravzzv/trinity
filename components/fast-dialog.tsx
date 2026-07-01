@@ -208,8 +208,6 @@ export default function FastDialog({
             <Input
               id='start-time-picker'
               type='time'
-              step='1'
-              className='appearance-none pr-0 outline [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
               value={format(startedAt, 'HH:mm:ss')}
               onChange={(e) => {
                 setStartedAt(
@@ -265,8 +263,6 @@ export default function FastDialog({
             <Input
               id='end-time-picker'
               type='time'
-              step='1'
-              className='appearance-none pr-0 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
               value={format(endedAt, 'HH:mm:ss')}
               onChange={(e) => {
                 setEndedAt(replaceTimeFromInputValue(endedAt, e.target.value))
