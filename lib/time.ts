@@ -15,6 +15,8 @@
  * - Other domain-agnostic date and time operations.
  */
 
+import { differenceInCalendarDays } from 'date-fns'
+
 /**
  * Returns a HH:MM:SS version of a duration.
  *
@@ -99,4 +101,28 @@ export const copyTime = (targetDate: Date, sourceDate: Date): Date => {
     sourceDate.getMinutes(),
     sourceDate.getSeconds(),
   )
+}
+
+/**
+ * Formats a date relative to today using calendar days.
+ *
+ * Returns human-friendly labels such as "today", "tomorrow",
+ * "yesterday", "in 3 days", or "2 days ago".
+ *
+ * @param date The date to describe relative to the current day.
+ * @returns A human-readable relative day label.
+ */
+export const formatRelativeDay = (date: Date): string => {
+  const days = differenceInCalendarDays(date, new Date())
+
+  switch (days) {
+    case 0:
+      return 'today'
+    case 1:
+      return 'tomorrow'
+    case -1:
+      return 'yesterday'
+    default:
+      return days > 0 ? `in ${days} days` : `${Math.abs(days)} days ago`
+  }
 }

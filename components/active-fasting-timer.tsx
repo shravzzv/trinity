@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { fastingPlans } from '@/constants/fasting-plans'
-import { formatDuration } from '@/lib/time'
+import { formatDuration, formatRelativeDay } from '@/lib/time'
 import {
   Card,
   CardAction,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
@@ -27,8 +28,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { Flame, UtensilsCrossed } from 'lucide-react'
+import { Flame, Pen, UtensilsCrossed } from 'lucide-react'
 import { toast } from 'sonner'
+import { Separator } from './ui/separator'
 
 interface ActiveFastingTimerProps {
   planId: FastingPlanId
@@ -78,6 +80,15 @@ export default function ActiveFastingTimer({
   // excess
   const hasExceededSessionLength = remainingMs < 0
   const excessMs = elapsedMs - sessionLengthMs
+
+  const endsAtFormatted = endsAt.toLocaleTimeString([], {
+    hour: 'numeric',
+    minute: '2-digit',
+  })
+  const startedAtFormatted = new Date(startedAt).toLocaleTimeString([], {
+    hour: 'numeric',
+    minute: '2-digit',
+  })
 
   const handleContinue = async () => {
     try {
@@ -166,6 +177,35 @@ export default function ActiveFastingTimer({
 
         <Progress value={progress} />
       </CardContent>
+
+      <Separator />
+
+      <CardFooter className='flex flex-col items-stretch gap-4'>
+        <div className='flex w-full items-center justify-evenly'>
+          <div className='flex flex-1 flex-col items-center gap-1'>
+            <p className='text-muted-foreground text-xs'>Started</p>
+
+            <Button variant='outline' size='sm' className='font-medium'>
+              {startedAtFormatted}
+              <Pen />
+            </Button>
+
+            <p className='text-muted-foreground text-xs'>
+              {formatRelativeDay(new Date(startedAt))}
+            </p>
+          </div>
+
+          <Separator orientation='vertical' />
+
+          <div className='flex flex-1 flex-col items-center gap-1'>
+            <p className='text-muted-foreground text-xs'>Ends</p>
+            <p className='font-medium'>{endsAtFormatted}</p>
+            <p className='text-muted-foreground text-xs'>
+              {formatRelativeDay(endsAt)}
+            </p>
+          </div>
+        </div>
+      </CardFooter>
     </Card>
   )
 }

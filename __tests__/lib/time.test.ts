@@ -3,6 +3,7 @@ import {
   copyTime,
   replaceTime,
   replaceTimeFromInputValue,
+  formatRelativeDay,
 } from '@/lib/time'
 
 describe('formatDuration', () => {
@@ -111,5 +112,42 @@ describe('copyTime', () => {
     copyTime(targetDate, sourceDate)
 
     expect(sourceDate).toEqual(new Date(2026, 5, 22, 18, 15, 30))
+  })
+})
+
+describe('formatRelativeDay', () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2026-01-15T12:00:00Z'))
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
+  })
+
+  it('returns today for the current day', () => {
+    expect(formatRelativeDay(new Date('2026-01-15T12:00:00Z'))).toBe('today')
+  })
+
+  it('returns tomorrow for the next calendar day', () => {
+    expect(formatRelativeDay(new Date('2026-01-16T00:00:00Z'))).toBe('tomorrow')
+  })
+
+  it('returns yesterday for the previous calendar day', () => {
+    expect(formatRelativeDay(new Date('2026-01-14T12:00:00Z'))).toBe(
+      'yesterday',
+    )
+  })
+
+  it('returns "in x days" for future dates', () => {
+    expect(formatRelativeDay(new Date('2026-01-18T12:00:00Z'))).toBe(
+      'in 3 days',
+    )
+  })
+
+  it('returns "x days ago" for past dates', () => {
+    expect(formatRelativeDay(new Date('2026-01-12T12:00:00Z'))).toBe(
+      '3 days ago',
+    )
   })
 })
