@@ -193,9 +193,12 @@ export const useFasting = (): UseFastingResult => {
    * @param fast The completed fast to add.
    */
   const addFast = async (fast: Fast) => {
-    const previousFasts = fasts
+    let previousFasts: Fast[] = []
 
-    setFasts((prev) => sortFasts([...prev, fast]))
+    setFasts((prev) => {
+      previousFasts = prev
+      return sortFasts([...prev, fast])
+    })
 
     try {
       await addFastToIdxDB(fast)
@@ -211,9 +214,12 @@ export const useFasting = (): UseFastingResult => {
    * @param id The id of the deleted fast.
    */
   const deleteFast = async (id: string) => {
-    const previousFasts = fasts
+    let previousFasts: Fast[] = []
 
-    setFasts((prev) => prev.filter((fast) => fast.id !== id))
+    setFasts((prev) => {
+      previousFasts = prev
+      return prev.filter((fast) => fast.id !== id)
+    })
 
     try {
       await deleteFastFromIdxDB(id)
@@ -233,13 +239,15 @@ export const useFasting = (): UseFastingResult => {
    * @param updatedFast The updated fast to update.
    */
   const updateFast = async (updatedFast: Fast) => {
-    const previousFasts = fasts
+    let previousFasts: Fast[] = []
 
-    setFasts((prev) =>
-      sortFasts(
+    setFasts((prev) => {
+      previousFasts = prev
+
+      return sortFasts(
         prev.map((fast) => (fast.id === updatedFast.id ? updatedFast : fast)),
-      ),
-    )
+      )
+    })
 
     try {
       await updateFastInIdxDB(updatedFast)
