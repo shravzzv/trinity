@@ -137,7 +137,7 @@ export default function FastingPlanCard({
               <p className='text-muted-foreground text-xs'>Fasting starts</p>
 
               <PreferredFastTimeDialog
-                dialogTitle='Update preferred fasting start time'
+                dialogTitle='Update fasting schedule'
                 dialogDescription='Change the time you usually begin your fasting window. Your preferred fasting schedule will be updated automatically.'
                 preferredFastStartTime={preferredFastStartTime}
                 selectedPlan={selectedPlan}
@@ -170,7 +170,7 @@ export default function FastingPlanCard({
             </p>
 
             <PreferredFastTimeDialog
-              dialogTitle='Set preferred fasting start time'
+              dialogTitle='Set fasting schedule'
               dialogDescription='Choose the time you usually begin your fasting window. Trinity will use this to suggest your preferred fasting schedule and prefill fasting start times throughout the app.'
               preferredFastStartTime={preferredFastStartTime}
               onSubmit={handleSave}
