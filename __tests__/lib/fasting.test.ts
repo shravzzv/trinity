@@ -6,6 +6,8 @@ import {
   sortFasts,
   formatPreferredTime,
   getPreferredFastSchedule,
+  getSessionStartedAtValidationErrors,
+  doesSessionOverlap,
 } from '@/lib/fasting'
 import type { Fast } from '@/types/fasting'
 
@@ -521,5 +523,90 @@ describe('formatPreferredTime', () => {
         minute: 0,
       }),
     ).toMatch(/12/)
+  })
+})
+
+describe('doesSessionOverlap', () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2026-01-10T12:00:00.000Z'))
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
+  })
+
+  it('returns false when there are no fasts', () => {
+    expect(doesSessionOverlap(new Date('2026-01-10T08:00:00.000Z'), [])).toBe(
+      false,
+    )
+  })
+
+  it('returns false when the session does not overlap a fast', () => {
+    expect(
+      doesSessionOverlap(new Date('2026-01-10T08:00:00.000Z'), [
+        {
+          id: 'fast-1',
+          startedAt: '2026-01-09T08:00:00.000Z',
+          endedAt: '2026-01-09T16:00:00.000Z',
+        },
+      ]),
+    ).toBe(false)
+  })
+
+  it('returns true when the session overlaps a fast', () => {
+    expect(
+      doesSessionOverlap(new Date('2026-01-10T09:00:00.000Z'), [
+        {
+          id: 'fast-1',
+          startedAt: '2026-01-10T10:00:00.000Z',
+          endedAt: '2026-01-10T11:00:00.000Z',
+        },
+      ]),
+    ).toBe(true)
+  })
+})
+
+describe('getSessionStartedAtValidationErrors', () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2026-01-10T12:00:00.000Z'))
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
+  })
+
+  it('returns no errors for a valid session', () => {
+    expect(
+      getSessionStartedAtValidationErrors(
+        new Date('2026-01-10T08:00:00.000Z'),
+        [],
+      ),
+    ).toEqual([])
+  })
+
+  it('returns an error when the session starts in the future', () => {
+    expect(
+      getSessionStartedAtValidationErrors(
+        new Date('2026-01-10T13:00:00.000Z'),
+        [],
+      ),
+    ).toEqual(['The session cannot start in the future.'])
+  })
+
+  it('returns an error when the session overlaps an existing fast', () => {
+    expect(
+      getSessionStartedAtValidationErrors(
+        new Date('2026-01-10T09:00:00.000Z'),
+        [
+          {
+            id: 'fast-1',
+            startedAt: '2026-01-10T10:00:00.000Z',
+            endedAt: '2026-01-10T11:00:00.000Z',
+          },
+        ],
+      ),
+    ).toEqual(['The session overlaps an existing fast.'])
   })
 })

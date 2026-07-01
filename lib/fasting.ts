@@ -233,15 +233,15 @@ export const formatPreferredTime = (time: PreferredFastStartTime): string => {
 }
 
 /**
- * Returns whether an active session beginning at {@link startedAt}
- * overlaps any completed fast.
+ * Returns whether an active fasting session beginning at {@link startedAt}
+ * overlaps any completed fasts.
  *
- * Unlike completed fast validation, the session has no end time.
- * The overlap is checked from the proposed start time until the present.
+ * Since an active session has no end time yet, the overlap is checked over
+ * the interval from the proposed start time until the current time.
  *
  * @param startedAt The proposed session start time.
  * @param fasts Existing completed fasts.
- * @returns Whether or not the session overlaps one from history.
+ * @returns Whether the proposed session overlaps an existing fast.
  */
 export const doesSessionOverlap = (startedAt: Date, fasts: Fast[]): boolean => {
   const now = new Date()
@@ -259,7 +259,8 @@ export const doesSessionOverlap = (startedAt: Date, fasts: Fast[]): boolean => {
  *
  * @param startedAt The proposed session start time.
  * @param fasts Existing completed fasts.
- * @returns A list of validation error messages. Returns an empty array when the session is valid.
+ * @returns A list of validation error messages. Returns an empty array when
+ * the proposed session start time is valid.
  */
 export const getSessionStartedAtValidationErrors = (
   startedAt: Date,
