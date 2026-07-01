@@ -4,6 +4,8 @@ import {
   getFastValidationErrors,
   filterFastsByCadence,
   sortFasts,
+  formatPreferredTime,
+  getPreferredFastSchedule,
 } from '@/lib/fasting'
 import type { Fast } from '@/types/fasting'
 
@@ -412,5 +414,112 @@ describe('sortFasts', () => {
     sortFasts(fasts)
 
     expect(fasts).toEqual(original)
+  })
+})
+
+describe('getPreferredFastSchedule', () => {
+  it('returns the preferred schedule when it ends on the same day', () => {
+    expect(
+      getPreferredFastSchedule(
+        {
+          hour: 8,
+          minute: 30,
+        },
+        8,
+      ),
+    ).toEqual({
+      startsAt: {
+        hour: 8,
+        minute: 30,
+      },
+      endsAt: {
+        hour: 16,
+        minute: 30,
+      },
+      endsNextDay: false,
+    })
+  })
+
+  it('returns the preferred schedule when it wraps to the next day', () => {
+    expect(
+      getPreferredFastSchedule(
+        {
+          hour: 18,
+          minute: 0,
+        },
+        16,
+      ),
+    ).toEqual({
+      startsAt: {
+        hour: 18,
+        minute: 0,
+      },
+      endsAt: {
+        hour: 10,
+        minute: 0,
+      },
+      endsNextDay: true,
+    })
+  })
+
+  it('preserves the preferred start minute', () => {
+    expect(
+      getPreferredFastSchedule(
+        {
+          hour: 19,
+          minute: 45,
+        },
+        16,
+      ).endsAt,
+    ).toEqual({
+      hour: 11,
+      minute: 45,
+    })
+  })
+
+  it('handles midnight correctly', () => {
+    expect(
+      getPreferredFastSchedule(
+        {
+          hour: 0,
+          minute: 15,
+        },
+        16,
+      ).endsAt,
+    ).toEqual({
+      hour: 16,
+      minute: 15,
+    })
+  })
+})
+
+describe('formatPreferredTime', () => {
+  it('formats a preferred time', () => {
+    const formatted = formatPreferredTime({
+      hour: 18,
+      minute: 5,
+    })
+
+    expect(typeof formatted).toBe('string')
+    expect(formatted).toContain('6')
+    expect(formatted).toContain('05')
+  })
+
+  it('formats midnight', () => {
+    expect(
+      formatPreferredTime({
+        hour: 0,
+        minute: 0,
+      }),
+    ).toMatch(/12|00/)
+  })
+
+  it('formats noon', () => {
+    expect(
+      formatPreferredTime({
+        hour: 12,
+        minute: 0,
+      }),
+    ).toMatch(/12/)
   })
 })

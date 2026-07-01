@@ -18,6 +18,20 @@ import { toast } from 'sonner'
 import FastingPlanDialog from './fasting-plan-dialog'
 import FastingPlanCardSkeleton from './skeletons/fasting-plan-card-skeleton'
 import { Separator } from './ui/separator'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { Field, FieldDescription, FieldLabel } from './ui/field'
+import { Input } from './ui/input'
+import { useState } from 'react'
+import { formatPreferredTime, getPreferredFastSchedule } from '@/lib/fasting'
 
 interface FastingPlanCardProps {
   isLoading: boolean
@@ -36,9 +50,37 @@ export default function FastingPlanCard({
   updatePreferredFastStartTime,
   clearPreferredFastStartTime,
 }: FastingPlanCardProps) {
+  const [draftTime, setDraftTime] = useState('18:00')
+
   if (isLoading) return <FastingPlanCardSkeleton />
 
   const selectedPlan = fastingPlans.find((p) => p.id === planId)
+
+  const [draftHour, draftMinute] = draftTime.split(':').map(Number)
+
+  const draftSchedule = selectedPlan
+    ? getPreferredFastSchedule(
+        {
+          hour: draftHour,
+          minute: draftMinute,
+        },
+        selectedPlan.fastingHours,
+      )
+    : null
+
+  const preferredSchedule =
+    preferredFastStartTime && selectedPlan
+      ? getPreferredFastSchedule(
+          preferredFastStartTime,
+          selectedPlan.fastingHours,
+        )
+      : null
+
+  const handleSave = () => {
+    const [hour, minute] = draftTime.split(':').map(Number)
+    updatePreferredFastStartTime(hour, minute)
+    toast.success('Fasting schedule set')
+  }
 
   return (
     <Card>
@@ -102,14 +144,18 @@ export default function FastingPlanCard({
           Preferred schedule
         </p>
 
-        {preferredFastStartTime ? (
+        {!selectedPlan ? (
+          <p className='text-muted-foreground text-sm'>
+            A fasting plan is needed to set a preferred schedule.
+          </p>
+        ) : preferredFastStartTime && preferredSchedule ? (
           <div className='flex w-full items-center justify-evenly'>
             <div className='flex flex-1 flex-col items-center gap-1'>
               <p className='text-muted-foreground text-xs'>Fasting starts</p>
 
               <div className='flex gap-2'>
                 <Button variant='outline' size='sm'>
-                  6:00 PM
+                  {formatPreferredTime(preferredSchedule.startsAt)}
                   <Pen />
                 </Button>
               </div>
@@ -119,8 +165,11 @@ export default function FastingPlanCard({
 
             <div className='flex flex-1 flex-col items-center gap-1'>
               <p className='text-muted-foreground text-xs'>Eating starts</p>
-              <p>5:30 PM</p>
-              <span className='text-muted-foreground text-xs'>next day</span>
+              <p>{formatPreferredTime(preferredSchedule.endsAt)}</p>
+
+              {preferredSchedule.endsNextDay && (
+                <span className='text-muted-foreground text-xs'>next day</span>
+              )}
             </div>
           </div>
         ) : (
@@ -129,10 +178,67 @@ export default function FastingPlanCard({
               Set your preferred fasting start time.
             </p>
 
-            <Button variant='secondary'>
-              <Clock3 />
-              Set time
-            </Button>
+            <Dialog
+              onOpenChange={(open) => {
+                if (!open) return
+
+                setDraftTime(
+                  preferredFastStartTime
+                    ? `${String(preferredFastStartTime.hour).padStart(2, '0')}:${String(preferredFastStartTime.minute).padStart(2, '0')}`
+                    : '18:00',
+                )
+              }}
+            >
+              <DialogTrigger asChild>
+                <Button variant='secondary'>
+                  <Clock3 />
+                  Set time
+                </Button>
+              </DialogTrigger>
+
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Set preferred fasting start time</DialogTitle>
+                  <DialogDescription>
+                    Set the time you usually begin your fasting window. This is
+                    used to calculate your preferred fasting schedule and to
+                    prefill fasting start times throughout the app.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <Field>
+                  <FieldLabel htmlFor='preferred-start-time'>
+                    Preferred start time
+                  </FieldLabel>
+
+                  <Input
+                    id='preferred-start-time'
+                    placeholder='start time'
+                    type='time'
+                    value={draftTime}
+                    onChange={(e) => setDraftTime(e.target.value)}
+                  />
+
+                  {draftSchedule && (
+                    <FieldDescription>
+                      Ends at{' '}
+                      <span className='font-medium'>
+                        {formatPreferredTime(draftSchedule.endsAt)}
+                      </span>
+                      {draftSchedule.endsNextDay && ' the next day'}.
+                    </FieldDescription>
+                  )}
+                </Field>
+
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant='outline'>Cancel</Button>
+                  </DialogClose>
+
+                  <Button onClick={handleSave}>Save</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         )}
       </CardFooter>

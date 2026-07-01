@@ -19,7 +19,11 @@
  * of the user interface.
  */
 
-import type { Fast, FastingStatisticsCadence } from '@/types/fasting'
+import type {
+  Fast,
+  FastingStatisticsCadence,
+  PreferredFastStartTime,
+} from '@/types/fasting'
 
 /**
  * Calculates the duration of a completed fast in hours.
@@ -170,4 +174,60 @@ export const sortFasts = (fasts: Fast[]) => {
   return [...fasts].sort(
     (a, b) => new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime(),
   )
+}
+
+interface PreferredFastSchedule {
+  startsAt: PreferredFastStartTime
+  endsAt: PreferredFastStartTime
+  endsNextDay: boolean
+}
+
+/**
+ * Calculates the preferred fasting schedule from a preferred fasting
+ * start time and fasting duration.
+ *
+ * The returned eating start time preserves the preferred start minute and
+ * wraps around midnight when necessary.
+ *
+ * @param startTime The preferred fasting start time.
+ * @param fastingHours The fasting duration in hours.
+ * @returns The preferred fasting schedule.
+ */
+export const getPreferredFastSchedule = (
+  startTime: PreferredFastStartTime,
+  fastingHours: number,
+): PreferredFastSchedule => {
+  const totalHours = startTime.hour + fastingHours
+
+  return {
+    startsAt: {
+      hour: startTime.hour,
+      minute: startTime.minute,
+    },
+    endsAt: {
+      hour: totalHours % 24,
+      minute: startTime.minute,
+    },
+    endsNextDay: totalHours >= 24,
+  }
+}
+
+/**
+ * Formats a preferred time for presentation using the user's locale.
+ *
+ * The returned string uses a localized 12-hour or 24-hour clock depending
+ * on the user's locale preferences.
+ *
+ * @param time The preferred time to format.
+ * @returns The formatted time.
+ */
+export const formatPreferredTime = (time: PreferredFastStartTime): string => {
+  const date = new Date()
+
+  date.setHours(time.hour, time.minute, 0, 0)
+
+  return date.toLocaleTimeString([], {
+    hour: 'numeric',
+    minute: '2-digit',
+  })
 }
