@@ -1,4 +1,6 @@
-export const fastingPlans = [
+import type { FastingPlan } from '@/types/fasting'
+
+export const fastingPlans: FastingPlan[] = [
   {
     id: '16:8',
     title: '16:8',

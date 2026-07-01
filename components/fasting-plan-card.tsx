@@ -18,20 +18,8 @@ import { toast } from 'sonner'
 import FastingPlanDialog from './fasting-plan-dialog'
 import FastingPlanCardSkeleton from './skeletons/fasting-plan-card-skeleton'
 import { Separator } from './ui/separator'
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import { Field, FieldDescription, FieldLabel } from './ui/field'
-import { Input } from './ui/input'
-import { useState } from 'react'
 import { formatPreferredTime, getPreferredFastSchedule } from '@/lib/fasting'
+import PreferredFastTimeDialog from './preferred-fast-time-dialog'
 
 interface FastingPlanCardProps {
   isLoading: boolean
@@ -50,23 +38,9 @@ export default function FastingPlanCard({
   updatePreferredFastStartTime,
   clearPreferredFastStartTime,
 }: FastingPlanCardProps) {
-  const [draftTime, setDraftTime] = useState('18:00')
-
   if (isLoading) return <FastingPlanCardSkeleton />
 
   const selectedPlan = fastingPlans.find((p) => p.id === planId)
-
-  const [draftHour, draftMinute] = draftTime.split(':').map(Number)
-
-  const draftSchedule = selectedPlan
-    ? getPreferredFastSchedule(
-        {
-          hour: draftHour,
-          minute: draftMinute,
-        },
-        selectedPlan.fastingHours,
-      )
-    : null
 
   const preferredSchedule =
     preferredFastStartTime && selectedPlan
@@ -76,10 +50,19 @@ export default function FastingPlanCard({
         )
       : null
 
-  const handleSave = () => {
-    const [hour, minute] = draftTime.split(':').map(Number)
+  const handleSave = (hour: number, minute: number) => {
     updatePreferredFastStartTime(hour, minute)
     toast.success('Fasting schedule set')
+  }
+
+  const handleUpdate = (hour: number, minute: number) => {
+    updatePreferredFastStartTime(hour, minute)
+    toast.success('Fasting schedule updated')
+  }
+
+  const handleDeleteSchedule = () => {
+    clearPreferredFastStartTime()
+    toast.success('Fasting schedule deleted')
   }
 
   return (
@@ -153,12 +136,20 @@ export default function FastingPlanCard({
             <div className='flex flex-1 flex-col items-center gap-1'>
               <p className='text-muted-foreground text-xs'>Fasting starts</p>
 
-              <div className='flex gap-2'>
+              <PreferredFastTimeDialog
+                dialogTitle='Update preferred fasting start time'
+                dialogDescription='Change the time you usually begin your fasting window. Your preferred fasting schedule will be updated automatically.'
+                preferredFastStartTime={preferredFastStartTime}
+                selectedPlan={selectedPlan}
+                allowDeleteSchedule
+                onSubmit={handleUpdate}
+                onDeleteSchedule={handleDeleteSchedule}
+              >
                 <Button variant='outline' size='sm'>
                   {formatPreferredTime(preferredSchedule.startsAt)}
                   <Pen />
                 </Button>
-              </div>
+              </PreferredFastTimeDialog>
             </div>
 
             <Separator orientation='vertical' />
@@ -178,67 +169,18 @@ export default function FastingPlanCard({
               Set your preferred fasting start time.
             </p>
 
-            <Dialog
-              onOpenChange={(open) => {
-                if (!open) return
-
-                setDraftTime(
-                  preferredFastStartTime
-                    ? `${String(preferredFastStartTime.hour).padStart(2, '0')}:${String(preferredFastStartTime.minute).padStart(2, '0')}`
-                    : '18:00',
-                )
-              }}
+            <PreferredFastTimeDialog
+              dialogTitle='Set preferred fasting start time'
+              dialogDescription='Choose the time you usually begin your fasting window. Trinity will use this to suggest your preferred fasting schedule and prefill fasting start times throughout the app.'
+              preferredFastStartTime={preferredFastStartTime}
+              onSubmit={handleSave}
+              selectedPlan={selectedPlan}
             >
-              <DialogTrigger asChild>
-                <Button variant='secondary'>
-                  <Clock3 />
-                  Set time
-                </Button>
-              </DialogTrigger>
-
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Set preferred fasting start time</DialogTitle>
-                  <DialogDescription>
-                    Set the time you usually begin your fasting window. This is
-                    used to calculate your preferred fasting schedule and to
-                    prefill fasting start times throughout the app.
-                  </DialogDescription>
-                </DialogHeader>
-
-                <Field>
-                  <FieldLabel htmlFor='preferred-start-time'>
-                    Preferred start time
-                  </FieldLabel>
-
-                  <Input
-                    id='preferred-start-time'
-                    placeholder='start time'
-                    type='time'
-                    value={draftTime}
-                    onChange={(e) => setDraftTime(e.target.value)}
-                  />
-
-                  {draftSchedule && (
-                    <FieldDescription>
-                      Ends at{' '}
-                      <span className='font-medium'>
-                        {formatPreferredTime(draftSchedule.endsAt)}
-                      </span>
-                      {draftSchedule.endsNextDay && ' the next day'}.
-                    </FieldDescription>
-                  )}
-                </Field>
-
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button variant='outline'>Cancel</Button>
-                  </DialogClose>
-
-                  <Button onClick={handleSave}>Save</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+              <Button variant='secondary'>
+                <Clock3 />
+                Set time
+              </Button>
+            </PreferredFastTimeDialog>
           </div>
         )}
       </CardFooter>

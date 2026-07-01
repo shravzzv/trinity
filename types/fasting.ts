@@ -4,6 +4,13 @@ export type FastingStatus = 'fasting' | 'eating'
 export type FastingPlanId = (typeof fastingPlans)[number]['id']
 export type FastingStatisticsCadence = 'week' | 'month' | 'year' | 'all'
 
+export interface FastingPlan {
+  id: string
+  title: string
+  fastingHours: number
+  eatingHours: number
+}
+
 export interface FastingSession {
   status: FastingStatus
   startedAt: string
