@@ -1,6 +1,6 @@
 import WeightStatistics from '@/components/weight-statistics'
 import { WEIGHT_STATISTICS_CADENCE_STORAGE_KEY } from '@/constants/storage-keys'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { toast } from 'sonner'
 
@@ -30,7 +30,7 @@ jest.mock('@/components/weight-dialog', () => ({
     onSave,
     children,
   }: {
-    onSave: (weightKg: number, recordedAt: Date) => void
+    onSave: (weightKg: number, recordedAt: Date) => Promise<void>
     children: React.ReactNode
   }) => (
     <div>
@@ -69,9 +69,9 @@ const entries = [
 const renderComponent = (
   props: Partial<React.ComponentProps<typeof WeightStatistics>> = {},
 ) => {
-  const addWeight = jest.fn()
-  const updateWeight = jest.fn()
-  const deleteWeight = jest.fn()
+  const addWeight = jest.fn().mockResolvedValue(undefined)
+  const updateWeight = jest.fn().mockResolvedValue(undefined)
+  const deleteWeight = jest.fn().mockResolvedValue(undefined)
 
   render(
     <WeightStatistics
@@ -94,6 +94,18 @@ const renderComponent = (
     deleteWeight,
   }
 }
+
+Object.defineProperties(HTMLElement.prototype, {
+  hasPointerCapture: {
+    value: jest.fn(),
+  },
+  setPointerCapture: {
+    value: jest.fn(),
+  },
+  releasePointerCapture: {
+    value: jest.fn(),
+  },
+})
 
 describe('WeightStatistics', () => {
   beforeEach(() => {
@@ -195,7 +207,27 @@ describe('WeightStatistics', () => {
       }),
     )
 
-    expect(toast.success).toHaveBeenCalledWith('Weight added')
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith('Weight added')
+    })
+  })
+
+  it('shows an error toast when adding a weight fails', async () => {
+    const error = new Error('Failed to save weight')
+
+    const { user } = renderComponent({
+      addWeight: jest.fn().mockRejectedValue(error),
+    })
+
+    await user.click(
+      screen.getByRole('button', {
+        name: /mock save weight/i,
+      }),
+    )
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('Failed to save weight')
+    })
   })
 
   it('hydrates cadence from localStorage', () => {
@@ -212,5 +244,126 @@ describe('WeightStatistics', () => {
     renderComponent()
 
     expect(screen.getByRole('combobox')).toHaveTextContent(/week/i)
+  })
+
+  it('persists cadence changes', async () => {
+    const setItemSpy = jest.spyOn(Storage.prototype, 'setItem')
+
+    renderComponent()
+
+    const user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+    })
+
+    await user.click(screen.getByRole('combobox'))
+    await user.click(screen.getByText('Month'))
+
+    expect(setItemSpy).toHaveBeenCalledWith(
+      WEIGHT_STATISTICS_CADENCE_STORAGE_KEY,
+      'month',
+    )
+  })
+
+  it('removes corrupted cadence storage when hydration throws', () => {
+    const getItemSpy = jest
+      .spyOn(Storage.prototype, 'getItem')
+      .mockImplementation(() => {
+        throw new Error('boom')
+      })
+
+    const removeItemSpy = jest.spyOn(Storage.prototype, 'removeItem')
+
+    const consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {})
+
+    renderComponent()
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Hydrating weight statistics cadence failed',
+      expect.any(Error),
+    )
+
+    expect(removeItemSpy).toHaveBeenCalledWith(
+      WEIGHT_STATISTICS_CADENCE_STORAGE_KEY,
+    )
+
+    getItemSpy.mockRestore()
+    consoleErrorSpy.mockRestore()
+  })
+
+  it('renders no weight change when only one entry exists', () => {
+    renderComponent({
+      entries: [
+        {
+          id: '1',
+          weightKg: 80,
+          recordedAt: new Date('2026-01-15T12:00:00Z').toISOString(),
+        },
+      ],
+    })
+
+    expect(screen.getByText('—')).toBeInTheDocument()
+  })
+
+  it('renders weight loss summary', () => {
+    renderComponent()
+
+    expect(screen.getByText(/2.0 kg lost this week/i)).toBeInTheDocument()
+  })
+
+  it('renders weight gain summary', () => {
+    renderComponent({
+      entries: [
+        {
+          id: '1',
+          weightKg: 78,
+          recordedAt: new Date('2026-01-10T12:00:00Z').toISOString(),
+        },
+        {
+          id: '2',
+          weightKg: 80,
+          recordedAt: new Date('2026-01-15T12:00:00Z').toISOString(),
+        },
+      ],
+    })
+
+    expect(screen.getByText(/2.0 kg gained this week/i)).toBeInTheDocument()
+  })
+
+  it('renders skeleton while loading', () => {
+    render(
+      <WeightStatistics
+        isLoading
+        entries={[]}
+        targetWeight={null}
+        addWeight={jest.fn()}
+        updateWeight={jest.fn()}
+        deleteWeight={jest.fn()}
+      />,
+    )
+
+    expect(
+      screen.queryByRole('button', { name: /edit weights/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('renders all cadence options', async () => {
+    const { user } = renderComponent()
+    await user.click(screen.getByRole('combobox'))
+
+    expect(screen.getByRole('option', { name: 'Week' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Month' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Year' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'All' })).toBeInTheDocument()
+  })
+
+  it('updates cadence selection', async () => {
+    const { user } = renderComponent()
+
+    await user.click(screen.getByRole('combobox'))
+    await user.click(screen.getByText('Year'))
+
+    expect(screen.getByRole('combobox')).toHaveTextContent(/year/i)
   })
 })
