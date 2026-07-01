@@ -14,3 +14,8 @@ export interface Fast {
   startedAt: string
   endedAt: string
 }
+
+export interface PreferredFastStartTime {
+  hour: number
+  minute: number
+}

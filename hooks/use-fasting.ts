@@ -11,6 +11,7 @@ import type {
   FastingPlanId,
   FastingSession,
   FastingStatus,
+  PreferredFastStartTime,
 } from '@/types/fasting'
 import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
@@ -48,6 +49,17 @@ export interface UseFastingResult {
    * Whether the fasting state is currently being restored or synchronized.
    */
   isLoading: boolean
+
+  /**
+   * The user's preferred daily fasting start time.
+   *
+   * This preference is used as the default starting time when creating
+   * or editing fasting sessions. It does not affect the timing of the
+   * currently active fasting session.
+   *
+   * Returns `null` when no preferred start time has been configured.
+   */
+  preferredFastStartTime: PreferredFastStartTime | null
 
   /**
    * Updates the selected fasting plan.
@@ -99,6 +111,26 @@ export interface UseFastingResult {
    * @param updatedFast The updated fast.
    */
   updateFast: (updatedFast: Fast) => Promise<void>
+
+  /**
+   * Updates the user's preferred daily fasting start time.
+   *
+   * This preference is used as the default starting time when creating
+   * or editing fasting sessions. It does not affect the timing of the
+   * currently active fasting session.
+   *
+   * @param hour The preferred hour in 24-hour format.
+   * @param minute The preferred minute.
+   */
+  updatePreferredFastStartTime: (hour: number, minute: number) => void
+
+  /**
+   * Clears the user's preferred daily fasting start time.
+   *
+   * After clearing the preference, new fasting sessions and dialogs
+   * fall back to their default starting time.
+   */
+  clearPreferredFastStartTime: () => void
 }
 
 /**
@@ -125,8 +157,16 @@ export const useFasting = (): UseFastingResult => {
   const [planId, setPlanId] = useState<FastingPlanId | null>(null)
   const [session, setSession] = useState<FastingSession | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [preferredFastStartTime, setPreferredFastStartTime] =
+    useState<PreferredFastStartTime | null>(null)
 
   const updatePlanId = (planId: FastingPlanId) => setPlanId(planId)
+
+  const updatePreferredFastStartTime = (hour: number, minute: number) => {
+    setPreferredFastStartTime({ hour, minute })
+  }
+
+  const clearPreferredFastStartTime = () => setPreferredFastStartTime(null)
 
   const startSession = async (status: FastingStatus) => {
     const now = new Date().toISOString()
@@ -306,10 +346,13 @@ export const useFasting = (): UseFastingResult => {
     planId,
     session,
     isLoading,
+    preferredFastStartTime,
     addFast,
     deleteFast,
     updateFast,
     updatePlanId,
+    updatePreferredFastStartTime,
+    clearPreferredFastStartTime,
     endFasting: () => startSession('eating'),
     startFasting: () => startSession('fasting'),
   }
