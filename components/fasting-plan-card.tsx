@@ -77,7 +77,7 @@ export default function FastingPlanCard({
 
       <CardContent>
         {planId && selectedPlan ? (
-          <div className='space-y-2'>
+          <div className='flex flex-col items-center justify-center gap-4'>
             <p className='bg-primary text-primary-foreground w-fit rounded-full px-4 py-1 text-xl font-medium'>
               {selectedPlan.title}
             </p>
