@@ -7,15 +7,13 @@ import {
   Card,
   CardAction,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 import { Progress } from './ui/progress'
-import type { FastingPlanId, FastingSession } from '@/types/fasting'
+import type { Fast, FastingPlanId, FastingSession } from '@/types/fasting'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,18 +29,23 @@ import {
 import { Flame, Pen, UtensilsCrossed } from 'lucide-react'
 import { toast } from 'sonner'
 import { Separator } from './ui/separator'
+import EditSessionStartedAtDialog from './edit-session-started-at-dialog'
 
 interface ActiveFastingTimerProps {
+  fasts: Fast[]
   planId: FastingPlanId
   session: FastingSession
-  startFasting: () => Promise<void>
   endFasting: () => Promise<void>
+  startFasting: () => Promise<void>
+  updateSessionStartedAt: (updatedStartedAt: Date) => void
 }
 
 export default function ActiveFastingTimer({
+  fasts,
   planId,
-  startFasting,
   endFasting,
+  startFasting,
+  updateSessionStartedAt,
   session: { status, startedAt },
 }: ActiveFastingTimerProps) {
   const [now, setNow] = useState(() => Date.now())
@@ -85,12 +88,13 @@ export default function ActiveFastingTimer({
     hour: 'numeric',
     minute: '2-digit',
   })
+
   const startedAtFormatted = new Date(startedAt).toLocaleTimeString([], {
     hour: 'numeric',
     minute: '2-digit',
   })
 
-  const handleContinue = async () => {
+  const handleSessionChange = async () => {
     try {
       if (isFasting) {
         await endFasting()
@@ -104,16 +108,15 @@ export default function ActiveFastingTimer({
     }
   }
 
+  const handleSessionStartedAtUpdate = (updatedStartedAt: Date) => {
+    updateSessionStartedAt(updatedStartedAt)
+    toast.success('Session updated')
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Fasting timer</CardTitle>
-
-        <CardDescription>
-          <Badge aria-label='fasting-status'>
-            {isFasting ? 'Fasting' : 'Eating'}
-          </Badge>
-        </CardDescription>
 
         <CardAction>
           <AlertDialog>
@@ -148,8 +151,7 @@ export default function ActiveFastingTimer({
 
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-
-                <AlertDialogAction onClick={handleContinue}>
+                <AlertDialogAction onClick={handleSessionChange}>
                   Continue
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -159,21 +161,24 @@ export default function ActiveFastingTimer({
       </CardHeader>
 
       <CardContent className='space-y-4'>
-        <div className='flex items-center justify-between gap-2'>
-          <h1 className='flex-1 text-2xl font-bold' aria-label='fasting-timer'>
-            {hasExceededSessionLength
-              ? `+${formatDuration(excessMs)}`
-              : formatDuration(remainingMs)}
-          </h1>
+        <div className='flex items-center justify-center gap-2 font-medium'>
+          {isFasting ? (
+            <Flame className='size-4' />
+          ) : (
+            <UtensilsCrossed className='size-4' />
+          )}
 
-          <p className='text-muted-foreground flex-1/2 text-right text-sm text-balance'>
-            {hasExceededSessionLength ? 'Goal reached' : 'Ends'} at{' '}
-            {endsAt.toLocaleTimeString([], {
-              hour: 'numeric',
-              minute: '2-digit',
-            })}
-          </p>
+          <p>{isFasting ? 'Fasting' : 'Eating'}</p>
         </div>
+
+        <h1
+          className='flex-1 text-center text-3xl font-bold'
+          aria-label='fasting-timer'
+        >
+          {hasExceededSessionLength
+            ? `+${formatDuration(excessMs)}`
+            : formatDuration(remainingMs)}
+        </h1>
 
         <Progress value={progress} />
       </CardContent>
@@ -185,10 +190,17 @@ export default function ActiveFastingTimer({
           <div className='flex flex-1 flex-col items-center gap-1'>
             <p className='text-muted-foreground text-xs'>Started</p>
 
-            <Button variant='outline' size='sm' className='font-medium'>
-              {startedAtFormatted}
-              <Pen />
-            </Button>
+            <EditSessionStartedAtDialog
+              fastsForValidation={fasts}
+              startedAt={new Date(startedAt)}
+              sessionLengthMs={sessionLengthMs}
+              onSave={handleSessionStartedAtUpdate}
+            >
+              <Button variant='outline' size='sm' className='font-medium'>
+                {startedAtFormatted}
+                <Pen />
+              </Button>
+            </EditSessionStartedAtDialog>
 
             <p className='text-muted-foreground text-xs'>
               {formatRelativeDay(new Date(startedAt))}
@@ -198,7 +210,9 @@ export default function ActiveFastingTimer({
           <Separator orientation='vertical' />
 
           <div className='flex flex-1 flex-col items-center gap-1'>
-            <p className='text-muted-foreground text-xs'>Ends</p>
+            <p className='text-muted-foreground text-xs'>
+              {hasExceededSessionLength ? 'Goal reached at' : 'Ends'}
+            </p>
             <p className='font-medium'>{endsAtFormatted}</p>
             <p className='text-muted-foreground text-xs'>
               {formatRelativeDay(endsAt)}

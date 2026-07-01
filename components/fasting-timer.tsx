@@ -1,6 +1,6 @@
 'use client'
 
-import type { FastingPlanId, FastingSession } from '@/types/fasting'
+import type { Fast, FastingPlanId, FastingSession } from '@/types/fasting'
 import ActiveFastingTimer from './active-fasting-timer'
 import InactiveFastingTimer from './inactive-fasting-timer'
 import { type UseFastingResult } from '@/hooks/use-fasting'
@@ -8,18 +8,20 @@ import FastingTimerSkeleton from './skeletons/fasting-timer-skeleton'
 
 interface FastingTimerProps {
   isLoading: boolean
+  fasts: Fast[]
   planId: FastingPlanId | null
   session: FastingSession | null
   endFasting: () => Promise<void>
   startFasting: () => Promise<void>
   updatePlanId: UseFastingResult['updatePlanId']
+  updateSessionStartedAt: (updatedStartedAt: Date) => void
 }
 
 export default function FastingTimer({
-  session,
   planId,
-  updatePlanId,
+  session,
   isLoading,
+  updatePlanId,
   ...rest
 }: FastingTimerProps) {
   if (isLoading) return <FastingTimerSkeleton />

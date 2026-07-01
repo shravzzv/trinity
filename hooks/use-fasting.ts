@@ -132,6 +132,13 @@ export interface UseFastingResult {
    * fall back to their default starting time.
    */
   clearPreferredFastStartTime: () => void
+
+  /**
+   *
+   * @param updatedStartedAt
+   * @returns
+   */
+  updateSessionStartedAt: (updatedStartedAt: Date) => void
 }
 
 /**
@@ -162,6 +169,17 @@ export const useFasting = (): UseFastingResult => {
     useState<PreferredFastStartTime | null>(null)
 
   const updatePlanId = (planId: FastingPlanId) => setPlanId(planId)
+
+  const updateSessionStartedAt = (updatedStartedAt: Date) => {
+    setSession((prev) => {
+      if (!prev) return prev
+
+      return {
+        ...prev,
+        startedAt: updatedStartedAt.toISOString(),
+      }
+    })
+  }
 
   const updatePreferredFastStartTime = (hour: number, minute: number) => {
     setPreferredFastStartTime({ hour, minute })
@@ -413,6 +431,7 @@ export const useFasting = (): UseFastingResult => {
     deleteFast,
     updateFast,
     updatePlanId,
+    updateSessionStartedAt,
     updatePreferredFastStartTime,
     clearPreferredFastStartTime,
     endFasting: () => startSession('eating'),

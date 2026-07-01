@@ -12,19 +12,20 @@ import { useWeight } from '@/hooks/use-weight'
 
 export default function Page() {
   const {
-    planId,
-    session,
     fasts,
+    planId,
+    addFast,
+    session,
+    deleteFast,
+    updateFast,
     endFasting,
     startFasting,
     updatePlanId,
-    addFast,
-    deleteFast,
-    updateFast,
-    isLoading: isFastingStateLoading,
     preferredFastStartTime,
-    updatePreferredFastStartTime,
+    updateSessionStartedAt,
     clearPreferredFastStartTime,
+    updatePreferredFastStartTime,
+    isLoading: isFastingStateLoading,
   } = useFasting()
 
   const {
@@ -42,12 +43,14 @@ export default function Page() {
       <Header />
 
       <FastingTimer
+        fasts={fasts}
         planId={planId}
         session={session}
         endFasting={endFasting}
         startFasting={startFasting}
         updatePlanId={updatePlanId}
         isLoading={isFastingStateLoading}
+        updateSessionStartedAt={updateSessionStartedAt}
       />
 
       <FastingPlanCard

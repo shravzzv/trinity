@@ -4,6 +4,7 @@ import {
   replaceTime,
   replaceTimeFromInputValue,
   formatRelativeDay,
+  toInputTime,
 } from '@/lib/time'
 
 describe('formatDuration', () => {
@@ -149,5 +150,46 @@ describe('formatRelativeDay', () => {
     expect(formatRelativeDay(new Date('2026-01-12T12:00:00Z'))).toBe(
       '3 days ago',
     )
+  })
+})
+
+describe('toInputTime', () => {
+  it('formats a morning time', () => {
+    const date = new Date(2026, 0, 1, 9, 5)
+
+    expect(toInputTime(date)).toBe('09:05')
+  })
+
+  it('formats an afternoon time', () => {
+    const date = new Date(2026, 0, 1, 18, 30)
+
+    expect(toInputTime(date)).toBe('18:30')
+  })
+
+  it('formats midnight', () => {
+    const date = new Date(2026, 0, 1, 0, 0)
+
+    expect(toInputTime(date)).toBe('00:00')
+  })
+
+  it('formats the last minute of the day', () => {
+    const date = new Date(2026, 0, 1, 23, 59)
+
+    expect(toInputTime(date)).toBe('23:59')
+  })
+
+  it('pads single-digit hours and minutes', () => {
+    const date = new Date(2026, 0, 1, 4, 7)
+
+    expect(toInputTime(date)).toBe('04:07')
+  })
+
+  it('does not modify the provided date', () => {
+    const date = new Date(2026, 0, 1, 12, 34)
+    const originalTime = date.getTime()
+
+    toInputTime(date)
+
+    expect(date.getTime()).toBe(originalTime)
   })
 })

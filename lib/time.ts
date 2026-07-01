@@ -126,3 +126,18 @@ export const formatRelativeDay = (date: Date): string => {
       return days > 0 ? `in ${days} days` : `${Math.abs(days)} days ago`
   }
 }
+
+/**
+ * Formats a {@link Date} into the `HH:mm` format expected by
+ * `<input type="time">`.
+ *
+ * Uses the date's local time rather than its UTC time.
+ *
+ * @param date The date whose time should be formatted.
+ * @returns The formatted time as `HH:mm`.
+ */
+export const toInputTime = (date: Date): string => {
+  return `${String(date.getHours()).padStart(2, '0')}:${String(
+    date.getMinutes(),
+  ).padStart(2, '0')}`
+}
