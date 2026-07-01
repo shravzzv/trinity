@@ -22,6 +22,9 @@ export default function Page() {
     deleteFast,
     updateFast,
     isLoading: isFastingStateLoading,
+    preferredFastStartTime,
+    updatePreferredFastStartTime,
+    clearPreferredFastStartTime,
   } = useFasting()
 
   const {
@@ -51,6 +54,9 @@ export default function Page() {
         planId={planId}
         updatePlanId={updatePlanId}
         isLoading={isFastingStateLoading}
+        preferredFastStartTime={preferredFastStartTime}
+        updatePreferredFastStartTime={updatePreferredFastStartTime}
+        clearPreferredFastStartTime={clearPreferredFastStartTime}
       />
 
       <FastingStatistics

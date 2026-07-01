@@ -4,29 +4,37 @@ import {
   Card,
   CardAction,
   CardContent,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
 import { Button } from './ui/button'
-import { Goal, Pen } from 'lucide-react'
+import { Clock3, Goal, Pen } from 'lucide-react'
 import { fastingPlans } from '@/constants/fasting-plans'
-import { FastingPlanId } from '@/types/fasting'
+import type { FastingPlanId, PreferredFastStartTime } from '@/types/fasting'
 import { UseFastingResult } from '@/hooks/use-fasting'
 import { pluralize } from '@/lib/strings'
 import { toast } from 'sonner'
 import FastingPlanDialog from './fasting-plan-dialog'
 import FastingPlanCardSkeleton from './skeletons/fasting-plan-card-skeleton'
+import { Separator } from './ui/separator'
 
 interface FastingPlanCardProps {
   isLoading: boolean
   planId: FastingPlanId | null
   updatePlanId: UseFastingResult['updatePlanId']
+  preferredFastStartTime: PreferredFastStartTime | null
+  updatePreferredFastStartTime: (hour: number, minute: number) => void
+  clearPreferredFastStartTime: () => void
 }
 
 export default function FastingPlanCard({
   planId,
   isLoading,
   updatePlanId,
+  preferredFastStartTime,
+  updatePreferredFastStartTime,
+  clearPreferredFastStartTime,
 }: FastingPlanCardProps) {
   if (isLoading) return <FastingPlanCardSkeleton />
 
@@ -86,6 +94,48 @@ export default function FastingPlanCard({
           </p>
         )}
       </CardContent>
+
+      <Separator />
+
+      <CardFooter className='flex flex-col items-stretch gap-4'>
+        <p className='text-muted-foreground text-center text-sm font-medium'>
+          Preferred schedule
+        </p>
+
+        {preferredFastStartTime ? (
+          <div className='flex w-full items-center justify-evenly'>
+            <div className='flex flex-1 flex-col items-center gap-1'>
+              <p className='text-muted-foreground text-xs'>Fasting starts</p>
+
+              <div className='flex gap-2'>
+                <Button variant='outline' size='sm'>
+                  6:00 PM
+                  <Pen />
+                </Button>
+              </div>
+            </div>
+
+            <Separator orientation='vertical' />
+
+            <div className='flex flex-1 flex-col items-center gap-1'>
+              <p className='text-muted-foreground text-xs'>Eating starts</p>
+              <p>5:30 PM</p>
+              <span className='text-muted-foreground text-xs'>next day</span>
+            </div>
+          </div>
+        ) : (
+          <div className='flex w-full items-center justify-between'>
+            <p className='text-muted-foreground text-sm'>
+              Set your preferred fasting start time.
+            </p>
+
+            <Button variant='secondary'>
+              <Clock3 />
+              Set time
+            </Button>
+          </div>
+        )}
+      </CardFooter>
     </Card>
   )
 }
