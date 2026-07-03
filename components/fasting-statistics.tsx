@@ -26,8 +26,17 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Clock3, Flame, Plus, Trophy } from 'lucide-react'
-import type { Fast, FastingStatisticsCadence } from '@/types/fasting'
-import { filterFastsByCadence, getFastDurationHours } from '@/lib/fasting'
+import type {
+  Fast,
+  FastingPlanId,
+  FastingStatisticsCadence,
+  PreferredFastStartTime,
+} from '@/types/fasting'
+import {
+  filterFastsByCadence,
+  getFastDurationHours,
+  getInitialFastDialogTimes,
+} from '@/lib/fasting'
 import EditFastsSheet from './edit-fasts-sheet'
 import FastDialog from './fast-dialog'
 import { v4 as uuidv4 } from 'uuid'
@@ -37,19 +46,23 @@ import { Button } from './ui/button'
 import FastingStatisticsSkeleton from './skeletons/fasting-statistics-skeleton'
 
 interface FastingStatisticsProps {
-  isLoading: boolean
   fasts: Fast[]
+  isLoading: boolean
+  planId: FastingPlanId | null
   addFast: (fast: Fast) => Promise<void>
   deleteFast: (id: string) => Promise<void>
   updateFast: (updatedFast: Fast) => Promise<void>
+  preferredFastStartTime: PreferredFastStartTime | null
 }
 
 export default function FastingStatistics({
   fasts,
+  planId,
   addFast,
+  isLoading,
   deleteFast,
   updateFast,
-  isLoading,
+  preferredFastStartTime,
 }: FastingStatisticsProps) {
   const [cadence, setCadence] = useState<FastingStatisticsCadence>('week')
 
@@ -142,6 +155,11 @@ export default function FastingStatistics({
     }
   }
 
+  const initialFastDialogTimes = getInitialFastDialogTimes({
+    planId,
+    preferredFastStartTime,
+  })
+
   return (
     <Card>
       <CardHeader>
@@ -225,6 +243,8 @@ export default function FastingStatistics({
             existingFasts={fasts}
             onSubmit={handleAddFast}
             submitLabel='Add fast'
+            initialStartedAt={initialFastDialogTimes?.startedAt ?? undefined}
+            initialEndedAt={initialFastDialogTimes?.endedAt ?? undefined}
           >
             <Button variant='secondary'>
               <Plus />

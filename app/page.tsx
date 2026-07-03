@@ -64,10 +64,12 @@ export default function Page() {
 
       <FastingStatistics
         fasts={fasts}
+        planId={planId}
         addFast={addFast}
         updateFast={updateFast}
         deleteFast={deleteFast}
         isLoading={isFastingStateLoading}
+        preferredFastStartTime={preferredFastStartTime}
       />
 
       <TargetWeightCard

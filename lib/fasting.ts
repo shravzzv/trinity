@@ -459,3 +459,71 @@ export const getActiveSessionStatistics = ({
     hasExceededSessionLength,
   }
 }
+
+interface GetInitialFastDialogTimesOptions {
+  /**
+   * The user's preferred daily fasting start time.
+   * Returns `null` when no preference has been configured.
+   */
+  preferredFastStartTime: {
+    hour: number
+    minute: number
+  } | null
+
+  /**
+   * The selected fasting plan.
+   */
+  planId: FastingPlanId | null
+}
+
+/**
+ * Returns sensible initial start and end dates for the "Add Fast" dialog
+ * using the user's preferred fasting start time.
+ *
+ * The returned fast always:
+ * - Starts at the preferred daily fasting time.
+ * - Has the correct duration for the selected fasting plan.
+ * - Ends in the past.
+ *
+ * If the preferred start time for today would produce a fast that has not yet
+ * finished, the fast is shifted back by one day.
+ *
+ * Returns `null` when no preferred fasting start time has been configured.
+ */
+export const getInitialFastDialogTimes = ({
+  planId,
+  preferredFastStartTime,
+}: GetInitialFastDialogTimesOptions): {
+  startedAt: Date
+  endedAt: Date
+} | null => {
+  if (!preferredFastStartTime || !planId) return null
+
+  const fastingPlan =
+    fastingPlans.find((plan) => plan.id === planId) ?? fastingPlans[0]
+
+  const now = new Date()
+
+  const startedAt = new Date(now)
+  startedAt.setHours(
+    preferredFastStartTime.hour,
+    preferredFastStartTime.minute,
+    0,
+    0,
+  )
+
+  const endedAt = new Date(startedAt)
+  endedAt.setHours(endedAt.getHours() + fastingPlan.fastingHours)
+
+  // If the fast would finish in the future,
+  // shift the entire fast back one day.
+  if (endedAt > now) {
+    startedAt.setDate(startedAt.getDate() - 1)
+    endedAt.setDate(endedAt.getDate() - 1)
+  }
+
+  return {
+    startedAt,
+    endedAt,
+  }
+}
