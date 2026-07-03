@@ -29,11 +29,11 @@ interface EditSessionStartedAtDialogProps {
 }
 
 export default function EditSessionStartedAtDialog({
+  onSave,
   children,
   startedAt,
-  onSave,
-  fastsForValidation,
   sessionLengthMs,
+  fastsForValidation,
 }: EditSessionStartedAtDialogProps) {
   const [draftStartedAt, setDraftStartedAt] = useState(startedAt)
   const [showErrors, setShowErrors] = useState(false)

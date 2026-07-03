@@ -5,19 +5,42 @@ import { toast } from 'sonner'
 
 const mockEndFasting = jest.fn()
 const mockStartFasting = jest.fn()
+const mockUpdateSessionStartedAt = jest.fn()
 
-jest.mock('sonner', () => ({
-  toast: {
-    success: jest.fn(),
-  },
+jest.mock('sonner')
+
+jest.mock('@/components/edit-session-started-at-dialog', () => ({
+  __esModule: true,
+  default: ({
+    children,
+    onSave,
+  }: {
+    children: React.ReactNode
+    onSave: (date: Date) => void
+  }) => (
+    <div>
+      {children}
+
+      <button
+        type='button'
+        onClick={() => onSave(new Date('2026-01-01T10:00:00.000Z'))}
+      >
+        Mock Update Session
+      </button>
+    </div>
+  ),
 }))
 
-const renderActiveFastingTimer = (props = {}) => {
-  return render(
+const renderComponent = (
+  props: Partial<React.ComponentProps<typeof ActiveFastingTimer>> = {},
+) => {
+  render(
     <ActiveFastingTimer
+      fasts={[]}
       planId='16:8'
       endFasting={mockEndFasting}
       startFasting={mockStartFasting}
+      updateSessionStartedAt={mockUpdateSessionStartedAt}
       session={{
         status: 'fasting',
         startedAt: new Date().toISOString(),
@@ -25,9 +48,15 @@ const renderActiveFastingTimer = (props = {}) => {
       {...props}
     />,
   )
+
+  return {
+    user: userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+    }),
+  }
 }
 
-describe('Active fasting timer', () => {
+describe('ActiveFastingTimer', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     jest.clearAllTimers()
@@ -37,80 +66,83 @@ describe('Active fasting timer', () => {
     jest.useRealTimers()
   })
 
-  it('should contain a title "Fasting timer"', () => {
-    renderActiveFastingTimer()
+  it('renders the title', () => {
+    renderComponent()
 
     expect(screen.getByText('Fasting timer')).toBeInTheDocument()
   })
 
-  it('should display fasting badge when fasting', () => {
-    renderActiveFastingTimer()
+  it('renders fasting status', () => {
+    renderComponent()
 
-    expect(screen.getByLabelText('fasting-status')).toHaveTextContent('Fasting')
+    expect(screen.getByText('Fasting')).toBeInTheDocument()
   })
 
-  it('should display eating badge when eating', () => {
-    renderActiveFastingTimer({
-      session: { status: 'eating', startedAt: new Date().toISOString() },
+  it('renders eating status', () => {
+    renderComponent({
+      session: {
+        status: 'eating',
+        startedAt: new Date().toISOString(),
+      },
     })
 
-    expect(screen.getByLabelText('fasting-status')).toHaveTextContent('Eating')
+    expect(screen.getByText('Eating')).toBeInTheDocument()
   })
 
-  it('should render countdown timer', () => {
+  it('renders countdown timer', () => {
     jest.useFakeTimers()
     jest.setSystemTime(new Date('2026-01-01T12:00:00Z'))
 
-    renderActiveFastingTimer({
-      session: { status: 'fasting', startedAt: '2026-01-01T12:00:00Z' },
+    renderComponent({
+      session: {
+        status: 'fasting',
+        startedAt: '2026-01-01T12:00:00Z',
+      },
     })
 
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-      '16:00:00',
-    )
+    expect(screen.getByLabelText('fasting-timer')).toHaveTextContent('16:00:00')
   })
 
-  it('should update the countdown timer every second', () => {
+  it('updates the countdown timer every second', () => {
     jest.useFakeTimers()
     jest.setSystemTime(new Date('2026-01-01T12:00:00Z'))
 
-    renderActiveFastingTimer({
-      session: { status: 'fasting', startedAt: '2026-01-01T12:00:00Z' },
+    renderComponent({
+      session: {
+        status: 'fasting',
+        startedAt: '2026-01-01T12:00:00Z',
+      },
     })
 
     act(() => {
       jest.advanceTimersByTime(1000)
     })
 
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-      '15:59:59',
-    )
+    expect(screen.getByLabelText('fasting-timer')).toHaveTextContent('15:59:59')
 
     act(() => {
       jest.advanceTimersByTime(1000)
     })
 
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-      '15:59:58',
-    )
+    expect(screen.getByLabelText('fasting-timer')).toHaveTextContent('15:59:58')
   })
 
-  it('should render progress bar', () => {
-    renderActiveFastingTimer()
+  it('renders progress bar', () => {
+    renderComponent()
 
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
 
-  it('should render end fasting button when fasting', () => {
-    renderActiveFastingTimer()
+  it('renders end fasting button when fasting', () => {
+    renderComponent()
 
     expect(
       screen.getByRole('button', { name: /end fasting/i }),
     ).toBeInTheDocument()
   })
 
-  it('should render start fasting button when eating', () => {
-    renderActiveFastingTimer({
+  it('renders start fasting button when eating', () => {
+    renderComponent({
       session: {
         status: 'eating',
         startedAt: new Date().toISOString(),
@@ -122,24 +154,34 @@ describe('Active fasting timer', () => {
     ).toBeInTheDocument()
   })
 
-  it('should render when the current fasting session ends', () => {
-    jest.useFakeTimers()
-    jest.setSystemTime(new Date('2026-01-01T12:00:00Z'))
+  it('renders started section', () => {
+    renderComponent()
 
-    renderActiveFastingTimer({
+    expect(screen.getByText('Started')).toBeInTheDocument()
+  })
+
+  it('renders ends section', () => {
+    renderComponent()
+
+    expect(screen.getByText('Ends')).toBeInTheDocument()
+  })
+
+  it('shows goal reached label when session duration has been exceeded', () => {
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2026-01-02T05:00:00Z'))
+
+    renderComponent({
       session: {
         status: 'fasting',
         startedAt: '2026-01-01T12:00:00Z',
       },
     })
 
-    expect(screen.getByText(/ends at/i)).toBeInTheDocument()
+    expect(screen.getByText('Goal reached at')).toBeInTheDocument()
   })
 
-  it('should open confirmation dialog', async () => {
-    const user = userEvent.setup()
-
-    renderActiveFastingTimer()
+  it('opens confirmation dialog', async () => {
+    const { user } = renderComponent()
 
     await user.click(screen.getByRole('button', { name: /end fasting/i }))
 
@@ -148,10 +190,8 @@ describe('Active fasting timer', () => {
     })
   })
 
-  it('should call endFasting when confirmed during fasting', async () => {
-    const user = userEvent.setup()
-
-    renderActiveFastingTimer()
+  it('calls endFasting when confirmed during fasting', async () => {
+    const { user } = renderComponent()
 
     await user.click(screen.getByRole('button', { name: /end fasting/i }))
     await user.click(screen.getByRole('button', { name: /continue/i }))
@@ -159,10 +199,8 @@ describe('Active fasting timer', () => {
     expect(mockEndFasting).toHaveBeenCalledTimes(1)
   })
 
-  it('should call startFasting when confirmed during eating', async () => {
-    const user = userEvent.setup()
-
-    renderActiveFastingTimer({
+  it('calls startFasting when confirmed during eating', async () => {
+    const { user } = renderComponent({
       session: {
         status: 'eating',
         startedAt: new Date().toISOString(),
@@ -175,15 +213,11 @@ describe('Active fasting timer', () => {
     expect(mockStartFasting).toHaveBeenCalledTimes(1)
   })
 
-  it('should show remaining time in confirmation dialog', async () => {
+  it('shows remaining time in confirmation dialog', async () => {
     jest.useFakeTimers()
     jest.setSystemTime(new Date('2026-01-01T12:00:00Z'))
 
-    const user = userEvent.setup({
-      advanceTimers: jest.advanceTimersByTime,
-    })
-
-    renderActiveFastingTimer({
+    const { user } = renderComponent({
       session: {
         status: 'fasting',
         startedAt: '2026-01-01T12:00:00Z',
@@ -191,14 +225,15 @@ describe('Active fasting timer', () => {
     })
 
     await user.click(screen.getByRole('button', { name: /end fasting/i }))
+
     expect(screen.getByText(/16:00:00 remaining/i)).toBeInTheDocument()
   })
 
-  it('should show elapsed overtime when session has exceeded its duration', () => {
+  it('shows elapsed overtime when session has exceeded its duration', () => {
     jest.useFakeTimers()
     jest.setSystemTime(new Date('2026-01-02T05:00:00Z'))
 
-    renderActiveFastingTimer({
+    renderComponent({
       session: {
         status: 'fasting',
         startedAt: '2026-01-01T12:00:00Z',
@@ -210,10 +245,8 @@ describe('Active fasting timer', () => {
     )
   })
 
-  it('should show success toast when ending a fast', async () => {
-    const user = userEvent.setup()
-
-    renderActiveFastingTimer()
+  it('shows success toast when ending a fast', async () => {
+    const { user } = renderComponent()
 
     await user.click(screen.getByRole('button', { name: /end fasting/i }))
     await user.click(screen.getByRole('button', { name: /continue/i }))
@@ -221,10 +254,8 @@ describe('Active fasting timer', () => {
     expect(toast.success).toHaveBeenCalledWith('Fast ended')
   })
 
-  it('should show success toast when starting a fast', async () => {
-    const user = userEvent.setup()
-
-    renderActiveFastingTimer({
+  it('shows success toast when starting a fast', async () => {
+    const { user } = renderComponent({
       session: {
         status: 'eating',
         startedAt: new Date().toISOString(),
@@ -235,5 +266,62 @@ describe('Active fasting timer', () => {
     await user.click(screen.getByRole('button', { name: /continue/i }))
 
     expect(toast.success).toHaveBeenCalledWith('Fast started')
+  })
+
+  it('shows error toast when ending a fast fails', async () => {
+    mockEndFasting.mockRejectedValueOnce(new Error('Boom'))
+
+    const { user } = renderComponent()
+
+    await user.click(screen.getByRole('button', { name: /end fasting/i }))
+    await user.click(screen.getByRole('button', { name: /continue/i }))
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('Boom')
+    })
+  })
+
+  it('shows error toast when starting a fast fails', async () => {
+    mockStartFasting.mockRejectedValueOnce(new Error('Boom'))
+
+    const { user } = renderComponent({
+      session: {
+        status: 'eating',
+        startedAt: new Date().toISOString(),
+      },
+    })
+
+    await user.click(screen.getByRole('button', { name: /start fasting/i }))
+    await user.click(screen.getByRole('button', { name: /continue/i }))
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('Boom')
+    })
+  })
+
+  it('updates the session started at', async () => {
+    const { user } = renderComponent()
+
+    await user.click(
+      screen.getByRole('button', {
+        name: /mock update session/i,
+      }),
+    )
+
+    expect(mockUpdateSessionStartedAt).toHaveBeenCalledWith(
+      new Date('2026-01-01T10:00:00.000Z'),
+    )
+  })
+
+  it('shows a success toast when updating the session', async () => {
+    const { user } = renderComponent()
+
+    await user.click(
+      screen.getByRole('button', {
+        name: /mock update session/i,
+      }),
+    )
+
+    expect(toast.success).toHaveBeenCalledWith('Session updated')
   })
 })
