@@ -60,6 +60,7 @@ describe('ActiveFastingTimer', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     jest.clearAllTimers()
+    jest.useFakeTimers()
   })
 
   afterEach(() => {
