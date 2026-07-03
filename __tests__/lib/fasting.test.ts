@@ -8,8 +8,11 @@ import {
   getPreferredFastSchedule,
   getSessionStartedAtValidationErrors,
   doesSessionOverlap,
+  getSessionEndedAtValidationErrors,
+  getActiveSessionStatistics,
 } from '@/lib/fasting'
 import type { Fast } from '@/types/fasting'
+import { fastingPlans } from '@/constants/fasting-plans'
 
 describe('getFastDurationHours', () => {
   it('should return 0 for a fast with identical start and end times', () => {
@@ -608,5 +611,206 @@ describe('getSessionStartedAtValidationErrors', () => {
         ],
       ),
     ).toEqual(['The session overlaps an existing fast.'])
+  })
+})
+
+describe('getSessionEndedAtValidationErrors', () => {
+  it('returns no errors for a valid session', () => {
+    const startedAt = new Date('2026-07-01T08:00:00')
+    const endedAt = new Date('2026-07-01T16:00:00')
+
+    expect(getSessionEndedAtValidationErrors(startedAt, endedAt, [])).toEqual(
+      [],
+    )
+  })
+
+  it('returns an error when the session ends before it starts', () => {
+    const startedAt = new Date('2026-07-01T08:00:00')
+    const endedAt = new Date('2026-07-01T07:59:00')
+
+    expect(getSessionEndedAtValidationErrors(startedAt, endedAt, [])).toEqual([
+      'The session must end after it starts.',
+    ])
+  })
+
+  it('returns an error when the session ends exactly when it starts', () => {
+    const startedAt = new Date('2026-07-01T08:00:00')
+    const endedAt = new Date('2026-07-01T08:00:00')
+
+    expect(getSessionEndedAtValidationErrors(startedAt, endedAt, [])).toEqual([
+      'The session must end after it starts.',
+    ])
+  })
+
+  it('returns an error when the session ends in the future', () => {
+    const startedAt = new Date(Date.now() - 60 * 60 * 1000)
+    const endedAt = new Date(Date.now() + 60 * 60 * 1000)
+
+    expect(getSessionEndedAtValidationErrors(startedAt, endedAt, [])).toEqual([
+      'The session cannot end in the future.',
+    ])
+  })
+
+  it('returns an error when the resulting session overlaps another recorded session', () => {
+    const fasts: Fast[] = [
+      {
+        id: '1',
+        startedAt: new Date('2026-07-01T12:00:00').toISOString(),
+        endedAt: new Date('2026-07-01T18:00:00').toISOString(),
+      },
+    ]
+
+    expect(
+      getSessionEndedAtValidationErrors(
+        new Date('2026-07-01T10:00:00'),
+        new Date('2026-07-01T13:00:00'),
+        fasts,
+      ),
+    ).toEqual(['This session overlaps another recorded session.'])
+  })
+
+  it('returns multiple errors when multiple validation rules are violated', () => {
+    const future = new Date(Date.now() + 60 * 60 * 1000)
+
+    const fasts: Fast[] = [
+      {
+        id: '1',
+        startedAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+        endedAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+      },
+    ]
+
+    expect(
+      getSessionEndedAtValidationErrors(
+        new Date(Date.now() - 60 * 60 * 1000),
+        future,
+        fasts,
+      ),
+    ).toEqual([
+      'The session cannot end in the future.',
+      'This session overlaps another recorded session.',
+    ])
+  })
+
+  it('returns all applicable errors', () => {
+    const startedAt = new Date(Date.now() + 60 * 60 * 1000)
+    const endedAt = new Date(Date.now() + 30 * 60 * 1000)
+
+    expect(getSessionEndedAtValidationErrors(startedAt, endedAt, [])).toEqual([
+      'The session must end after it starts.',
+      'The session cannot end in the future.',
+    ])
+  })
+})
+
+describe('getActiveSessionStatistics', () => {
+  const fastingPlan = fastingPlans[0]
+
+  it('calculates statistics for an active fasting session', () => {
+    const startedAt = new Date('2026-01-01T00:00:00Z')
+    const now = startedAt.getTime() + 2 * 60 * 60 * 1000 // 2 hours later
+    const stats = getActiveSessionStatistics({
+      now,
+      planId: fastingPlan.id,
+      status: 'fasting',
+      startedAt,
+    })
+
+    expect(stats.isFasting).toBe(true)
+    expect(stats.sessionLengthMs).toBe(
+      fastingPlan.fastingHours * 60 * 60 * 1000,
+    )
+    expect(stats.remainingMs).toBe(stats.sessionLengthMs - 2 * 60 * 60 * 1000)
+    expect(stats.hasExceededSessionLength).toBe(false)
+  })
+
+  it('calculates statistics for an active eating session', () => {
+    const startedAt = new Date('2026-01-01T00:00:00Z')
+    const stats = getActiveSessionStatistics({
+      now: startedAt.getTime(),
+      planId: fastingPlan.id,
+      status: 'eating',
+      startedAt,
+    })
+
+    expect(stats.isFasting).toBe(false)
+    expect(stats.sessionLengthMs).toBe(fastingPlan.eatingHours * 60 * 60 * 1000)
+  })
+
+  it('calculates progress correctly', () => {
+    const startedAt = new Date('2026-01-01T00:00:00Z')
+    const sessionLengthMs = fastingPlan.fastingHours * 60 * 60 * 1000
+    const now = startedAt.getTime() + sessionLengthMs / 2
+
+    const stats = getActiveSessionStatistics({
+      now,
+      planId: fastingPlan.id,
+      status: 'fasting',
+      startedAt,
+    })
+
+    expect(stats.progress).toBeCloseTo(50)
+  })
+
+  it('caps progress at 100%', () => {
+    const startedAt = new Date('2026-01-01T00:00:00Z')
+    const sessionLengthMs = fastingPlan.fastingHours * 60 * 60 * 1000
+    const now = startedAt.getTime() + sessionLengthMs * 2
+
+    const stats = getActiveSessionStatistics({
+      now,
+      planId: fastingPlan.id,
+      status: 'fasting',
+      startedAt,
+    })
+
+    expect(stats.progress).toBe(100)
+  })
+
+  it('detects when the session has exceeded its planned duration', () => {
+    const startedAt = new Date('2026-01-01T00:00:00Z')
+    const sessionLengthMs = fastingPlan.fastingHours * 60 * 60 * 1000
+    const excessMs = 30 * 60 * 1000
+    const now = startedAt.getTime() + sessionLengthMs + excessMs
+
+    const stats = getActiveSessionStatistics({
+      now,
+      planId: fastingPlan.id,
+      status: 'fasting',
+      startedAt,
+    })
+
+    expect(stats.hasExceededSessionLength).toBe(true)
+    expect(stats.excessMs).toBe(excessMs)
+    expect(stats.remainingMs).toBe(-excessMs)
+  })
+
+  it('calculates the planned end time', () => {
+    const startedAt = new Date('2026-01-01T00:00:00Z')
+
+    const stats = getActiveSessionStatistics({
+      now: startedAt.getTime(),
+      planId: fastingPlan.id,
+      status: 'fasting',
+      startedAt,
+    })
+
+    expect(stats.endsAt.getTime()).toBe(
+      startedAt.getTime() + stats.sessionLengthMs,
+    )
+  })
+
+  it('returns formatted timestamps', () => {
+    const startedAt = new Date('2026-01-01T10:30:00')
+
+    const stats = getActiveSessionStatistics({
+      now: startedAt.getTime(),
+      planId: fastingPlan.id,
+      status: 'fasting',
+      startedAt,
+    })
+
+    expect(stats.startedAtFormatted).toBeTruthy()
+    expect(stats.endsAtFormatted).toBeTruthy()
   })
 })

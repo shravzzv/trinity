@@ -19,8 +19,11 @@
  * of the user interface.
  */
 
+import { fastingPlans } from '@/constants/fasting-plans'
 import type {
   Fast,
+  FastingPlanId,
+  FastingSession,
   FastingStatisticsCadence,
   PreferredFastStartTime,
 } from '@/types/fasting'
@@ -277,4 +280,182 @@ export const getSessionStartedAtValidationErrors = (
   }
 
   return errors
+}
+
+/**
+ * Returns any validation errors that prevent a session's end time
+ * from being updated.
+ *
+ * Validation rules:
+ *
+ * - The session must end after it starts.
+ * - The session cannot end in the future.
+ * - The resulting session cannot overlap another recorded session.
+ *
+ * @param startedAt The session start time.
+ * @param endedAt The proposed session end time.
+ * @param fasts Existing fasting history used to detect overlaps.
+ * @returns A list of validation error messages. Returns an empty array when the end time is valid.
+ */
+export const getSessionEndedAtValidationErrors = (
+  startedAt: Date,
+  endedAt: Date,
+  fasts: Fast[],
+): string[] => {
+  const errors: string[] = []
+
+  if (startedAt >= endedAt) {
+    errors.push('The session must end after it starts.')
+  }
+
+  if (endedAt > new Date()) {
+    errors.push('The session cannot end in the future.')
+  }
+
+  if (doesFastOverlap(startedAt, endedAt, fasts)) {
+    errors.push('This session overlaps another recorded session.')
+  }
+
+  return errors
+}
+
+/**
+ * Derived values describing the current state of an active fasting or
+ * eating session.
+ */
+interface ActiveSessionStatistics {
+  /**
+   * Whether the active session is a fasting session.
+   */
+  isFasting: boolean
+
+  /**
+   * Planned session length in milliseconds.
+   */
+  sessionLengthMs: number
+
+  /**
+   * Time remaining until the planned end of the session.
+   *
+   * Negative when the session has exceeded its planned duration.
+   */
+  remainingMs: number
+
+  /**
+   * Time elapsed beyond the planned session length.
+   *
+   * Zero or greater once the planned duration has been exceeded.
+   */
+  excessMs: number
+
+  /**
+   * Session progress as a percentage of the planned duration.
+   *
+   * Clamped to a maximum of 100.
+   */
+  progress: number
+
+  /**
+   * Planned end time based on the session start and fasting plan.
+   */
+  endsAt: Date
+
+  /**
+   * Whether the session has exceeded its planned duration.
+   */
+  hasExceededSessionLength: boolean
+
+  /**
+   * Formatted session start time for display.
+   */
+  startedAtFormatted: string
+
+  /**
+   * Formatted planned end time for display.
+   */
+  endsAtFormatted: string
+}
+
+interface GetActiveSessionStatisticsOptions {
+  /**
+   * The active fasting plan.
+   */
+  planId: FastingPlanId
+
+  /**
+   * Whether the current session is a fasting or eating session.
+   */
+  status: FastingSession['status']
+
+  /**
+   * When the current session started.
+   */
+  startedAt: Date
+
+  /**
+   * The current timestamp, in milliseconds since the Unix epoch.
+   */
+  now: number
+}
+
+/**
+ * Computes the current state of an active fasting or eating session.
+ *
+ * Given the current session, fasting plan, and current time, this helper
+ * derives all values needed to render the active timer UI, including:
+ *
+ * - remaining or exceeded duration
+ * - progress percentage
+ * - planned end time
+ * - formatted timestamps
+ * - whether the session has exceeded its planned length
+ *
+ * This function is pure and performs no side effects.
+ *
+ * @param options Configuration describing the active session.
+ * @returns Derived statistics for rendering the active session timer.
+ */
+export const getActiveSessionStatistics = ({
+  now,
+  status,
+  planId,
+  startedAt,
+}: GetActiveSessionStatisticsOptions): ActiveSessionStatistics => {
+  const isFasting = status === 'fasting'
+
+  const fastingPlan =
+    fastingPlans.find((plan) => plan.id === planId) ?? fastingPlans[0]
+
+  const sessionLengthHours = isFasting
+    ? fastingPlan.fastingHours
+    : fastingPlan.eatingHours
+
+  const sessionLengthMs = sessionLengthHours * 60 * 60 * 1000
+  const startedAtMs = startedAt.getTime()
+  const elapsedMs = now - startedAtMs
+  const remainingMs = sessionLengthMs - elapsedMs
+  const progress = Math.min((elapsedMs / sessionLengthMs) * 100, 100)
+  const endsAt = new Date(startedAtMs + sessionLengthMs)
+  const hasExceededSessionLength = remainingMs < 0
+  const excessMs = elapsedMs - sessionLengthMs
+  const startedAtFormatted = startedAt.toLocaleTimeString([], {
+    hour: 'numeric',
+    minute: '2-digit',
+  })
+  const endsAtFormatted = endsAt.toLocaleTimeString([], {
+    hour: 'numeric',
+    minute: '2-digit',
+  })
+
+  return {
+    endsAt,
+    progress,
+    excessMs,
+    isFasting,
+    remainingMs,
+    sessionLengthMs,
+    endsAtFormatted,
+    startedAtFormatted,
+    hasExceededSessionLength,
+  }
 }

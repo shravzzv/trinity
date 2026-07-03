@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { fastingPlans } from '@/constants/fasting-plans'
 import { formatDuration, formatRelativeDay } from '@/lib/time'
 import {
   Card,
@@ -30,6 +29,14 @@ import { Flame, Pen, UtensilsCrossed } from 'lucide-react'
 import { toast } from 'sonner'
 import { Separator } from './ui/separator'
 import EditSessionStartedAtDialog from './edit-session-started-at-dialog'
+import {
+  Alert,
+  AlertAction,
+  AlertDescription,
+  AlertTitle,
+} from '@/components/ui/alert'
+import EditSessionEndedAtDrawer from './edit-session-ended-at-drawer'
+import { getActiveSessionStatistics } from '@/lib/fasting'
 
 interface ActiveFastingTimerProps {
   fasts: Fast[]
@@ -49,54 +56,31 @@ export default function ActiveFastingTimer({
   session: { status, startedAt },
 }: ActiveFastingTimerProps) {
   const [now, setNow] = useState(() => Date.now())
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [selectedEndedAt, setSelectedEndedAt] = useState<Date | null>(null)
 
-  /**
-   * Update the {@link now} (current time) every second.
-   */
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setNow(Date.now())
-    }, 1000)
-
-    return () => clearInterval(intervalId)
-  }, [])
-
-  const isFasting = status === 'fasting'
-  const fastingPlan =
-    fastingPlans.find((p) => p.id === planId) ?? fastingPlans[0]
-
-  // session duration
-  const sessionLengthHours: number = isFasting
-    ? fastingPlan.fastingHours
-    : fastingPlan.eatingHours
-  const sessionLengthMs = sessionLengthHours * 60 * 60 * 1000
-
-  // timeline
-  const startedAtMs = new Date(startedAt).getTime()
-  const elapsedMs = now - startedAtMs
-  const remainingMs = sessionLengthMs - elapsedMs
-
-  // presentation
-  const progress = Math.min((elapsedMs / sessionLengthMs) * 100, 100)
-  const endsAt = new Date(startedAtMs + sessionLengthMs)
-
-  // excess
-  const hasExceededSessionLength = remainingMs < 0
-  const excessMs = elapsedMs - sessionLengthMs
-
-  const endsAtFormatted = endsAt.toLocaleTimeString([], {
-    hour: 'numeric',
-    minute: '2-digit',
-  })
-
-  const startedAtFormatted = new Date(startedAt).toLocaleTimeString([], {
-    hour: 'numeric',
-    minute: '2-digit',
+  const {
+    endsAt,
+    excessMs,
+    progress,
+    isFasting,
+    remainingMs,
+    sessionLengthMs,
+    endsAtFormatted,
+    startedAtFormatted,
+    hasExceededSessionLength,
+  } = getActiveSessionStatistics({
+    now,
+    planId,
+    status,
+    startedAt: new Date(startedAt),
   })
 
   const handleSessionChange = async () => {
     try {
       if (isFasting) {
+        // const endedAt = selectedEndedAt ?? new Date()
+        // await endFasting(endedAt)
         await endFasting()
         toast.success('Fast ended')
       } else {
@@ -113,13 +97,28 @@ export default function ActiveFastingTimer({
     toast.success('Session updated')
   }
 
+  const handleAlertDialogOpenChange = () => {
+    setSelectedEndedAt(null)
+  }
+
+  /**
+   * Update the {@link now} (current time) every second.
+   */
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setNow(Date.now())
+    }, 1000)
+
+    return () => clearInterval(intervalId)
+  }, [])
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Fasting timer</CardTitle>
 
         <CardAction>
-          <AlertDialog>
+          <AlertDialog onOpenChange={handleAlertDialogOpenChange}>
             <AlertDialogTrigger asChild>
               <Button>{isFasting ? 'End' : 'Start'} fasting</Button>
             </AlertDialogTrigger>
@@ -141,13 +140,50 @@ export default function ActiveFastingTimer({
                       : 'This will end your current eating window and start a new fasting session.'}
                   </span>
 
-                  {remainingMs > 0 && (
+                  {!hasExceededSessionLength && (
                     <span className='font-medium'>
                       {formatDuration(remainingMs)} remaining.
                     </span>
                   )}
                 </AlertDialogDescription>
               </AlertDialogHeader>
+
+              {hasExceededSessionLength && (
+                <Alert>
+                  <AlertTitle>Finished earlier?</AlertTitle>
+                  <AlertDescription className='flex flex-col gap-2'>
+                    {selectedEndedAt ? (
+                      <div>
+                        <span>
+                          Finish time:{' '}
+                          <span className='font-medium'>
+                            {selectedEndedAt.toLocaleTimeString()}
+                          </span>{' '}
+                        </span>
+
+                        <span className='font-medium'>
+                          {formatRelativeDay(selectedEndedAt)}.
+                        </span>
+                      </div>
+                    ) : (
+                      <span>
+                        Update the finish time before continuing. The present
+                        time will be used by default if you continue.
+                      </span>
+                    )}
+                  </AlertDescription>
+
+                  <AlertAction>
+                    <Button
+                      size='xs'
+                      variant='outline'
+                      onClick={() => setIsDrawerOpen(true)}
+                    >
+                      Update time
+                    </Button>
+                  </AlertAction>
+                </Alert>
+              )}
 
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -220,6 +256,18 @@ export default function ActiveFastingTimer({
           </div>
         </div>
       </CardFooter>
+
+      <EditSessionEndedAtDrawer
+        open={isDrawerOpen}
+        fastsForValidation={fasts}
+        onApply={(endedAt) => {
+          setSelectedEndedAt(endedAt)
+          setIsDrawerOpen(false)
+        }}
+        onOpenChange={setIsDrawerOpen}
+        startedAt={new Date(startedAt)}
+        initialEndedAt={selectedEndedAt ?? new Date()}
+      />
     </Card>
   )
 }
