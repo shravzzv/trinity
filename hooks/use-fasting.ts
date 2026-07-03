@@ -72,16 +72,20 @@ export interface UseFastingResult {
   /**
    * Starts a fasting session and records the current timestamp as the
    * session start time.
+   *
+   * @param startedAt The time when the fast has started.
    */
-  startFasting: () => Promise<void>
+  startFasting: (startedAt?: Date) => Promise<void>
 
   /**
    * Ends the current fasting session and begins an eating session.
    *
    * If a fasting session is active, a completed fast is recorded and
    * persisted before the returned promise resolves.
+   *
+   * @param endedAt The time when the fast has ended.
    */
-  endFasting: () => Promise<void>
+  endFasting: (endedAt?: Date) => Promise<void>
 
   /**
    * Optimistically adds a completed fast to the fasting history.
@@ -187,18 +191,21 @@ export const useFasting = (): UseFastingResult => {
 
   const clearPreferredFastStartTime = () => setPreferredFastStartTime(null)
 
-  const startSession = async (status: FastingStatus) => {
-    const now = new Date().toISOString()
+  const startSession = async (
+    status: FastingStatus,
+    startedAt: Date = new Date(),
+  ) => {
+    const sessionStartedAt = startedAt.toISOString()
 
     if (session?.status === 'fasting' && status === 'eating') {
       await addFast({
         id: uuidv4(),
         startedAt: session.startedAt,
-        endedAt: now,
+        endedAt: sessionStartedAt,
       })
     }
 
-    setSession({ status, startedAt: now })
+    setSession({ status, startedAt: sessionStartedAt })
   }
 
   /**
@@ -434,7 +441,7 @@ export const useFasting = (): UseFastingResult => {
     updateSessionStartedAt,
     updatePreferredFastStartTime,
     clearPreferredFastStartTime,
-    endFasting: () => startSession('eating'),
-    startFasting: () => startSession('fasting'),
+    endFasting: (endedAt) => startSession('eating', endedAt),
+    startFasting: (startedAt) => startSession('fasting', startedAt),
   }
 }

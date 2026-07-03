@@ -42,8 +42,8 @@ interface ActiveFastingTimerProps {
   fasts: Fast[]
   planId: FastingPlanId
   session: FastingSession
-  endFasting: () => Promise<void>
-  startFasting: () => Promise<void>
+  endFasting: (endedAt?: Date) => Promise<void>
+  startFasting: (startedAt?: Date) => Promise<void>
   updateSessionStartedAt: (updatedStartedAt: Date) => void
 }
 
@@ -57,7 +57,7 @@ export default function ActiveFastingTimer({
 }: ActiveFastingTimerProps) {
   const [now, setNow] = useState(() => Date.now())
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-  const [selectedEndedAt, setSelectedEndedAt] = useState<Date | null>(null)
+  const [selectedEndedAt, setSelectedEndedAt] = useState<Date | undefined>()
 
   const {
     endsAt,
@@ -79,12 +79,10 @@ export default function ActiveFastingTimer({
   const handleSessionChange = async () => {
     try {
       if (isFasting) {
-        // const endedAt = selectedEndedAt ?? new Date()
-        // await endFasting(endedAt)
-        await endFasting()
+        await endFasting(selectedEndedAt)
         toast.success('Fast ended')
       } else {
-        await startFasting()
+        await startFasting(selectedEndedAt)
         toast.success('Fast started')
       }
     } catch (error) {
@@ -98,7 +96,7 @@ export default function ActiveFastingTimer({
   }
 
   const handleAlertDialogOpenChange = () => {
-    setSelectedEndedAt(null)
+    setSelectedEndedAt(undefined)
   }
 
   /**

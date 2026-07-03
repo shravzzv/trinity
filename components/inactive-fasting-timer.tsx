@@ -9,8 +9,8 @@ import { type UseFastingResult } from '@/hooks/use-fasting'
 
 interface InactiveFastingTimerProps {
   hasPlan: boolean
-  startFasting: () => Promise<void>
   updatePlanId: UseFastingResult['updatePlanId']
+  startFasting: (startedAt?: Date) => Promise<void>
 }
 
 export default function InactiveFastingTimer({
@@ -25,7 +25,7 @@ export default function InactiveFastingTimer({
 
         <CardAction>
           {hasPlan ? (
-            <Button onClick={startFasting}>Start fasting</Button>
+            <Button onClick={() => startFasting()}>Start fasting</Button>
           ) : (
             <FastingPlanDialog
               dialogTitle='Select your fasting plan'

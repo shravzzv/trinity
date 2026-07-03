@@ -11,8 +11,8 @@ interface FastingTimerProps {
   fasts: Fast[]
   planId: FastingPlanId | null
   session: FastingSession | null
-  endFasting: () => Promise<void>
-  startFasting: () => Promise<void>
+  endFasting: (endedAt?: Date) => Promise<void>
+  startFasting: (startedAt?: Date) => Promise<void>
   updatePlanId: UseFastingResult['updatePlanId']
   updateSessionStartedAt: (updatedStartedAt: Date) => void
 }
