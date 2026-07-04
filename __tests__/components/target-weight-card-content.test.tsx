@@ -1,22 +1,17 @@
 import userEvent from '@testing-library/user-event'
 import { render, screen } from '@testing-library/react'
-import TargetWeightCard from '@/components/target-weight-card'
 import { toast } from 'sonner'
+import TargetWeightCardContent from '@/components/target-weight-card-content'
 
 jest.mock('sonner')
 
 const update = jest.fn()
 
 const renderComponent = (
-  props: Partial<React.ComponentProps<typeof TargetWeightCard>> = {},
+  props: Partial<React.ComponentProps<typeof TargetWeightCardContent>> = {},
 ) => {
   render(
-    <TargetWeightCard
-      targetWeight={null}
-      update={update}
-      isLoading={false}
-      {...props}
-    />,
+    <TargetWeightCardContent targetWeight={null} update={update} {...props} />,
   )
 }
 
@@ -31,7 +26,7 @@ const openDialog = async (
   )
 }
 
-describe('TargetWeightCard', () => {
+describe('TargetWeightCardContent', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
