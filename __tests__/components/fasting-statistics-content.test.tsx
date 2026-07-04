@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react'
-import FastingStatistics from '@/components/fasting-statistics'
 import EditFastsSheet from '@/components/edit-fasts-sheet'
 import FastDialog from '@/components/fast-dialog'
 import type { Fast } from '@/types/fasting'
+import FastingStatisticsContent from '@/components/fasting-statistics-content'
 
 jest.mock('uuid')
 
@@ -51,13 +51,15 @@ const fasts: Fast[] = [
   },
 ]
 
-const renderComponent = (customFasts: Fast[] = fasts) => {
+const renderComponent = (customFasts: Fast[] = fasts, planId = '16:8') => {
   render(
-    <FastingStatistics
-      fasts={customFasts}
+    <FastingStatisticsContent
+      planId={planId}
       addFast={addFast}
+      fasts={customFasts}
       deleteFast={deleteFast}
       updateFast={updateFast}
+      preferredFastStartTime={null}
     />,
   )
 }
