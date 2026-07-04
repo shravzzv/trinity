@@ -26,11 +26,13 @@ import { toast } from 'sonner'
 import { MIN_TARGET_WEIGHT_KG, MAX_TARGET_WEIGHT_KG } from '@/constants/weight'
 
 interface TargetWeightCardContentProps {
+  clear: () => void
   targetWeight: number | null
   update: (newTarget: number) => void
 }
 
 export default function TargetWeightCardContent({
+  clear,
   update,
   targetWeight,
 }: TargetWeightCardContentProps) {
@@ -51,6 +53,12 @@ export default function TargetWeightCardContent({
     update(input)
     setOpen(false)
     toast.success(`Target weight ${targetWeight === null ? 'set' : 'updated'}`)
+  }
+
+  const handleClear = () => {
+    clear()
+    setOpen(false)
+    toast.success('Target weight deleted')
   }
 
   return (
@@ -138,6 +146,16 @@ export default function TargetWeightCardContent({
               </Field>
 
               <DialogFooter>
+                {targetWeight && (
+                  <Button
+                    variant='ghost'
+                    className='text-destructive hover:text-destructive hover:bg-destructive/20 dark:hover:bg-destructive/30'
+                    onClick={handleClear}
+                  >
+                    Delete target weight
+                  </Button>
+                )}
+
                 <DialogClose asChild>
                   <Button variant='outline' type='button'>
                     Close

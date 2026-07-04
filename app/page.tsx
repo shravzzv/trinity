@@ -31,6 +31,7 @@ export default function Page() {
     entries,
     targetWeightKg,
     addWeightEntry,
+    clearTargetWeight,
     updateWeightEntry,
     deleteWeightEntry,
     updateTargetWeight,
@@ -73,6 +74,7 @@ export default function Page() {
       />
 
       <TargetWeightCard
+        clear={clearTargetWeight}
         update={updateTargetWeight}
         targetWeight={targetWeightKg}
         isLoading={isWeightStateLoading}

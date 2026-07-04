@@ -62,6 +62,11 @@ interface UseWeightResult {
    * Whether the weight state is currently being restored or synchronized.
    */
   isLoading: boolean
+
+  /**
+   * Resets the target weight to null.
+   */
+  clearTargetWeight: () => void
 }
 
 /**
@@ -152,6 +157,8 @@ export const useWeight = (): UseWeightResult => {
     setTargetWeightKg(newTargetWeightKg)
   }
 
+  const clearTargetWeight = () => setTargetWeightKg(null)
+
   const hydrateTargetWeightKg = () => {
     try {
       const saved = localStorage.getItem(TARGET_WEIGHT_KG_STORAGE_KEY)
@@ -214,6 +221,7 @@ export const useWeight = (): UseWeightResult => {
     addWeightEntry,
     updateWeightEntry,
     deleteWeightEntry,
+    clearTargetWeight,
     updateTargetWeight,
     entries: weightEntries,
   }
