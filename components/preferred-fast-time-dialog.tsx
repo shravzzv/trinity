@@ -185,7 +185,7 @@ export default function PreferredFastTimeDialog({
           {allowDeleteSchedule && (
             <Button
               variant='ghost'
-              className='text-destructive'
+              className='text-destructive hover:text-destructive hover:bg-destructive/20 dark:hover:bg-destructive/30'
               onClick={handleDeleteSchedule}
             >
               Delete schedule
