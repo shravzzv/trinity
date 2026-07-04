@@ -214,7 +214,11 @@ export default function ActiveFastingTimer({
             : formatDuration(remainingMs)}
         </h1>
 
-        <Progress value={progress} />
+        <Progress
+          value={progress}
+          aria-label={`Current ${status} session progress.`}
+          aria-valuetext={`${Math.round(progress)} percent complete`}
+        />
       </CardContent>
 
       <Separator />

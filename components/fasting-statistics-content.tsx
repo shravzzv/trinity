@@ -165,7 +165,7 @@ export default function FastingStatisticsContent({
             value={cadence}
             onValueChange={(v) => setCadence(v as FastingStatisticsCadence)}
           >
-            <SelectTrigger>
+            <SelectTrigger aria-label='Fasting statistics cadence.'>
               <SelectValue placeholder='Cadence' />
             </SelectTrigger>
             <SelectContent position='popper'>
