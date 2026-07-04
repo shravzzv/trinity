@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { Flame, Pen, UtensilsCrossed } from 'lucide-react'
+import { Anchor, Flame, Pen, UtensilsCrossed } from 'lucide-react'
 import { toast } from 'sonner'
 import { Separator } from './ui/separator'
 import EditSessionStartedAtDialog from './edit-session-started-at-dialog'
@@ -206,13 +206,22 @@ export default function ActiveFastingTimer({
         </div>
 
         <h1
-          className='flex-1 text-center text-3xl font-bold'
+          className='flex-1 text-center text-4xl font-bold'
           aria-label='fasting-timer'
         >
           {hasExceededSessionLength
             ? `+${formatDuration(excessMs)}`
             : formatDuration(remainingMs)}
         </h1>
+
+        {isFasting && (
+          <div className='flex justify-center'>
+            <Button variant='outline' size='sm'>
+              <Anchor />
+              Take flex day
+            </Button>
+          </div>
+        )}
 
         <Progress
           value={progress}
