@@ -459,4 +459,73 @@ describe('useFasting', () => {
       )
     })
   })
+
+  it('updates the current session startedAt', async () => {
+    const { result } = renderUseFasting()
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    await act(async () => {
+      await result.current.startFasting(new Date('2026-01-01T18:00:00.000Z'))
+    })
+
+    act(() => {
+      result.current.updateSessionStartedAt(
+        new Date('2026-01-01T20:30:00.000Z'),
+      )
+    })
+
+    expect(result.current.session).toEqual({
+      status: 'fasting',
+      startedAt: '2026-01-01T20:30:00.000Z',
+    })
+  })
+
+  it('does nothing when updating the session start time without an active session', async () => {
+    const { result } = renderUseFasting()
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    act(() => {
+      result.current.updateSessionStartedAt(
+        new Date('2026-01-01T20:30:00.000Z'),
+      )
+    })
+
+    expect(result.current.session).toBeNull()
+  })
+
+  it('persists updated session startedAt', async () => {
+    const setItemSpy = jest.spyOn(Storage.prototype, 'setItem')
+
+    const { result } = renderUseFasting()
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    await act(async () => {
+      await result.current.startFasting(new Date('2026-01-01T18:00:00.000Z'))
+    })
+
+    setItemSpy.mockClear()
+
+    act(() => {
+      result.current.updateSessionStartedAt(
+        new Date('2026-01-01T20:30:00.000Z'),
+      )
+    })
+
+    expect(setItemSpy).toHaveBeenCalledWith(
+      FASTING_SESSION_STORAGE_KEY,
+      JSON.stringify({
+        status: 'fasting',
+        startedAt: '2026-01-01T20:30:00.000Z',
+      }),
+    )
+  })
 })
