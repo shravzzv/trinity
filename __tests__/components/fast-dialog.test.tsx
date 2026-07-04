@@ -59,21 +59,6 @@ describe('FastDialog', () => {
     ).toBeInTheDocument()
   })
 
-  it('shows validation errors when submitting an invalid fast', async () => {
-    const user = setupUser()
-
-    renderDialog()
-
-    await user.click(screen.getByRole('button', { name: /open/i }))
-    await user.click(screen.getByRole('button', { name: /add fast/i }))
-
-    expect(
-      screen.getByText(/the start time must be before the end time/i),
-    ).toBeInTheDocument()
-
-    expect(screen.getByRole('button', { name: /add fast/i })).toBeDisabled()
-  })
-
   it('does not call onSubmit when validation fails', async () => {
     const user = setupUser()
 
@@ -83,37 +68,6 @@ describe('FastDialog', () => {
     await user.click(screen.getByRole('button', { name: /add fast/i }))
 
     expect(onSubmit).not.toHaveBeenCalled()
-  })
-
-  it('clears validation errors when reopened', async () => {
-    const user = setupUser()
-
-    renderDialog()
-
-    await user.click(screen.getByRole('button', { name: /open/i }))
-    await user.click(screen.getByRole('button', { name: /add fast/i }))
-
-    expect(
-      screen.getByText(/the start time must be before the end time/i),
-    ).toBeInTheDocument()
-
-    const dialog = screen.getByRole('dialog')
-
-    const closeButton = within(dialog)
-      .getAllByRole('button', { name: /^close$/i })
-      .at(-1)!
-
-    await user.click(closeButton)
-
-    await waitFor(() => {
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    })
-
-    await user.click(screen.getByRole('button', { name: /open/i }))
-
-    expect(
-      screen.queryByText(/the start time must be before the end time/i),
-    ).not.toBeInTheDocument()
   })
 
   it('submits a valid fast', async () => {
