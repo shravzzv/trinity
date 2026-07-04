@@ -64,7 +64,7 @@ const renderComponent = (customFasts: Fast[] = fasts, planId = '16:8') => {
   )
 }
 
-describe('FastingStatistics', () => {
+describe('FastingStatisticsContent', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     jest.useFakeTimers()
