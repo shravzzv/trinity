@@ -4,17 +4,17 @@ import TargetWeightCardSkeleton from './skeletons/target-weight-card-skeleton'
 import TargetWeightCardContent from './target-weight-card-content'
 
 interface TargetWeightCardProps {
+  clear: () => void
   isLoading: boolean
   targetWeight: number | null
   update: (newTarget: number) => void
 }
 
 export default function TargetWeightCard({
-  update,
   isLoading,
-  targetWeight,
+  ...rest
 }: TargetWeightCardProps) {
   if (isLoading) return <TargetWeightCardSkeleton />
 
-  return <TargetWeightCardContent update={update} targetWeight={targetWeight} />
+  return <TargetWeightCardContent {...rest} />
 }
