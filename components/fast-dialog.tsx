@@ -123,6 +123,7 @@ export default function FastDialog({
     if (initialStartedAt) return new Date(initialStartedAt)
 
     const date = new Date()
+    date.setDate(date.getDate() - 1)
     date.setHours(18, 0, 0)
     return date
   }, [initialStartedAt])

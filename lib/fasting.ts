@@ -488,7 +488,7 @@ interface GetInitialFastDialogTimesOptions {
  * If the preferred start time for today would produce a fast that has not yet
  * finished, the fast is shifted back by one day.
  *
- * Returns `null` when no preferred fasting start time has been configured.
+ * Returns `null` when no preferred fasting start time or planId has been configured.
  */
 export const getInitialFastDialogTimes = ({
   planId,

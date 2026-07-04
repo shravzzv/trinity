@@ -10,6 +10,7 @@ import {
   doesSessionOverlap,
   getSessionEndedAtValidationErrors,
   getActiveSessionStatistics,
+  getInitialFastDialogTimes,
 } from '@/lib/fasting'
 import type { Fast } from '@/types/fasting'
 import { fastingPlans } from '@/constants/fasting-plans'
@@ -812,5 +813,90 @@ describe('getActiveSessionStatistics', () => {
 
     expect(stats.startedAtFormatted).toBeTruthy()
     expect(stats.endsAtFormatted).toBeTruthy()
+  })
+})
+
+describe('getInitialFastDialogTimes', () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
+  })
+
+  it('returns null when preferredFastStartTime is null', () => {
+    expect(
+      getInitialFastDialogTimes({
+        planId: fastingPlans[0].id,
+        preferredFastStartTime: null,
+      }),
+    ).toBeNull()
+  })
+
+  it('returns null when planId is null', () => {
+    expect(
+      getInitialFastDialogTimes({
+        planId: null,
+        preferredFastStartTime: {
+          hour: 18,
+          minute: 0,
+        },
+      }),
+    ).toBeNull()
+  })
+
+  it('creates a fast starting at the preferred time today when it ends in the past', () => {
+    jest.setSystemTime(new Date('2026-07-04T22:00:00'))
+
+    const plan = fastingPlans.find((p) => p.fastingHours === 16)!
+
+    const result = getInitialFastDialogTimes({
+      planId: plan.id,
+      preferredFastStartTime: {
+        hour: 0,
+        minute: 0,
+      },
+    })
+
+    expect(result).not.toBeNull()
+    expect(result!.startedAt).toEqual(new Date('2026-07-04T00:00:00'))
+    expect(result!.endedAt).toEqual(new Date('2026-07-04T16:00:00'))
+  })
+
+  it('shifts the fast back one day when it would end in the future', () => {
+    jest.setSystemTime(new Date('2026-07-04T08:00:00'))
+
+    const plan = fastingPlans.find((p) => p.fastingHours === 16)!
+
+    const result = getInitialFastDialogTimes({
+      planId: plan.id,
+      preferredFastStartTime: {
+        hour: 18,
+        minute: 0,
+      },
+    })
+
+    expect(result).not.toBeNull()
+    expect(result!.startedAt).toEqual(new Date('2026-07-03T18:00:00'))
+    expect(result!.endedAt).toEqual(new Date('2026-07-04T10:00:00'))
+  })
+
+  it('uses the fasting duration from the selected plan', () => {
+    jest.setSystemTime(new Date('2026-07-04T23:00:00'))
+
+    const plan = fastingPlans[0]
+
+    const result = getInitialFastDialogTimes({
+      planId: plan.id,
+      preferredFastStartTime: {
+        hour: 6,
+        minute: 30,
+      },
+    })
+
+    expect(result).not.toBeNull()
+    const durationMs = result!.endedAt.getTime() - result!.startedAt.getTime()
+    expect(durationMs).toBe(plan.fastingHours * 60 * 60 * 1000)
   })
 })
