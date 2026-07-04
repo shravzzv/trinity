@@ -183,7 +183,7 @@ export default function WeightStatisticsContent({
             value={cadence}
             onValueChange={(v) => setCadence(v as WeightStatisticsCadence)}
           >
-            <SelectTrigger>
+            <SelectTrigger aria-label='Weight statistics cadence.'>
               <SelectValue placeholder='Cadence' />
             </SelectTrigger>
             <SelectContent position='popper'>
