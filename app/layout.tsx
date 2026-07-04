@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/providers/theme-provider'
 import { Analytics } from '@vercel/analytics/next'
 import { SerwistProvider } from '@serwist/turbopack/react'
 import { Toaster } from '@/components/ui/sonner'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const APP_NAME = 'Trinity'
 const APP_DEFAULT_TITLE = 'Trinity'
@@ -80,6 +81,7 @@ export default function RootLayout({
           </ThemeProvider>
         </SerwistProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
