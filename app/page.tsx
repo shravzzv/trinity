@@ -5,7 +5,6 @@ import FastingStatistics from '@/components/fasting-statistics'
 import FastingTimer from '@/components/fasting-timer'
 import Header from '@/components/header'
 import TargetWeightCard from '@/components/target-weight-card'
-import { Button } from '@/components/ui/button'
 import WeightStatistics from '@/components/weight-statistics'
 import { useFasting } from '@/hooks/use-fasting'
 import { useWeight } from '@/hooks/use-weight'
@@ -87,15 +86,6 @@ export default function Page() {
         deleteWeight={deleteWeightEntry}
         isLoading={isWeightStateLoading}
       />
-
-      <Button
-        onClick={() => {
-          localStorage.clear()
-          location.reload()
-        }}
-      >
-        Clear storage
-      </Button>
     </main>
   )
 }

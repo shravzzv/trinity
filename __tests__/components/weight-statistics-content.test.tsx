@@ -1,4 +1,4 @@
-import WeightStatistics from '@/components/weight-statistics'
+import WeightStatisticsContent from '@/components/weight-statistics-content'
 import { WEIGHT_STATISTICS_CADENCE_STORAGE_KEY } from '@/constants/storage-keys'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -67,15 +67,14 @@ const entries = [
 ]
 
 const renderComponent = (
-  props: Partial<React.ComponentProps<typeof WeightStatistics>> = {},
+  props: Partial<React.ComponentProps<typeof WeightStatisticsContent>> = {},
 ) => {
   const addWeight = jest.fn().mockResolvedValue(undefined)
   const updateWeight = jest.fn().mockResolvedValue(undefined)
   const deleteWeight = jest.fn().mockResolvedValue(undefined)
 
   render(
-    <WeightStatistics
-      isLoading={false}
+    <WeightStatisticsContent
       entries={entries}
       targetWeight={75}
       addWeight={addWeight}
@@ -107,7 +106,7 @@ Object.defineProperties(HTMLElement.prototype, {
   },
 })
 
-describe('WeightStatistics', () => {
+describe('WeightStatisticsContent', () => {
   beforeEach(() => {
     localStorage.clear()
     jest.clearAllMocks()
@@ -329,23 +328,6 @@ describe('WeightStatistics', () => {
     })
 
     expect(screen.getByText(/2.0 kg gained this week/i)).toBeInTheDocument()
-  })
-
-  it('renders skeleton while loading', () => {
-    render(
-      <WeightStatistics
-        isLoading
-        entries={[]}
-        targetWeight={null}
-        addWeight={jest.fn()}
-        updateWeight={jest.fn()}
-        deleteWeight={jest.fn()}
-      />,
-    )
-
-    expect(
-      screen.queryByRole('button', { name: /edit weights/i }),
-    ).not.toBeInTheDocument()
   })
 
   it('renders all cadence options', async () => {
