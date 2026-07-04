@@ -122,9 +122,12 @@ export const useWeight = (): UseWeightResult => {
   }
 
   const deleteWeightEntry = async (id: string) => {
-    const previousEntries = weightEntries
+    let previousEntries: WeightEntry[] = []
 
-    setWeightEntries((prev) => prev.filter((entry) => entry.id !== id))
+    setWeightEntries((prev) => {
+      previousEntries = prev
+      return prev.filter((entry) => entry.id !== id)
+    })
 
     try {
       await deleteWeightEntryFromIdxDB(id)
@@ -135,15 +138,17 @@ export const useWeight = (): UseWeightResult => {
   }
 
   const updateWeightEntry = async (updatedWeightEntry: WeightEntry) => {
-    const previousEntries = weightEntries
+    let previousEntries: WeightEntry[] = []
 
-    setWeightEntries((prev) =>
-      sortWeightEntries(
+    setWeightEntries((prev) => {
+      previousEntries = prev
+
+      return sortWeightEntries(
         prev.map((entry) =>
           entry.id === updatedWeightEntry.id ? updatedWeightEntry : entry,
         ),
-      ),
-    )
+      )
+    })
 
     try {
       await updateWeightEntryInIdxDB(updatedWeightEntry)
@@ -183,7 +188,7 @@ export const useWeight = (): UseWeightResult => {
   const hydrateWeightEntries = async () => {
     try {
       const entries = await getWeightEntriesFromIdxDB()
-      setWeightEntries(entries)
+      setWeightEntries(sortWeightEntries(entries))
     } catch (error) {
       console.error('Hydrating weight entries failed', error)
     }
