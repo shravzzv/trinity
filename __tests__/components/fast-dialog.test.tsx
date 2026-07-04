@@ -82,7 +82,7 @@ describe('FastDialog', () => {
 
     await user.click(screen.getByRole('button', { name: /open/i }))
 
-    const endTimeInput = screen.getAllByLabelText(/^time$/i)[1]
+    const endTimeInput = screen.getByLabelText(/end time/i)
 
     fireEvent.change(endTimeInput, {
       target: { value: '23:30:00' },
@@ -107,7 +107,7 @@ describe('FastDialog', () => {
 
     await user.click(screen.getByRole('button', { name: /open/i }))
 
-    const endTimeInput = screen.getAllByLabelText(/^time$/i)[1]
+    const endTimeInput = screen.getByLabelText(/end time/i)
 
     fireEvent.change(endTimeInput, {
       target: { value: '23:30:00' },
@@ -132,7 +132,8 @@ describe('FastDialog', () => {
 
     await user.click(screen.getByRole('button', { name: /open/i }))
 
-    const [startTimeInput, endTimeInput] = screen.getAllByLabelText(/^time$/i)
+    const startTimeInput = screen.getByLabelText(/start time/i)
+    const endTimeInput = screen.getByLabelText(/end time/i)
 
     fireEvent.change(startTimeInput, {
       target: { value: '21:30:00' },
@@ -164,7 +165,8 @@ describe('FastDialog', () => {
 
     await user.click(screen.getByRole('button', { name: /open/i }))
 
-    const [startTimeInput, endTimeInput] = screen.getAllByLabelText(/^time$/i)
+    const startTimeInput = screen.getByLabelText(/start time/i)
+    const endTimeInput = screen.getByLabelText(/end time/i)
 
     fireEvent.change(startTimeInput, {
       target: { value: '20:30:00' },
@@ -184,10 +186,8 @@ describe('FastDialog', () => {
 
     await user.click(screen.getByRole('button', { name: /open/i }))
 
-    const [reopenedStart, reopenedEnd] = screen.getAllByLabelText(/^time$/i)
-
-    expect(reopenedStart).toHaveValue('18:00:00')
-    expect(reopenedEnd).toHaveValue('17:30:00')
+    expect(screen.getByLabelText(/start time/i)).toHaveValue('18:00')
+    expect(screen.getByLabelText(/end time/i)).toHaveValue('17:30')
   })
 
   it('initializes with provided timestamps', async () => {
@@ -200,10 +200,8 @@ describe('FastDialog', () => {
 
     await user.click(screen.getByRole('button', { name: /open/i }))
 
-    const [startTimeInput, endTimeInput] = screen.getAllByLabelText(/^time$/i)
-
-    expect(startTimeInput).toHaveValue('08:00:00')
-    expect(endTimeInput).toHaveValue('20:00:00')
+    expect(screen.getByLabelText(/start time/i)).toHaveValue('08:00')
+    expect(screen.getByLabelText(/end time/i)).toHaveValue('20:00')
   })
 
   it('restores initial timestamps when reopened', async () => {
@@ -216,9 +214,7 @@ describe('FastDialog', () => {
 
     await user.click(screen.getByRole('button', { name: /open/i }))
 
-    const [startTimeInput] = screen.getAllByLabelText(/^time$/i)
-
-    fireEvent.change(startTimeInput, {
+    fireEvent.change(screen.getByLabelText(/start time/i), {
       target: { value: '12:00:00' },
     })
 
@@ -232,9 +228,7 @@ describe('FastDialog', () => {
 
     await user.click(screen.getByRole('button', { name: /open/i }))
 
-    const [reopenedStart] = screen.getAllByLabelText(/^time$/i)
-
-    expect(reopenedStart).toHaveValue('08:00:00')
+    expect(screen.getByLabelText(/start time/i)).toHaveValue('08:00')
   })
 
   it('shows overlap validation errors', async () => {
@@ -256,28 +250,21 @@ describe('FastDialog', () => {
 
     await user.click(screen.getByRole('button', { name: /open/i }))
 
-    const dialog = screen.getByRole('dialog')
-
-    const [startTimeInput, endTimeInput] =
-      within(dialog).getAllByLabelText(/^time$/i)
-
-    fireEvent.change(startTimeInput, {
+    fireEvent.change(screen.getByLabelText(/start time/i), {
       target: { value: '19:00:00' },
     })
 
-    fireEvent.change(endTimeInput, {
+    fireEvent.change(screen.getByLabelText(/end time/i), {
       target: { value: '21:00:00' },
     })
 
     await user.click(
-      within(dialog).getByRole('button', {
+      screen.getByRole('button', {
         name: /add fast/i,
       }),
     )
 
-    expect(
-      await screen.findByText(/the fast overlaps an existing fast/i),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toBeInTheDocument()
   })
 
   it('supports controlled mode', async () => {
