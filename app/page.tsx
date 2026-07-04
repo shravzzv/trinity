@@ -51,6 +51,7 @@ export default function Page() {
         updatePlanId={updatePlanId}
         isLoading={isFastingStateLoading}
         updateSessionStartedAt={updateSessionStartedAt}
+        preferredFastStartTime={preferredFastStartTime}
       />
 
       <FastingPlanCard
@@ -58,8 +59,8 @@ export default function Page() {
         updatePlanId={updatePlanId}
         isLoading={isFastingStateLoading}
         preferredFastStartTime={preferredFastStartTime}
-        updatePreferredFastStartTime={updatePreferredFastStartTime}
         clearPreferredFastStartTime={clearPreferredFastStartTime}
+        updatePreferredFastStartTime={updatePreferredFastStartTime}
       />
 
       <FastingStatistics

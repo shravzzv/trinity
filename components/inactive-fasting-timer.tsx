@@ -6,18 +6,25 @@ import { Card, CardAction, CardContent, CardHeader, CardTitle } from './ui/card'
 import FastingPlanDialog from './fasting-plan-dialog'
 import { toast } from 'sonner'
 import { type UseFastingResult } from '@/hooks/use-fasting'
+import type { FastingPlanId, PreferredFastStartTime } from '@/types/fasting'
+import { getInitialSessionStartedAt } from '@/lib/fasting'
 
 interface InactiveFastingTimerProps {
-  hasPlan: boolean
+  planId: FastingPlanId | null
   updatePlanId: UseFastingResult['updatePlanId']
   startFasting: (startedAt?: Date) => Promise<void>
+  preferredFastStartTime: PreferredFastStartTime | null
 }
 
 export default function InactiveFastingTimer({
-  hasPlan,
+  planId,
   startFasting,
   updatePlanId,
+  preferredFastStartTime,
 }: InactiveFastingTimerProps) {
+  const hasPlan = planId !== null
+  const fastStartsAt = getInitialSessionStartedAt(preferredFastStartTime)
+
   return (
     <Card>
       <CardHeader>
@@ -25,7 +32,9 @@ export default function InactiveFastingTimer({
 
         <CardAction>
           {hasPlan ? (
-            <Button onClick={() => startFasting()}>Start fasting</Button>
+            <Button onClick={() => startFasting(fastStartsAt ?? undefined)}>
+              Start fasting
+            </Button>
           ) : (
             <FastingPlanDialog
               dialogTitle='Select your fasting plan'

@@ -527,3 +527,46 @@ export const getInitialFastDialogTimes = ({
     endedAt,
   }
 }
+
+/**
+ * Returns an initial start time for beginning a new fasting session.
+ *
+ * The returned value is the most recent occurrence of the user's preferred
+ * fasting start time. If today's preferred time has already passed, today's
+ * occurrence is returned. Otherwise, yesterday's occurrence is returned.
+ *
+ * Returns `null` when no preferred fasting start time has been configured.
+ *
+ * Examples:
+ *
+ * Now: 2026-07-04 22:00
+ * Preferred: 18:00
+ * → 2026-07-04 18:00
+ *
+ * Now: 2026-07-04 08:00
+ * Preferred: 18:00
+ * → 2026-07-03 18:00
+ */
+export const getInitialSessionStartedAt = (
+  preferredFastStartTime: PreferredFastStartTime | null,
+): Date | null => {
+  if (!preferredFastStartTime) return null
+
+  const now = new Date()
+
+  const startedAt = new Date(now)
+  startedAt.setHours(
+    preferredFastStartTime.hour,
+    preferredFastStartTime.minute,
+    0,
+    0,
+  )
+
+  // If today's preferred start time hasn't happened yet,
+  // use yesterday's occurrence instead.
+  if (startedAt > now) {
+    startedAt.setDate(startedAt.getDate() - 1)
+  }
+
+  return startedAt
+}

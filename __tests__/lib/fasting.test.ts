@@ -11,6 +11,7 @@ import {
   getSessionEndedAtValidationErrors,
   getActiveSessionStatistics,
   getInitialFastDialogTimes,
+  getInitialSessionStartedAt,
 } from '@/lib/fasting'
 import type { Fast } from '@/types/fasting'
 import { fastingPlans } from '@/constants/fasting-plans'
@@ -898,5 +899,63 @@ describe('getInitialFastDialogTimes', () => {
     expect(result).not.toBeNull()
     const durationMs = result!.endedAt.getTime() - result!.startedAt.getTime()
     expect(durationMs).toBe(plan.fastingHours * 60 * 60 * 1000)
+  })
+})
+
+describe('getInitialSessionStartedAt', () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
+  })
+
+  it('returns null when no preferred fast start time is configured', () => {
+    expect(getInitialSessionStartedAt(null)).toBeNull()
+  })
+
+  it("returns today's preferred start time when it has already passed", () => {
+    jest.setSystemTime(new Date('2026-07-04T22:00:00'))
+
+    expect(
+      getInitialSessionStartedAt({
+        hour: 18,
+        minute: 0,
+      }),
+    ).toEqual(new Date('2026-07-04T18:00:00'))
+  })
+
+  it("returns yesterday's preferred start time when today's has not yet occurred", () => {
+    jest.setSystemTime(new Date('2026-07-04T08:00:00'))
+
+    expect(
+      getInitialSessionStartedAt({
+        hour: 18,
+        minute: 0,
+      }),
+    ).toEqual(new Date('2026-07-03T18:00:00'))
+  })
+
+  it('returns today when the preferred start time is exactly now', () => {
+    jest.setSystemTime(new Date('2026-07-04T18:00:00'))
+
+    expect(
+      getInitialSessionStartedAt({
+        hour: 18,
+        minute: 0,
+      }),
+    ).toEqual(new Date('2026-07-04T18:00:00'))
+  })
+
+  it('preserves the configured minutes', () => {
+    jest.setSystemTime(new Date('2026-07-04T18:45:00'))
+
+    expect(
+      getInitialSessionStartedAt({
+        hour: 18,
+        minute: 30,
+      }),
+    ).toEqual(new Date('2026-07-04T18:30:00'))
   })
 })
