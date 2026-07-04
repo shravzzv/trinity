@@ -8,6 +8,7 @@ import TargetWeightCard from '@/components/target-weight-card'
 import WeightStatistics from '@/components/weight-statistics'
 import { useFasting } from '@/hooks/use-fasting'
 import { useWeight } from '@/hooks/use-weight'
+import ProgressCard from '@/components/progress-card'
 
 export default function Page() {
   const {
@@ -41,6 +42,7 @@ export default function Page() {
   return (
     <main className='mx-auto max-w-xl space-y-6 px-6 py-6'>
       <Header />
+      <ProgressCard />
 
       <FastingTimer
         fasts={fasts}
