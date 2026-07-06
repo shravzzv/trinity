@@ -102,7 +102,7 @@ export default function StreakDialog() {
 
 const StreakCalendarLegend = () => {
   return (
-    <footer className='flex items-center justify-center gap-4 py-2 text-xs'>
+    <footer className='flex items-center justify-center gap-3 py-2 text-xs'>
       <div className='flex items-center gap-1'>
         <div className='size-3 rounded-full border-2 border-green-600 bg-green-600/10' />
         <span>Completed</span>
@@ -113,7 +113,7 @@ const StreakCalendarLegend = () => {
       </div>
       <div className='flex items-center gap-1'>
         <div className='size-3 rounded-full border-2 border-dotted border-sky-500 bg-sky-500/10' />
-        Anchor
+        Anchored
       </div>
     </footer>
   )
