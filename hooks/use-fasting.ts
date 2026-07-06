@@ -374,7 +374,7 @@ export const useFasting = (): UseFastingResult => {
   const hydrateFasts = async () => {
     try {
       const fasts = await getFastsFromIdxDB()
-      setFasts(fasts)
+      setFasts(sortFasts(fasts))
     } catch (error) {
       console.error('Hydrating fasts failed', error)
     }
