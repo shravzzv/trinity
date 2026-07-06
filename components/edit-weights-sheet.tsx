@@ -89,16 +89,23 @@ export default function EditWeightsSheet({
         ) : (
           <ScrollArea className='min-h-0 flex-1 rounded-md'>
             <div className='space-y-2 px-6 py-1'>
-              {sortedWeightEntries.map((entry) => (
-                <WeightListItem
-                  key={entry.id}
-                  entry={entry}
-                  onUpdate={(weightKg, recordedAt) =>
-                    handleUpdateWeight(weightKg, recordedAt, entry)
-                  }
-                  onDelete={() => handleDeleteWeight(entry.id)}
-                />
-              ))}
+              {sortedWeightEntries.map((entry, idx) => {
+                const previous = sortedWeightEntries[idx + 1]
+                const changeFromPreviousKg =
+                  previous === undefined
+                    ? null
+                    : entry.weightKg - previous.weightKg
+
+                return (
+                  <WeightListItem
+                    key={entry.id}
+                    entry={entry}
+                    changeFromPreviousKg={changeFromPreviousKg}
+                    onDelete={() => handleDeleteWeight(entry.id)}
+                    onUpdate={(...args) => handleUpdateWeight(...args, entry)}
+                  />
+                )
+              })}
             </div>
           </ScrollArea>
         )}

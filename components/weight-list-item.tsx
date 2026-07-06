@@ -31,17 +31,20 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useState } from 'react'
+import { cn } from '@/lib/utils'
 
 interface WeightListItemProps {
   entry: WeightEntry
   onDelete: () => void
+  changeFromPreviousKg: number | null
   onUpdate: (weightKg: number, recordedAt: Date) => void
 }
 
 export default function WeightListItem({
-  entry: { weightKg, recordedAt },
   onDelete,
   onUpdate,
+  changeFromPreviousKg,
+  entry: { weightKg, recordedAt },
 }: WeightListItemProps) {
   const [deleting, setDeleting] = useState(false)
   const [editing, setEditing] = useState(false)
@@ -49,7 +52,21 @@ export default function WeightListItem({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{formatWeight(weightKg)}</CardTitle>
+        <CardTitle className='flex items-center gap-2'>
+          <span>{formatWeight(weightKg)}</span>
+
+          {changeFromPreviousKg !== null && (
+            <span
+              className={cn(
+                changeFromPreviousKg <= 0 ? 'text-green-600' : 'text-red-600',
+                'text-xs',
+              )}
+            >
+              {changeFromPreviousKg > 0 ? '+' : ''}
+              {changeFromPreviousKg.toFixed(1)} kg
+            </span>
+          )}
+        </CardTitle>
         <CardDescription>{format(recordedAt, 'EEE, PP')}</CardDescription>
 
         <CardAction>
