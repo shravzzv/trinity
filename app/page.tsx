@@ -56,15 +56,6 @@ export default function Page() {
         preferredFastStartTime={preferredFastStartTime}
       />
 
-      <FastingPlanCard
-        planId={planId}
-        updatePlanId={updatePlanId}
-        isLoading={isFastingStateLoading}
-        preferredFastStartTime={preferredFastStartTime}
-        clearPreferredFastStartTime={clearPreferredFastStartTime}
-        updatePreferredFastStartTime={updatePreferredFastStartTime}
-      />
-
       <FastingStatistics
         fasts={fasts}
         planId={planId}
@@ -75,19 +66,28 @@ export default function Page() {
         preferredFastStartTime={preferredFastStartTime}
       />
 
-      <TargetWeightCard
-        clear={clearTargetWeight}
-        update={updateTargetWeight}
-        targetWeight={targetWeightKg}
-        isLoading={isWeightStateLoading}
-      />
-
       <WeightStatistics
         entries={entries}
         addWeight={addWeightEntry}
         targetWeight={targetWeightKg}
         updateWeight={updateWeightEntry}
         deleteWeight={deleteWeightEntry}
+        isLoading={isWeightStateLoading}
+      />
+
+      <FastingPlanCard
+        planId={planId}
+        updatePlanId={updatePlanId}
+        isLoading={isFastingStateLoading}
+        preferredFastStartTime={preferredFastStartTime}
+        clearPreferredFastStartTime={clearPreferredFastStartTime}
+        updatePreferredFastStartTime={updatePreferredFastStartTime}
+      />
+
+      <TargetWeightCard
+        clear={clearTargetWeight}
+        update={updateTargetWeight}
+        targetWeight={targetWeightKg}
         isLoading={isWeightStateLoading}
       />
     </main>

@@ -131,9 +131,10 @@ describe('WeightStatisticsContent', () => {
     expect(screen.getByTestId('area-chart')).toBeInTheDocument()
   })
 
-  it('renders current weight', () => {
+  it('renders the current weight section', () => {
     renderComponent()
 
+    expect(screen.getByText(/current weight/i)).toBeInTheDocument()
     expect(screen.getByText('78.0 kg')).toBeInTheDocument()
   })
 
@@ -302,7 +303,9 @@ describe('WeightStatisticsContent', () => {
       ],
     })
 
-    expect(screen.getByText('—')).toBeInTheDocument()
+    expect(
+      screen.getByText(/insufficient data to show changes/i),
+    ).toBeInTheDocument()
   })
 
   it('renders weight loss summary', () => {
