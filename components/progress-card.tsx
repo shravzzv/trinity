@@ -1,5 +1,3 @@
-'use client'
-
 import { Card, CardContent } from './ui/card'
 import StreakDialog from './streak-dialog'
 import AnchorsDialog from './anchors-dialog'
