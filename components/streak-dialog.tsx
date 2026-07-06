@@ -9,10 +9,11 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from './ui/button'
-import { Flame } from 'lucide-react'
+import { Flame, Trophy } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import { Card, CardContent } from './ui/card'
 import { Separator } from './ui/separator'
+import { Badge } from './ui/badge'
 
 export default function StreakDialog() {
   const completedDays = [
@@ -23,6 +24,11 @@ export default function StreakDialog() {
   const missedDays = [new Date(2026, 6, 2)]
   const anchoredDays = [new Date(2026, 6, 4)]
 
+  const currentStreak = 0
+  const longestStreak = 0
+  const isCurrentStreakPersonalBest =
+    currentStreak > 0 && currentStreak === longestStreak
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -32,7 +38,7 @@ export default function StreakDialog() {
         >
           <div className='flex items-center gap-2'>
             <Flame className='size-5' />
-            <p className='text-xl font-bold'>18</p>
+            <p className='text-xl font-bold'>{currentStreak}</p>
           </div>
 
           <p className='text-muted-foreground text-xs'>Streak</p>
@@ -78,21 +84,34 @@ export default function StreakDialog() {
           </CardContent>
         </Card>
 
-        <Card className='flex flex-row gap-0'>
-          <CardContent className='flex flex-1 flex-col items-center justify-center'>
-            <p className='text-2xl font-bold'>18</p>
-            <span className='text-muted-foreground text-center text-xs'>
-              Current streak
-            </span>
-          </CardContent>
+        <Card>
+          <CardContent className='flex gap-0 p-0'>
+            <div className='flex flex-1 flex-col items-center justify-center gap-1'>
+              <p className='text-2xl font-bold'>{currentStreak}</p>
 
-          <Separator orientation='vertical' />
+              <span className='text-muted-foreground text-center text-xs'>
+                Current streak
+              </span>
 
-          <CardContent className='flex flex-1 flex-col items-center justify-center'>
-            <p className='text-muted-foreground text-2xl font-bold'>24</p>
-            <span className='text-muted-foreground text-center text-xs'>
-              Longest streak
-            </span>
+              {isCurrentStreakPersonalBest && (
+                <Badge>
+                  <Trophy />
+                  Personal best
+                </Badge>
+              )}
+            </div>
+
+            <Separator orientation='vertical' />
+
+            <div className='flex flex-1 flex-col items-center justify-center gap-1'>
+              <p className='text-muted-foreground text-2xl font-bold'>
+                {longestStreak}
+              </p>
+
+              <span className='text-muted-foreground text-center text-xs'>
+                Longest streak
+              </span>
+            </div>
           </CardContent>
         </Card>
       </DialogContent>
