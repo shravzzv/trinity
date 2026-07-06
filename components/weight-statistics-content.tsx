@@ -199,6 +199,18 @@ export default function WeightStatisticsContent({
       </CardHeader>
 
       <CardContent>
+        <div className='space-y-1 text-center'>
+          <p className='text-muted-foreground text-xs'>Current weight</p>
+
+          {currentWeight ? (
+            <p className='text-3xl font-bold lg:text-4xl'>
+              {formatWeight(currentWeight)}
+            </p>
+          ) : (
+            <p>No weight available in this period.</p>
+          )}
+        </div>
+
         <ChartContainer config={chartConfig}>
           <AreaChart
             accessibilityLayer
@@ -259,11 +271,6 @@ export default function WeightStatisticsContent({
 
       <CardFooter className='flex flex-col gap-4'>
         <div className='flex w-full flex-wrap items-center justify-evenly text-sm'>
-          <div className='flex items-center gap-2'>
-            <MapPin className='size-4' />
-            <span>{formatWeight(currentWeight)}</span>
-          </div>
-
           <div className='flex items-center gap-2'>
             {weightChange === null ? (
               <>
