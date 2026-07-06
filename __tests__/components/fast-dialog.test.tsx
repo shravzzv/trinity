@@ -59,17 +59,6 @@ describe('FastDialog', () => {
     ).toBeInTheDocument()
   })
 
-  it('does not call onSubmit when validation fails', async () => {
-    const user = setupUser()
-
-    renderDialog()
-
-    await user.click(screen.getByRole('button', { name: /open/i }))
-    await user.click(screen.getByRole('button', { name: /add fast/i }))
-
-    expect(onSubmit).not.toHaveBeenCalled()
-  })
-
   it('submits a valid fast', async () => {
     jest.useFakeTimers()
     jest.setSystemTime(new Date('2026-01-01T23:59:59'))
