@@ -9,12 +9,17 @@ const entry: WeightEntry = {
   recordedAt: new Date('2026-01-10T12:00:00Z').toISOString(),
 }
 
-const renderComponent = () => {
+const renderComponent = (changeFromPreviousKg: number | null = null) => {
   const onDelete = jest.fn()
   const onUpdate = jest.fn()
 
   render(
-    <WeightListItem entry={entry} onDelete={onDelete} onUpdate={onUpdate} />,
+    <WeightListItem
+      entry={entry}
+      onDelete={onDelete}
+      onUpdate={onUpdate}
+      changeFromPreviousKg={changeFromPreviousKg}
+    />,
   )
 
   return {
@@ -40,6 +45,25 @@ describe('WeightListItem', () => {
     renderComponent()
 
     expect(screen.getByText('72.5 kg')).toBeInTheDocument()
+  })
+
+  it('renders the weight change from the previous entry', () => {
+    renderComponent(-2)
+
+    expect(screen.getByText('-2.0 kg')).toBeInTheDocument()
+  })
+
+  it('renders the weight gain from the previous entry', () => {
+    renderComponent(1.5)
+
+    expect(screen.getByText('+1.5 kg')).toBeInTheDocument()
+  })
+
+  it('does not render a weight change for the first recorded weight', () => {
+    renderComponent(null)
+
+    expect(screen.queryByText('-2.0 kg')).not.toBeInTheDocument()
+    expect(screen.queryByText('+2.0 kg')).not.toBeInTheDocument()
   })
 
   it('renders the recording date', () => {
