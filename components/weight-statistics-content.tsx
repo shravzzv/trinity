@@ -28,7 +28,6 @@ import {
 import {
   ArrowDownRight,
   ArrowUpRight,
-  MapPin,
   PartyPopper,
   Plus,
   Target,
@@ -199,6 +198,18 @@ export default function WeightStatisticsContent({
       </CardHeader>
 
       <CardContent>
+        <div className='space-y-1 text-center'>
+          <p className='text-muted-foreground text-xs'>Current weight</p>
+
+          {currentWeight ? (
+            <p className='text-3xl font-bold lg:text-4xl'>
+              {formatWeight(currentWeight)}
+            </p>
+          ) : (
+            <p>No weight available in this period.</p>
+          )}
+        </div>
+
         <ChartContainer config={chartConfig}>
           <AreaChart
             accessibilityLayer
@@ -258,34 +269,29 @@ export default function WeightStatisticsContent({
       </CardContent>
 
       <CardFooter className='flex flex-col gap-4'>
-        <div className='flex w-full flex-wrap items-center justify-evenly text-sm'>
-          <div className='flex items-center gap-2'>
-            <MapPin className='size-4' />
-            <span>{formatWeight(currentWeight)}</span>
-          </div>
+        <div className='flex items-center gap-2 text-sm'>
+          {weightChange === null ? (
+            <>
+              <ArrowDownRight className='size-4 opacity-40' />
+              <span className='text-muted-foreground text-sm'>
+                Insufficient data to show changes
+              </span>
+            </>
+          ) : (
+            <>
+              {weightChange < 0 ? (
+                <ArrowDownRight className='size-4' />
+              ) : (
+                <ArrowUpRight className='size-4' />
+              )}
 
-          <div className='flex items-center gap-2'>
-            {weightChange === null ? (
-              <>
-                <ArrowDownRight className='size-4 opacity-40' />
-                <span>—</span>
-              </>
-            ) : (
-              <>
-                {weightChange < 0 ? (
-                  <ArrowDownRight className='size-4' />
-                ) : (
-                  <ArrowUpRight className='size-4' />
-                )}
-
-                <span>
-                  {Math.abs(weightChange).toFixed(1)} kg
-                  {weightChange < 0 ? ' lost' : ' gained'}{' '}
-                  {cadence === 'all' ? 'all time' : `this ${cadence}`}
-                </span>
-              </>
-            )}
-          </div>
+              <span>
+                {Math.abs(weightChange).toFixed(1)} kg
+                {weightChange < 0 ? ' lost' : ' gained'}{' '}
+                {cadence === 'all' ? 'all time' : `this ${cadence}`}
+              </span>
+            </>
+          )}
         </div>
 
         <div className='flex w-full flex-wrap items-center justify-evenly text-sm'>
