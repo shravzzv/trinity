@@ -14,21 +14,15 @@ import {
   AlertDialogTrigger,
 } from './ui/alert-dialog'
 import { Button } from './ui/button'
-import { toast } from 'sonner'
 
 interface AnchorConfirmationDialogProps {
-  startAnchoring: () => void
+  onSubmit: () => void
 }
 
 export default function AnchorConfirmationDialog({
-  startAnchoring,
+  onSubmit,
 }: AnchorConfirmationDialogProps) {
   const anchorsAvailable: number = 1
-
-  const handleSubmit = () => {
-    startAnchoring()
-    toast.success('Anchor is in effect')
-  }
 
   return (
     <AlertDialog>
@@ -71,9 +65,7 @@ export default function AnchorConfirmationDialog({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
 
-          <AlertDialogAction onClick={handleSubmit}>
-            Use Anchor
-          </AlertDialogAction>
+          <AlertDialogAction onClick={onSubmit}>Use Anchor</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

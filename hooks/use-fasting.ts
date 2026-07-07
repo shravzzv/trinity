@@ -22,6 +22,7 @@ import {
   updateFast as updateFastInIdxDB,
   deleteFast as deleteFastFromIdxDB,
 } from '@/lib/indexed-db'
+import { getStreakStatus } from '@/lib/gamification'
 
 /**
  * The public API exposed by {@link useFasting}.
@@ -143,6 +144,16 @@ export interface UseFastingResult {
    * @returns
    */
   updateSessionStartedAt: (updatedStartedAt: Date) => void
+
+  /**
+   * Starts an anchored fasting session.
+   *
+   * An anchored fasting session allows the user to skip the current fast
+   * while preserving their fasting streak. The current session remains
+   * active but is marked as anchored, causing it to be recorded as an
+   * anchored fast when it ends.
+   */
+  startAnchoredSession: () => void
 }
 
 /**
@@ -194,18 +205,45 @@ export const useFasting = (): UseFastingResult => {
   const startSession = async (
     status: FastingStatus,
     startedAt: Date = new Date(),
+    options?: {
+      isAnchored?: boolean
+    },
   ) => {
+    if (!planId) {
+      throw new Error('Cannot record a fast without a fasting plan.')
+    }
+
     const sessionStartedAt = startedAt.toISOString()
 
-    if (session?.status === 'fasting' && status === 'eating') {
+    // Add a new fast when transitioning from eating to fasting.
+    if (status === 'eating' && session?.status === 'fasting') {
       await addFast({
         id: uuidv4(),
-        startedAt: session.startedAt,
+        planId: planId,
         endedAt: sessionStartedAt,
+        startedAt: session.startedAt,
+        streakStatus: getStreakStatus({
+          planId,
+          endedAt: new Date(sessionStartedAt),
+          startedAt: new Date(session.startedAt),
+          isAnchored: session.isAnchored,
+        }),
       })
     }
 
-    setSession({ status, startedAt: sessionStartedAt })
+    setSession({
+      status,
+      startedAt: sessionStartedAt,
+      isAnchored: options?.isAnchored ?? false,
+    })
+  }
+
+  const startAnchoredSession = () => {
+    setSession((prev) => {
+      if (!prev) return prev
+
+      return { ...prev, isAnchored: true }
+    })
   }
 
   /**
@@ -358,10 +396,20 @@ export const useFasting = (): UseFastingResult => {
           (session.status === 'fasting' || session.status === 'eating'))
 
       if (!isValidSession) {
-        throw Error('Fasting session in local storage corrupted')
+        throw new Error('Fasting session in local storage corrupted')
       }
 
-      setSession(session)
+      setSession(
+        session === null
+          ? null
+          : {
+              ...session,
+              isAnchored:
+                typeof session.isAnchored === 'boolean'
+                  ? session.isAnchored
+                  : false,
+            },
+      )
     } catch (error) {
       console.error(
         'Hydrating fasting session from local storage failed',
@@ -374,7 +422,14 @@ export const useFasting = (): UseFastingResult => {
   const hydrateFasts = async () => {
     try {
       const fasts = await getFastsFromIdxDB()
-      setFasts(sortFasts(fasts))
+
+      const migratedFasts = fasts.map((fast) => ({
+        ...fast,
+        streakStatus: fast.streakStatus ?? 'completed',
+        planId: fast.planId ?? '23:1',
+      }))
+
+      setFasts(sortFasts(migratedFasts))
     } catch (error) {
       console.error('Hydrating fasts failed', error)
     }
@@ -433,12 +488,13 @@ export const useFasting = (): UseFastingResult => {
     planId,
     session,
     isLoading,
-    preferredFastStartTime,
     addFast,
     deleteFast,
     updateFast,
     updatePlanId,
+    startAnchoredSession,
     updateSessionStartedAt,
+    preferredFastStartTime,
     updatePreferredFastStartTime,
     clearPreferredFastStartTime,
     endFasting: (endedAt) => startSession('eating', endedAt),

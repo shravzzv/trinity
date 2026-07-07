@@ -21,6 +21,7 @@ export default function Page() {
     endFasting,
     startFasting,
     updatePlanId,
+    startAnchoredSession,
     preferredFastStartTime,
     updateSessionStartedAt,
     clearPreferredFastStartTime,
@@ -54,6 +55,7 @@ export default function Page() {
         isLoading={isFastingStateLoading}
         updateSessionStartedAt={updateSessionStartedAt}
         preferredFastStartTime={preferredFastStartTime}
+        startAnchoredSession={startAnchoredSession}
       />
 
       <FastingStatistics

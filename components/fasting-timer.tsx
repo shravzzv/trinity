@@ -16,6 +16,7 @@ interface FastingTimerProps {
   isLoading: boolean
   planId: FastingPlanId | null
   session: FastingSession | null
+  startAnchoredSession: () => void
   endFasting: (endedAt?: Date) => Promise<void>
   updatePlanId: UseFastingResult['updatePlanId']
   startFasting: (startedAt?: Date) => Promise<void>

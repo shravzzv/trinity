@@ -45,6 +45,7 @@ interface ActiveFastingTimerProps {
   fasts: Fast[]
   planId: FastingPlanId
   session: FastingSession
+  startAnchoredSession: () => void
   endFasting: (endedAt?: Date) => Promise<void>
   startFasting: (startedAt?: Date) => Promise<void>
   updateSessionStartedAt: (updatedStartedAt: Date) => void
@@ -55,13 +56,13 @@ export default function ActiveFastingTimer({
   planId,
   endFasting,
   startFasting,
+  startAnchoredSession,
   updateSessionStartedAt,
-  session: { status, startedAt },
+  session: { status, startedAt, isAnchored },
 }: ActiveFastingTimerProps) {
   const [now, setNow] = useState(() => Date.now())
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [selectedEndedAt, setSelectedEndedAt] = useState<Date | undefined>()
-  const [isAnchoring, setIsAnchoring] = useState(false)
 
   const {
     endsAt,
@@ -81,11 +82,6 @@ export default function ActiveFastingTimer({
   })
 
   const handleSessionChange = async () => {
-    if (isAnchoring) {
-      toast.success('Fast started')
-      return
-    }
-
     try {
       if (isFasting) {
         await endFasting(selectedEndedAt)
@@ -120,7 +116,7 @@ export default function ActiveFastingTimer({
   }, [])
 
   return (
-    <Card className={cn(isAnchoring && 'border-primary/30 border')}>
+    <Card className={cn(isAnchored && 'border-primary/30 border')}>
       <CardHeader>
         <CardTitle>Fasting timer</CardTitle>
 
@@ -128,14 +124,14 @@ export default function ActiveFastingTimer({
           <AlertDialog onOpenChange={handleAlertDialogOpenChange}>
             <AlertDialogTrigger asChild>
               <Button>
-                {isAnchoring ? 'Start' : isFasting ? 'End' : 'Start'} fasting
+                {isAnchored ? 'Start' : isFasting ? 'End' : 'Start'} fasting
               </Button>
             </AlertDialogTrigger>
 
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogMedia>
-                  {isAnchoring ? (
+                  {isAnchored ? (
                     <Flame />
                   ) : isFasting ? (
                     <UtensilsCrossed />
@@ -145,13 +141,13 @@ export default function ActiveFastingTimer({
                 </AlertDialogMedia>
 
                 <AlertDialogTitle>
-                  {isAnchoring ? 'Start' : isFasting ? 'End' : 'Start'} fasting
+                  {isAnchored ? 'Start' : isFasting ? 'End' : 'Start'} fasting
                   session?
                 </AlertDialogTitle>
 
                 <AlertDialogDescription className='flex flex-col gap-1 space-y-2'>
                   <span>
-                    {isAnchoring
+                    {isAnchored
                       ? 'This will end your current anchored fasting session and start a new fast.'
                       : isFasting
                         ? 'This will end your current fasting session and start your eating window.'
@@ -206,7 +202,7 @@ export default function ActiveFastingTimer({
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction onClick={handleSessionChange}>
-                  {isAnchoring ? 'Start' : isFasting ? 'End' : 'Start'} fasting
+                  {isAnchored ? 'Start' : isFasting ? 'End' : 'Start'} fasting
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -215,7 +211,7 @@ export default function ActiveFastingTimer({
       </CardHeader>
 
       <CardContent className='space-y-4'>
-        {isAnchoring ? (
+        {isAnchored ? (
           <div className='border-primary/20 bg-primary/5 mx-auto w-fit space-y-1 rounded-full border px-8 py-3'>
             <div className='flex items-center justify-center gap-2 font-medium'>
               <Anchor className='size-4' />
@@ -249,10 +245,13 @@ export default function ActiveFastingTimer({
             : formatDuration(remainingMs)}
         </h1>
 
-        {!isAnchoring && isFasting && (
+        {!isAnchored && isFasting && (
           <div className='flex justify-center'>
             <AnchorConfirmationDialog
-              startAnchoring={() => setIsAnchoring(true)}
+              onSubmit={() => {
+                startAnchoredSession()
+                toast.success('Anchored fasting session started')
+              }}
             />
           </div>
         )}
