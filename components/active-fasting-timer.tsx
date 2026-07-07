@@ -60,6 +60,7 @@ export default function ActiveFastingTimer({
   const [now, setNow] = useState(() => Date.now())
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [selectedEndedAt, setSelectedEndedAt] = useState<Date | undefined>()
+  const [isAnchoring, setIsAnchoring] = useState(false)
 
   const {
     endsAt,
@@ -79,6 +80,11 @@ export default function ActiveFastingTimer({
   })
 
   const handleSessionChange = async () => {
+    if (isAnchoring) {
+      toast.success('Fast started')
+      return
+    }
+
     try {
       if (isFasting) {
         await endFasting(selectedEndedAt)
@@ -112,8 +118,6 @@ export default function ActiveFastingTimer({
     return () => clearInterval(intervalId)
   }, [])
 
-  const isAnchoring = false
-
   return (
     <Card>
       <CardHeader>
@@ -122,24 +126,35 @@ export default function ActiveFastingTimer({
         <CardAction>
           <AlertDialog onOpenChange={handleAlertDialogOpenChange}>
             <AlertDialogTrigger asChild>
-              <Button>{isFasting ? 'End' : 'Start'} fasting</Button>
+              <Button>
+                {isAnchoring ? 'Start' : isFasting ? 'End' : 'Start'} fasting
+              </Button>
             </AlertDialogTrigger>
 
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogMedia>
-                  {isFasting ? <UtensilsCrossed /> : <Flame />}
+                  {isAnchoring ? (
+                    <Flame />
+                  ) : isFasting ? (
+                    <UtensilsCrossed />
+                  ) : (
+                    <Flame />
+                  )}
                 </AlertDialogMedia>
 
                 <AlertDialogTitle>
-                  {isFasting ? 'End' : 'Start'} fasting session?
+                  {isAnchoring ? 'Start' : isFasting ? 'End' : 'Start'} fasting
+                  session?
                 </AlertDialogTitle>
 
                 <AlertDialogDescription className='flex flex-col gap-1 space-y-2'>
                   <span>
-                    {isFasting
-                      ? 'This will end your current fasting session and start your eating window.'
-                      : 'This will end your current eating window and start a new fasting session.'}
+                    {isAnchoring
+                      ? 'This will end your current anchored fasting session and start a new fast.'
+                      : isFasting
+                        ? 'This will end your current fasting session and start your eating window.'
+                        : 'This will end your current eating window and start a new fasting session.'}
                   </span>
 
                   {!hasExceededSessionLength && (
@@ -190,7 +205,7 @@ export default function ActiveFastingTimer({
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction onClick={handleSessionChange}>
-                  Continue
+                  {isAnchoring ? 'Start' : isFasting ? 'End' : 'Start'} fasting
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -204,6 +219,7 @@ export default function ActiveFastingTimer({
             <div className='flex items-center justify-center gap-2 font-medium'>
               <Anchor className='size-4' />
               <p>Anchor in use</p>
+              <Badge variant='outline'>{planId}</Badge>
             </div>
 
             <p className='text-muted-foreground text-center text-xs'>
@@ -234,7 +250,9 @@ export default function ActiveFastingTimer({
 
         {!isAnchoring && isFasting && (
           <div className='flex justify-center'>
-            <AnchorConfirmationDialog />
+            <AnchorConfirmationDialog
+              startAnchoring={() => setIsAnchoring(true)}
+            />
           </div>
         )}
 
