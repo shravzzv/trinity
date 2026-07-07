@@ -10,8 +10,21 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from './ui/button'
 import { Anchor } from 'lucide-react'
+import { Progress } from './ui/progress'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
+import { anchorsInfo } from '@/constants/gamification'
 
 export default function AnchorsDialog() {
+  const anchorsAvailable = 0
+  const fastsRequired = 7
+  const fastsCompleted = 1
+  const progress = (fastsCompleted / fastsRequired) * 100
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -21,7 +34,7 @@ export default function AnchorsDialog() {
         >
           <div className='flex items-center gap-2'>
             <Anchor className='size-5' />
-            <p className='text-xl font-bold'>12</p>
+            <p className='text-xl font-bold'>{anchorsAvailable}</p>
           </div>
 
           <p className='text-muted-foreground text-xs'>Anchors</p>
@@ -32,10 +45,38 @@ export default function AnchorsDialog() {
         <DialogHeader>
           <DialogTitle>Anchors</DialogTitle>
           <DialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
+            Preserve your streak when life gets in the way of your fasting
+            routine.
           </DialogDescription>
         </DialogHeader>
+
+        <div className='flex flex-col items-center justify-center gap-2'>
+          <div className='flex items-center justify-center gap-2'>
+            <Anchor className='size-8' />
+            <p className='text-3xl'>{anchorsAvailable}</p>
+          </div>
+          <p className='text-muted-foreground text-xs'>Available</p>
+        </div>
+
+        <p className='text-center'>
+          Next Anchor in {fastsRequired - fastsCompleted} completed fasts.
+        </p>
+
+        <div className='flex items-center gap-2'>
+          <Progress value={progress} className='flex-3 lg:flex-4' />
+          <p className='flex-1 text-center'>
+            {fastsCompleted}/{fastsRequired} fasts
+          </p>
+        </div>
+
+        <Accordion type='single' collapsible>
+          {anchorsInfo.map((item) => (
+            <AccordionItem key={item.value} value={item.value}>
+              <AccordionTrigger>{item.trigger}</AccordionTrigger>
+              <AccordionContent>{item.content}</AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
       </DialogContent>
     </Dialog>
   )
