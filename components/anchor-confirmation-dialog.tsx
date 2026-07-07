@@ -14,10 +14,21 @@ import {
   AlertDialogTrigger,
 } from './ui/alert-dialog'
 import { Button } from './ui/button'
+import { toast } from 'sonner'
 
-export default function AnchorConfirmationDialog() {
+interface AnchorConfirmationDialogProps {
+  startAnchoring: () => void
+}
+
+export default function AnchorConfirmationDialog({
+  startAnchoring,
+}: AnchorConfirmationDialogProps) {
   const anchorsAvailable: number = 1
-  const handleSubmit = () => {}
+
+  const handleSubmit = () => {
+    startAnchoring()
+    toast.success('Anchor is in effect')
+  }
 
   return (
     <AlertDialog>
@@ -33,25 +44,26 @@ export default function AnchorConfirmationDialog() {
           <AlertDialogMedia>
             <Anchor />
           </AlertDialogMedia>
-
           <AlertDialogTitle>Use an Anchor?</AlertDialogTitle>
 
           <AlertDialogDescription className='flex flex-col gap-1 space-y-2'>
             <span>
-              You can use an Anchor to safely skip a fast while maintaining your
-              fasting streak. This turns the fasting session into an eating
-              window. This action is irreversible.
+              Your current fasting session will become an{' '}
+              <span className='font-medium'>anchored fasting session</span>,
+              allowing you to eat while preserving your fasting streak.
             </span>
 
             <span>
-              You can start a fast anytime while using an Anchor. A regular
-              eating window follows this anchored fast per your plan.
+              You can start another fast at any time. Otherwise, your next
+              scheduled fasting session begins at{' '}
+              <span className='font-medium'>6:00 p.m. tomorrow</span> after the
+              next eating window.
             </span>
 
             <span>
-              Earliest next fast is
-              <span className='font-medium'> 6:00 p.m. tomorrow</span> unless
-              started earlier.
+              This action is <span className='font-medium'>irreversible</span>.
+              After use, you&apos;ll have{' '}
+              <span className='font-medium'>0 Anchors remaining</span>.
             </span>
           </AlertDialogDescription>
         </AlertDialogHeader>
