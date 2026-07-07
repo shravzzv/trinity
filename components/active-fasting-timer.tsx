@@ -39,6 +39,7 @@ import EditSessionEndedAtDrawer from './edit-session-ended-at-drawer'
 import { getActiveSessionStatistics } from '@/lib/fasting'
 import { Badge } from './ui/badge'
 import AnchorConfirmationDialog from './anchor-confirmation-dialog'
+import { cn } from '@/lib/utils'
 
 interface ActiveFastingTimerProps {
   fasts: Fast[]
@@ -119,7 +120,7 @@ export default function ActiveFastingTimer({
   }, [])
 
   return (
-    <Card>
+    <Card className={cn(isAnchoring && 'border-primary/30 border')}>
       <CardHeader>
         <CardTitle>Fasting timer</CardTitle>
 
@@ -215,7 +216,7 @@ export default function ActiveFastingTimer({
 
       <CardContent className='space-y-4'>
         {isAnchoring ? (
-          <div className='space-y-1'>
+          <div className='border-primary/20 bg-primary/5 mx-auto w-fit space-y-1 rounded-full border px-8 py-3'>
             <div className='flex items-center justify-center gap-2 font-medium'>
               <Anchor className='size-4' />
               <p>Anchor in use</p>
