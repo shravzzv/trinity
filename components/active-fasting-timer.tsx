@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/alert'
 import EditSessionEndedAtDrawer from './edit-session-ended-at-drawer'
 import { getActiveSessionStatistics } from '@/lib/fasting'
+import { Badge } from './ui/badge'
 
 interface ActiveFastingTimerProps {
   fasts: Fast[]
@@ -203,6 +204,7 @@ export default function ActiveFastingTimer({
           )}
 
           <p>{isFasting ? 'Fasting' : 'Eating'}</p>
+          <Badge variant='outline'>{planId}</Badge>
         </div>
 
         <h1
