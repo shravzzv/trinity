@@ -76,7 +76,7 @@ describe('ActiveFastingTimer', () => {
   it('renders fasting status', () => {
     renderComponent()
 
-    expect(screen.getByText('Fasting')).toBeInTheDocument()
+    expect(screen.getByText(/^Fasting$/)).toBeInTheDocument()
   })
 
   it('renders eating status', () => {
@@ -87,7 +87,7 @@ describe('ActiveFastingTimer', () => {
       },
     })
 
-    expect(screen.getByText('Eating')).toBeInTheDocument()
+    expect(screen.getByText(/^Eating$/)).toBeInTheDocument()
   })
 
   it('renders countdown timer', () => {
@@ -195,7 +195,7 @@ describe('ActiveFastingTimer', () => {
     const { user } = renderComponent()
 
     await user.click(screen.getByRole('button', { name: /end fasting/i }))
-    await user.click(screen.getByRole('button', { name: /continue/i }))
+    await user.click(screen.getByRole('button', { name: /end fasting/i }))
 
     expect(mockEndFasting).toHaveBeenCalledTimes(1)
   })
@@ -209,7 +209,7 @@ describe('ActiveFastingTimer', () => {
     })
 
     await user.click(screen.getByRole('button', { name: /start fasting/i }))
-    await user.click(screen.getByRole('button', { name: /continue/i }))
+    await user.click(screen.getByRole('button', { name: /start fasting/i }))
 
     expect(mockStartFasting).toHaveBeenCalledTimes(1)
   })
@@ -250,7 +250,7 @@ describe('ActiveFastingTimer', () => {
     const { user } = renderComponent()
 
     await user.click(screen.getByRole('button', { name: /end fasting/i }))
-    await user.click(screen.getByRole('button', { name: /continue/i }))
+    await user.click(screen.getByRole('button', { name: /end fasting/i }))
 
     expect(toast.success).toHaveBeenCalledWith('Fast ended')
   })
@@ -264,7 +264,7 @@ describe('ActiveFastingTimer', () => {
     })
 
     await user.click(screen.getByRole('button', { name: /start fasting/i }))
-    await user.click(screen.getByRole('button', { name: /continue/i }))
+    await user.click(screen.getByRole('button', { name: /start fasting/i }))
 
     expect(toast.success).toHaveBeenCalledWith('Fast started')
   })
@@ -275,7 +275,7 @@ describe('ActiveFastingTimer', () => {
     const { user } = renderComponent()
 
     await user.click(screen.getByRole('button', { name: /end fasting/i }))
-    await user.click(screen.getByRole('button', { name: /continue/i }))
+    await user.click(screen.getByRole('button', { name: /end fasting/i }))
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('Boom')
@@ -293,7 +293,7 @@ describe('ActiveFastingTimer', () => {
     })
 
     await user.click(screen.getByRole('button', { name: /start fasting/i }))
-    await user.click(screen.getByRole('button', { name: /continue/i }))
+    await user.click(screen.getByRole('button', { name: /start fasting/i }))
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('Boom')
