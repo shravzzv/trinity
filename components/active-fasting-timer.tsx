@@ -111,6 +111,9 @@ export default function ActiveFastingTimer({
     return () => clearInterval(intervalId)
   }, [])
 
+  const anchorsAvailable: number = 1
+  const isAnchoring = true
+
   return (
     <Card>
       <CardHeader>
@@ -196,16 +199,29 @@ export default function ActiveFastingTimer({
       </CardHeader>
 
       <CardContent className='space-y-4'>
-        <div className='flex items-center justify-center gap-2 font-medium'>
-          {isFasting ? (
-            <Flame className='size-4' />
-          ) : (
-            <UtensilsCrossed className='size-4' />
-          )}
+        {isAnchoring ? (
+          <div className='space-y-1'>
+            <div className='flex items-center justify-center gap-2 font-medium'>
+              <Anchor className='size-4' />
+              <p>Anchor in use</p>
+            </div>
 
-          <p>{isFasting ? 'Fasting' : 'Eating'}</p>
-          <Badge variant='outline'>{planId}</Badge>
-        </div>
+            <p className='text-muted-foreground text-center text-xs'>
+              Your streak is protected.
+            </p>
+          </div>
+        ) : (
+          <div className='flex items-center justify-center gap-2 font-medium'>
+            {isFasting ? (
+              <Flame className='size-4' />
+            ) : (
+              <UtensilsCrossed className='size-4' />
+            )}
+
+            <p>{isFasting ? 'Fasting' : 'Eating'}</p>
+            <Badge variant='outline'>{planId}</Badge>
+          </div>
+        )}
 
         <h1
           className='flex-1 text-center text-4xl font-bold'
@@ -216,11 +232,15 @@ export default function ActiveFastingTimer({
             : formatDuration(remainingMs)}
         </h1>
 
-        {isFasting && (
+        {!isAnchoring && isFasting && (
           <div className='flex justify-center'>
-            <Button variant='outline' size='sm'>
+            <Button
+              variant='outline'
+              size='sm'
+              disabled={anchorsAvailable === 0}
+            >
               <Anchor />
-              Take flex day
+              {anchorsAvailable > 0 ? 'Use anchor' : 'No anchors available'}
             </Button>
           </div>
         )}
