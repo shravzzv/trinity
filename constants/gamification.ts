@@ -1,8 +1,6 @@
-export const anchorsInfo: {
-  value: string
-  trigger: string
-  content: string
-}[] = [
+import type { AccordionInfo } from '@/types/gamification'
+
+export const anchorsInfo: AccordionInfo[] = [
   {
     value: 'what',
     trigger: 'What are Anchors?',
@@ -18,5 +16,26 @@ export const anchorsInfo: {
     trigger: 'How do I earn more?',
     content:
       'Earn an Anchor by completing a streak of seven successful fasts or by reaching new levels. Your progress toward the next Anchor is shown above.',
+  },
+]
+
+export const levelsInfo: AccordionInfo[] = [
+  {
+    value: 'about',
+    trigger: 'About levels',
+    content:
+      'Levels represent your long-term progress in Trinity. Earn XP through consistent fasting and other activities to reach new levels.',
+  },
+  {
+    value: 'earning',
+    trigger: 'Earning XP',
+    content:
+      'Earn XP by completing fasts and achieving milestones. New ways to earn XP may be added over time.',
+  },
+  {
+    value: 'rewards',
+    trigger: 'Level rewards',
+    content:
+      'Reaching new levels unlocks rewards such as Anchors and celebrates your long-term consistency.',
   },
 ]

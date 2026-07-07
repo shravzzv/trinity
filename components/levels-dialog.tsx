@@ -9,9 +9,25 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from './ui/button'
-import { Trophy } from 'lucide-react'
+import { Sparkles, Trophy } from 'lucide-react'
+import { Progress } from './ui/progress'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from './ui/accordion'
+import { levelsInfo } from '@/constants/gamification'
+import { Card, CardContent } from './ui/card'
+import { Separator } from './ui/separator'
 
 export default function LevelsDialog() {
+  const currentLevel = 0
+  const nextLevel = currentLevel + 1
+  const xpEarned = 25
+  const xpRequired = 100
+  const progress = (xpEarned / xpRequired) * 100
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -21,10 +37,10 @@ export default function LevelsDialog() {
         >
           <div className='flex items-center gap-2'>
             <Trophy className='size-5' />
-            <p className='text-xl font-bold'>0</p>
+            <p className='text-xl font-bold'>{currentLevel}</p>
           </div>
 
-          <p className='text-muted-foreground text-xs'>Level</p>
+          <p className='text-muted-foreground text-xs capitalize'>Level</p>
         </Button>
       </DialogTrigger>
 
@@ -32,10 +48,63 @@ export default function LevelsDialog() {
         <DialogHeader>
           <DialogTitle>Levels</DialogTitle>
           <DialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
+            Celebrate your long-term progress by earning XP and reaching new
+            levels.
           </DialogDescription>
         </DialogHeader>
+
+        <Card>
+          <CardContent className='flex gap-0 p-0'>
+            <div className='flex flex-1 flex-col items-center justify-center gap-1'>
+              <div className='flex items-center justify-center gap-2'>
+                <Trophy className='size-6' />
+                <p className='text-2xl font-bold'>{currentLevel}</p>
+              </div>
+
+              <span className='text-muted-foreground text-center text-xs capitalize'>
+                Level
+              </span>
+            </div>
+
+            <Separator orientation='vertical' />
+
+            <div className='flex flex-1 flex-col items-center justify-center gap-1'>
+              <div className='flex items-center justify-center gap-2'>
+                <Sparkles className='size-6' />
+                <p className='text-2xl font-bold'>{xpEarned}</p>
+              </div>
+
+              <span className='text-muted-foreground text-center text-xs'>
+                XP Earned
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className='space-y-2'>
+          <div className='flex items-center gap-2'>
+            <span className='text-muted-foreground text-sm font-medium'>
+              {currentLevel}
+            </span>
+            <Progress value={progress} className='flex-1' />
+            <span className='text-muted-foreground text-sm font-medium'>
+              {nextLevel}
+            </span>
+          </div>
+
+          <p className='text-muted-foreground text-center text-sm'>
+            Next level in {xpRequired - xpEarned} XP.
+          </p>
+        </div>
+
+        <Accordion type='single' collapsible>
+          {levelsInfo.map((item) => (
+            <AccordionItem key={item.value} value={item.value}>
+              <AccordionTrigger>{item.trigger}</AccordionTrigger>
+              <AccordionContent>{item.content}</AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
       </DialogContent>
     </Dialog>
   )
