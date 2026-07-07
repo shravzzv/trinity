@@ -38,6 +38,7 @@ import {
 import EditSessionEndedAtDrawer from './edit-session-ended-at-drawer'
 import { getActiveSessionStatistics } from '@/lib/fasting'
 import { Badge } from './ui/badge'
+import AnchorConfirmationDialog from './anchor-confirmation-dialog'
 
 interface ActiveFastingTimerProps {
   fasts: Fast[]
@@ -111,8 +112,7 @@ export default function ActiveFastingTimer({
     return () => clearInterval(intervalId)
   }, [])
 
-  const anchorsAvailable: number = 1
-  const isAnchoring = true
+  const isAnchoring = false
 
   return (
     <Card>
@@ -234,14 +234,7 @@ export default function ActiveFastingTimer({
 
         {!isAnchoring && isFasting && (
           <div className='flex justify-center'>
-            <Button
-              variant='outline'
-              size='sm'
-              disabled={anchorsAvailable === 0}
-            >
-              <Anchor />
-              {anchorsAvailable > 0 ? 'Use anchor' : 'No anchors available'}
-            </Button>
+            <AnchorConfirmationDialog />
           </div>
         )}
 
