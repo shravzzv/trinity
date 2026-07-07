@@ -18,6 +18,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import { anchorsInfo } from '@/constants/gamification'
+import { Card, CardContent } from './ui/card'
 
 export default function AnchorsDialog() {
   const anchorsAvailable = 0
@@ -50,13 +51,15 @@ export default function AnchorsDialog() {
           </DialogDescription>
         </DialogHeader>
 
-        <div className='flex flex-col items-center justify-center gap-2'>
-          <div className='flex items-center justify-center gap-2'>
-            <Anchor className='size-8' />
-            <p className='text-3xl'>{anchorsAvailable}</p>
-          </div>
-          <p className='text-muted-foreground text-xs'>Available</p>
-        </div>
+        <Card>
+          <CardContent className='flex flex-col items-center justify-center gap-2'>
+            <div className='flex items-center justify-center gap-2'>
+              <Anchor className='size-8' />
+              <p className='text-3xl'>{anchorsAvailable}</p>
+            </div>
+            <p className='text-muted-foreground text-xs'>Available</p>
+          </CardContent>
+        </Card>
 
         <p className='text-center'>
           Next Anchor in {fastsRequired - fastsCompleted} completed fasts.
