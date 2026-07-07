@@ -21,8 +21,9 @@ export default function FastingTimerSkeleton() {
       </CardHeader>
 
       <CardContent className='space-y-4'>
-        <Skeleton className='mx-auto h-4 w-20' />
-        <Skeleton className='mx-auto h-10 w-34' />
+        <Skeleton className='mx-auto h-4 w-24' />
+        <Skeleton className='mx-auto h-12 w-38' />
+        <Skeleton className='mx-auto h-8 w-24' />
         <Skeleton className='h-2.5 w-full' />
       </CardContent>
 
