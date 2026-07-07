@@ -3,3 +3,5 @@ export interface AccordionInfo {
   trigger: string
   content: string
 }
+
+export type StreakStatus = 'completed' | 'missed' | 'anchored'

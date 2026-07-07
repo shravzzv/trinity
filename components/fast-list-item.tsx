@@ -5,7 +5,7 @@ import { Button } from './ui/button'
 import { EllipsisVertical, Flag, Pen, Play, Trash, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { formatDuration } from '@/lib/time'
-import { Card, CardContent } from './ui/card'
+import { Card, CardContent, CardFooter } from './ui/card'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +25,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
+import type { StreakStatus } from '@/types/gamification'
+import StreakStatusBadge from './streak-status-badge'
+import { cn } from '@/lib/utils'
+import { Badge } from './ui/badge'
 
 interface FastListItemProps {
   fast: Fast
@@ -42,10 +46,28 @@ export default function FastListItem({
   const [deleting, setDeleting] = useState(false)
   const [editing, setEditing] = useState(false)
 
+  const streakStatus: StreakStatus = 'missed'
+
+  const getBorderStyles = (streakStatus: StreakStatus) => {
+    switch (streakStatus) {
+      case 'completed':
+        return 'border border-green-500/20'
+
+      case 'missed':
+        return 'border border-destructive/30'
+
+      case 'anchored':
+        return 'border border-primary/30'
+
+      default:
+        return ''
+    }
+  }
+
   return (
-    <Card className='relative'>
+    <Card className={cn(getBorderStyles(streakStatus), 'relative')}>
       <CardContent className='space-y-4'>
-        <div className='text-center'>
+        <div className='space-y-1 text-center'>
           <p className='text-2xl font-semibold'>
             {formatDuration(
               new Date(fast.endedAt).getTime() -
@@ -81,6 +103,11 @@ export default function FastListItem({
             </div>
           </div>
         </div>
+
+        <CardFooter className='flex items-center justify-center gap-2'>
+          <StreakStatusBadge streakStatus={streakStatus} />
+          <Badge variant='outline'>23:1</Badge>
+        </CardFooter>
       </CardContent>
 
       <div className='absolute top-8 right-4'>
