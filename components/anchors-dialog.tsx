@@ -17,14 +17,20 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import { anchorsAccordionInfo } from '@/constants/gamification'
+import {
+  ANCHOR_STREAK_REQUIREMENT,
+  anchorsAccordionInfo,
+} from '@/constants/gamification'
 import { Card, CardContent } from './ui/card'
 
-export default function AnchorsDialog() {
-  const anchorsAvailable = 0
-  const fastsRequired = 7
-  const fastsCompleted = 1
-  const progress = (fastsCompleted / fastsRequired) * 100
+interface AnchorsDialogProps {
+  anchors: number
+}
+
+export default function AnchorsDialog({ anchors }: AnchorsDialogProps) {
+  const fastsCompleted = 0
+  const anchorsAvailable = anchors
+  const progress = (fastsCompleted / ANCHOR_STREAK_REQUIREMENT) * 100
 
   return (
     <Dialog>
@@ -52,23 +58,24 @@ export default function AnchorsDialog() {
         </DialogHeader>
 
         <Card>
-          <CardContent className='flex flex-col items-center justify-center gap-2'>
+          <CardContent className='flex flex-col items-center justify-center gap-2 p-0'>
             <div className='flex items-center justify-center gap-2'>
-              <Anchor className='size-8' />
-              <p className='text-3xl'>{anchorsAvailable}</p>
+              <Anchor className='size-6' />
+              <p className='text-2xl font-bold'>{anchorsAvailable}</p>
             </div>
             <p className='text-muted-foreground text-xs'>Available</p>
           </CardContent>
         </Card>
 
         <p className='text-center'>
-          Next Anchor in {fastsRequired - fastsCompleted} completed fasts.
+          Next Anchor in {ANCHOR_STREAK_REQUIREMENT - fastsCompleted} completed
+          fasts.
         </p>
 
         <div className='flex items-center gap-2'>
           <Progress value={progress} className='flex-3 lg:flex-4' />
           <p className='flex-1 text-center'>
-            {fastsCompleted}/{fastsRequired} fasts
+            {fastsCompleted}/{ANCHOR_STREAK_REQUIREMENT} fasts
           </p>
         </div>
 

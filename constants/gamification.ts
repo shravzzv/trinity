@@ -74,3 +74,5 @@ export const xpRewards = {
   setTargetWeight: 10,
   addedWeightEntry: 3,
 } as const
+
+export const ANCHOR_STREAK_REQUIREMENT = 7

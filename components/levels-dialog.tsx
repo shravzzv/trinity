@@ -21,11 +21,16 @@ import { levelsAccordionInfo } from '@/constants/gamification'
 import { Card, CardContent } from './ui/card'
 import { Separator } from './ui/separator'
 
-export default function LevelsDialog() {
-  const currentLevel = 0
-  const nextLevel = currentLevel + 1
-  const xpEarned = 25
+interface LevelsDialogProps {
+  xp: number
+  level: number
+}
+
+export default function LevelsDialog({ xp, level }: LevelsDialogProps) {
+  const xpEarned = xp
   const xpRequired = 100
+  const currentLevel = level
+  const nextLevel = currentLevel + 1
   const progress = (xpEarned / xpRequired) * 100
 
   return (

@@ -41,13 +41,18 @@ const streakLegend = [
 
 interface StreakDialogProps {
   fasts: Fast[]
+  streak: number
 }
 
-export default function StreakDialog({ fasts }: StreakDialogProps) {
+const getLongestStreak = (fasts: Fast[]): number => {
+  return fasts.length
+}
+
+export default function StreakDialog({ fasts, streak }: StreakDialogProps) {
   const { completed, missed, anchored } = getStreakCalendarDays(fasts)
 
-  const currentStreak = 0
-  const longestStreak = 0
+  const currentStreak = streak
+  const longestStreak = getLongestStreak(fasts)
   const isCurrentStreakPersonalBest =
     currentStreak > 0 && currentStreak === longestStreak
 

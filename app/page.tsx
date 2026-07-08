@@ -9,6 +9,7 @@ import WeightStatistics from '@/components/weight-statistics'
 import { useFasting } from '@/hooks/use-fasting'
 import { useWeight } from '@/hooks/use-weight'
 import ProgressCard from '@/components/progress-card'
+import { useGamification } from '@/hooks/use-gamification'
 
 export default function Page() {
   const {
@@ -40,10 +41,31 @@ export default function Page() {
     isLoading: isWeightStateLoading,
   } = useWeight()
 
+  const {
+    xp,
+    level,
+    streak,
+    anchors,
+    awardXp,
+    awardAnchor,
+    spendAnchor,
+    resetStreak,
+    incrementStreak,
+    isLoading: isGamificationLoading,
+  } = useGamification()
+
   return (
     <main className='mx-auto max-w-xl space-y-6 px-6 py-6'>
       <Header />
-      <ProgressCard fasts={fasts} />
+
+      <ProgressCard
+        xp={xp}
+        fasts={fasts}
+        level={level}
+        streak={streak}
+        anchors={anchors}
+        isLoading={isGamificationLoading}
+      />
 
       <FastingTimer
         fasts={fasts}
@@ -53,9 +75,9 @@ export default function Page() {
         startFasting={startFasting}
         updatePlanId={updatePlanId}
         isLoading={isFastingStateLoading}
+        startAnchoredSession={startAnchoredSession}
         updateSessionStartedAt={updateSessionStartedAt}
         preferredFastStartTime={preferredFastStartTime}
-        startAnchoredSession={startAnchoredSession}
       />
 
       <FastingStatistics
