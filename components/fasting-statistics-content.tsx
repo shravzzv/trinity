@@ -43,6 +43,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { toast } from 'sonner'
 import { FASTING_STATISTICS_CADENCE_STORAGE_KEY } from '@/constants/storage-keys'
 import { Button } from './ui/button'
+import { getStreakStatus } from '@/lib/gamification'
 
 interface FastingStatisticsContentProps {
   fasts: Fast[]
@@ -138,11 +139,20 @@ export default function FastingStatisticsContent({
   } satisfies ChartConfig
 
   const handleAddFast = async (startedAt: Date, endedAt: Date) => {
+    if (!planId) return
+
     try {
       await addFast({
         id: uuidv4(),
         startedAt: startedAt.toISOString(),
         endedAt: endedAt.toISOString(),
+        planId,
+        streakStatus: getStreakStatus({
+          planId,
+          startedAt,
+          endedAt,
+          isAnchored: false,
+        }),
       })
       toast.success('Fast added')
     } catch (error) {
