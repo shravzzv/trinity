@@ -1,4 +1,4 @@
-import type { AccordionInfo } from '@/types/gamification'
+import type { AccordionInfo, LevelDefinition } from '@/types/gamification'
 
 export const anchorsAccordionInfo: AccordionInfo[] = [
   {
@@ -39,3 +39,38 @@ export const levelsAccordionInfo: AccordionInfo[] = [
       'Reaching new levels unlocks rewards such as Anchors and celebrates your long-term consistency.',
   },
 ]
+
+/**
+ * Level progression in ascending order of required XP.
+ *
+ * The array must remain sorted by `requiredXp`.
+ */
+export const levels: LevelDefinition[] = [
+  { level: 0, requiredXp: 0 },
+  { level: 1, requiredXp: 100 },
+  { level: 2, requiredXp: 250 },
+  { level: 3, requiredXp: 450 },
+  { level: 4, requiredXp: 700 },
+  { level: 5, requiredXp: 1000 },
+] as const
+
+/**
+ * XP awarded for gamified actions throughout the app.
+ *
+ * These values define Trinity's progression balance and are used by
+ * the gamification system when awarding experience points. Only verifiable
+ * actions are rewarded. Administrative actions such as modifying history
+ * aren't rewarded.
+ */
+export const xpRewards = {
+  // fasting
+  missedFast: 2,
+  anchoredFast: 4,
+  completedFast: 10,
+  startedFirstFast: 15,
+  setPreferredFastingTime: 5,
+
+  // weight
+  setTargetWeight: 10,
+  addedWeightEntry: 3,
+} as const

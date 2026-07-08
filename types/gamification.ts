@@ -5,3 +5,8 @@ export interface AccordionInfo {
 }
 
 export type StreakStatus = 'completed' | 'missed' | 'anchored'
+
+export interface LevelDefinition {
+  level: number
+  requiredXp: number
+}

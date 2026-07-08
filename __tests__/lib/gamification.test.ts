@@ -1,4 +1,8 @@
-import { getStreakCalendarDays, getStreakStatus } from '@/lib/gamification'
+import {
+  getLevelForXp,
+  getStreakCalendarDays,
+  getStreakStatus,
+} from '@/lib/gamification'
 
 describe('getStreakStatus', () => {
   it('returns anchored when an Anchor was used', () => {
@@ -134,5 +138,39 @@ describe('getStreakCalendarDays', () => {
     expect(result.completed).toHaveLength(1)
     expect(result.missed).toHaveLength(1)
     expect(result.anchored).toHaveLength(1)
+  })
+})
+
+describe('getLevelForXp', () => {
+  it('returns level 0 for 0 XP', () => {
+    expect(getLevelForXp(0)).toBe(0)
+  })
+
+  it('returns level 0 for XP below the first threshold', () => {
+    expect(getLevelForXp(99)).toBe(0)
+  })
+
+  it('returns level 1 at the first threshold', () => {
+    expect(getLevelForXp(100)).toBe(1)
+  })
+
+  it('returns the highest unlocked level between thresholds', () => {
+    expect(getLevelForXp(249)).toBe(1)
+    expect(getLevelForXp(250)).toBe(2)
+
+    expect(getLevelForXp(449)).toBe(2)
+    expect(getLevelForXp(450)).toBe(3)
+
+    expect(getLevelForXp(699)).toBe(3)
+    expect(getLevelForXp(700)).toBe(4)
+  })
+
+  it('returns the highest configured level at the final threshold', () => {
+    expect(getLevelForXp(1000)).toBe(5)
+  })
+
+  it('returns the highest configured level for XP beyond the final threshold', () => {
+    expect(getLevelForXp(1500)).toBe(5)
+    expect(getLevelForXp(Number.MAX_SAFE_INTEGER)).toBe(5)
   })
 })

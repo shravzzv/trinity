@@ -22,6 +22,7 @@
  */
 
 import { fastingPlans } from '@/constants/fasting-plans'
+import { levels } from '@/constants/gamification'
 import type { Fast, FastingPlanId } from '@/types/fasting'
 import type { StreakStatus } from '@/types/gamification'
 
@@ -155,4 +156,25 @@ export const getStreakCalendarDays = (fasts: Fast[]) => {
     anchored,
     completed,
   }
+}
+
+/**
+ * Returns the highest unlocked level for the given amount of XP.
+ *
+ * Levels are unlocked once the user's XP meets or exceeds the
+ * level's required XP threshold.
+ *
+ * @param xp The user's total experience points.
+ * @returns The user's current level.
+ */
+export const getLevelForXp = (xp: number): number => {
+  for (let i = levels.length - 1; i >= 0; i--) {
+    const levelInfo = levels[i]
+
+    if (xp >= levelInfo.requiredXp) {
+      return levelInfo.level
+    }
+  }
+
+  return 0
 }
