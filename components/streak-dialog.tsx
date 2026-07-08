@@ -14,14 +14,37 @@ import { Calendar } from '@/components/ui/calendar'
 import { Card, CardContent } from './ui/card'
 import { Separator } from './ui/separator'
 import { Badge } from './ui/badge'
+import type { StreakStatus } from '@/types/gamification'
+import { cn } from '@/lib/utils'
+
+const streakCalendarStyles = {
+  completed:
+    'bg-primary/20 text-primary dark:bg-primary/40 dark:text-primary-foreground',
+
+  missed:
+    'bg-destructive/20 text-destructive dark:bg-destructive/25 dark:text-destructive-foreground',
+
+  anchored:
+    'bg-anchor/40 text-anchor-950 dark:bg-anchor/40 dark:text-anchor-950',
+} satisfies Record<StreakStatus, string>
+
+const streakLegend = [
+  { status: 'completed', label: 'Completed' },
+  { status: 'missed', label: 'Missed' },
+  { status: 'anchored', label: 'Anchored' },
+] satisfies {
+  status: StreakStatus
+  label: string
+}[]
 
 export default function StreakDialog() {
   const completedDays = [
     new Date(2026, 6, 1),
     new Date(2026, 6, 3),
     new Date(2026, 6, 5),
+    new Date(2026, 6, 7),
   ]
-  const missedDays = [new Date(2026, 6, 2)]
+  const missedDays = [new Date(2026, 6, 2), new Date(2026, 6, 6)]
   const anchoredDays = [new Date(2026, 6, 4)]
 
   const currentStreak = 0
@@ -68,16 +91,11 @@ export default function StreakDialog() {
                 completed: completedDays,
               }}
               classNames={{
-                today:
-                  'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground border-2 border-primary',
+                today: 'ring-2 ring-primary border-transparent',
                 day_button:
-                  'hover:bg-transparent hover:text-foreground cursor-default',
+                  'h-8 w-8 rounded-lg font-medium transition-colors rounded-full hover:bg-transparent',
               }}
-              modifiersClassNames={{
-                completed: 'border-2 border-primary bg-primary/10',
-                missed: 'border-2 border-destructive bg-destructive/10',
-                anchored: 'border-2 border-anchor bg-anchor/10',
-              }}
+              modifiersClassNames={streakCalendarStyles}
               footer={<StreakCalendarLegend />}
             />
           </CardContent>
@@ -121,18 +139,14 @@ export default function StreakDialog() {
 const StreakCalendarLegend = () => {
   return (
     <footer className='flex items-center justify-center gap-3 py-2 text-xs'>
-      <div className='flex items-center gap-1'>
-        <div className='border-primary bg-primary/10 size-3 rounded-full border-2' />
-        <span>Completed</span>
-      </div>
-      <div className='flex items-center gap-1'>
-        <div className='border-destructive bg-destructive/10 size-3 rounded-full border-2' />
-        Missed
-      </div>
-      <div className='flex items-center gap-1'>
-        <div className='border-anchor bg-anchor/10 size-3 rounded-full border-2' />
-        Anchored
-      </div>
+      {streakLegend.map(({ status, label }) => (
+        <div key={status} className='flex items-center gap-2'>
+          <div
+            className={cn('size-3 rounded-full', streakCalendarStyles[status])}
+          />
+          <span>{label}</span>
+        </div>
+      ))}
     </footer>
   )
 }
