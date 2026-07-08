@@ -1,7 +1,12 @@
 'use client'
 
+import {
+  ANCHORS_STORAGE_KEY,
+  STREAK_STORAGE_KEY,
+  XP_STORAGE_KEY,
+} from '@/constants/storage-keys'
 import { getLevelForXp } from '@/lib/gamification'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 /**
  * Result returned by {@link useGamification}.
@@ -29,6 +34,11 @@ interface UseGamificationResult {
    * The number of unused Anchors available.
    */
   anchors: number
+
+  /**
+   * Whether the gamification state is currently being restored or synchronized.
+   */
+  isLoading: boolean
 
   /**
    * Awards experience points to the user.
@@ -76,6 +86,7 @@ export const useGamification = (): UseGamificationResult => {
   const [xp, setXp] = useState(0)
   const [streak, setStreak] = useState(0)
   const [anchors, setAnchors] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
 
   const level = getLevelForXp(xp)
 
@@ -100,12 +111,117 @@ export const useGamification = (): UseGamificationResult => {
     setStreak(0)
   }
 
+  const hydrateXp = () => {
+    try {
+      const saved = localStorage.getItem(XP_STORAGE_KEY)
+      if (!saved) return
+
+      const xp = JSON.parse(saved) as number
+
+      const isValidXp = typeof xp === 'number'
+
+      if (!isValidXp) {
+        throw Error('XP in local storage corrupted')
+      }
+
+      setXp(xp)
+    } catch (error) {
+      console.error('Hydrating xp from local storage failed', error)
+      localStorage.removeItem(XP_STORAGE_KEY)
+    }
+  }
+
+  const hydrateStreak = () => {
+    try {
+      const saved = localStorage.getItem(STREAK_STORAGE_KEY)
+      if (!saved) return
+
+      const streak = JSON.parse(saved) as number
+
+      const isValidStreak = typeof streak === 'number'
+
+      if (!isValidStreak) {
+        throw Error('Streak in local storage corrupted')
+      }
+
+      setStreak(streak)
+    } catch (error) {
+      console.error('Hydrating streak from local storage failed', error)
+      localStorage.removeItem(STREAK_STORAGE_KEY)
+    }
+  }
+
+  const hydrateAnchors = () => {
+    try {
+      const saved = localStorage.getItem(ANCHORS_STORAGE_KEY)
+      if (!saved) return
+
+      const anchors = JSON.parse(saved) as number
+
+      const isValidAnchors = typeof anchors === 'number'
+
+      if (!isValidAnchors) {
+        throw Error('Anchors in local storage corrupted')
+      }
+
+      setAnchors(anchors)
+    } catch (error) {
+      console.error('Hydrating anchors from local storage failed', error)
+      localStorage.removeItem(ANCHORS_STORAGE_KEY)
+    }
+  }
+
+  useEffect(() => {
+    const hydrate = () => {
+      try {
+        hydrateXp()
+        hydrateStreak()
+        hydrateAnchors()
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    hydrate()
+  }, [])
+
+  useEffect(() => {
+    if (isLoading) return
+
+    const syncXp = () => {
+      localStorage.setItem(XP_STORAGE_KEY, JSON.stringify(xp))
+    }
+
+    syncXp()
+  }, [isLoading, xp])
+
+  useEffect(() => {
+    if (isLoading) return
+
+    const syncStreak = () => {
+      localStorage.setItem(STREAK_STORAGE_KEY, JSON.stringify(streak))
+    }
+
+    syncStreak()
+  }, [isLoading, streak])
+
+  useEffect(() => {
+    if (isLoading) return
+
+    const syncAnchors = () => {
+      localStorage.setItem(ANCHORS_STORAGE_KEY, JSON.stringify(anchors))
+    }
+
+    syncAnchors()
+  }, [anchors, isLoading])
+
   return {
     xp,
     level,
     streak,
     anchors,
     awardXp,
+    isLoading,
     awardAnchor,
     spendAnchor,
     resetStreak,
