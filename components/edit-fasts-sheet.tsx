@@ -16,6 +16,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import type { Fast } from '@/types/fasting'
 import FastListItem from './fast-list-item'
 import { toast } from 'sonner'
+import { getStreakStatus } from '@/lib/gamification'
 
 interface EditFastsSheetProps {
   fasts: Fast[]
@@ -47,11 +48,22 @@ export default function EditFastsSheet({
     fast: Fast,
   ) => {
     try {
-      await updateFast({
+      const updatedFast: Fast = {
         ...fast,
         startedAt: startedAt.toISOString(),
         endedAt: endedAt.toISOString(),
-      })
+        streakStatus:
+          fast.streakStatus === 'anchored'
+            ? 'anchored'
+            : getStreakStatus({
+                planId: fast.planId,
+                startedAt,
+                endedAt,
+                isAnchored: false,
+              }),
+      }
+
+      await updateFast(updatedFast)
       toast.success('Fast updated')
     } catch (error) {
       if (error instanceof Error) toast.error(error.message)
