@@ -202,9 +202,9 @@ export const useFasting = (): UseFastingResult => {
 
   const clearPreferredFastStartTime = () => setPreferredFastStartTime(null)
 
-  const startSession = async (
+  const transitionToSession = async (
     status: FastingStatus,
-    startedAt: Date = new Date(),
+    newSessionStartedAt: Date = new Date(),
     options?: {
       isAnchored?: boolean
     },
@@ -213,27 +213,27 @@ export const useFasting = (): UseFastingResult => {
       throw new Error('Cannot record a fast without a fasting plan.')
     }
 
-    const sessionStartedAt = startedAt.toISOString()
+    const newSessionStartedAtISO = newSessionStartedAt.toISOString()
 
-    // Add a new fast when transitioning from eating to fasting.
+    // Record the completed fasting session when transitioning from fasting to eating.
     if (status === 'eating' && session?.status === 'fasting') {
       await addFast({
+        planId,
         id: uuidv4(),
-        planId: planId,
-        endedAt: sessionStartedAt,
         startedAt: session.startedAt,
+        endedAt: newSessionStartedAtISO,
         streakStatus: getStreakStatus({
           planId,
-          endedAt: new Date(sessionStartedAt),
-          startedAt: new Date(session.startedAt),
+          endedAt: newSessionStartedAt,
           isAnchored: session.isAnchored,
+          startedAt: new Date(session.startedAt),
         }),
       })
     }
 
     setSession({
       status,
-      startedAt: sessionStartedAt,
+      startedAt: newSessionStartedAtISO,
       isAnchored: options?.isAnchored ?? false,
     })
   }
@@ -497,7 +497,7 @@ export const useFasting = (): UseFastingResult => {
     preferredFastStartTime,
     updatePreferredFastStartTime,
     clearPreferredFastStartTime,
-    endFasting: (endedAt) => startSession('eating', endedAt),
-    startFasting: (startedAt) => startSession('fasting', startedAt),
+    endFasting: (endedAt) => transitionToSession('eating', endedAt),
+    startFasting: (startedAt) => transitionToSession('fasting', startedAt),
   }
 }
