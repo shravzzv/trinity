@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { levelsInfo } from '@/constants/gamification'
+import { levelsAccordionInfo } from '@/constants/gamification'
 import LevelsDialog from '@/components/levels-dialog'
 
 const renderComponent = () => {
@@ -67,7 +67,7 @@ describe('LevelsDialog', () => {
   it('renders all help topics', async () => {
     await openDialog()
 
-    for (const item of levelsInfo) {
+    for (const item of levelsAccordionInfo) {
       expect(
         screen.getByRole('button', {
           name: item.trigger,
@@ -81,11 +81,11 @@ describe('LevelsDialog', () => {
 
     await userEvent.click(
       screen.getByRole('button', {
-        name: levelsInfo[0].trigger,
+        name: levelsAccordionInfo[0].trigger,
       }),
     )
 
-    expect(screen.getByText(levelsInfo[0].content)).toBeInTheDocument()
+    expect(screen.getByText(levelsAccordionInfo[0].content)).toBeInTheDocument()
   })
 
   it('collapses an expanded help topic', async () => {
@@ -93,15 +93,17 @@ describe('LevelsDialog', () => {
     await user.click(screen.getByRole('button', { name: /level/i }))
 
     const trigger = screen.getByRole('button', {
-      name: levelsInfo[0].trigger,
+      name: levelsAccordionInfo[0].trigger,
     })
 
     await user.click(trigger)
 
-    expect(screen.getByText(levelsInfo[0].content)).toBeInTheDocument()
+    expect(screen.getByText(levelsAccordionInfo[0].content)).toBeInTheDocument()
 
     await user.click(trigger)
 
-    expect(screen.queryByText(levelsInfo[0].content)).not.toBeInTheDocument()
+    expect(
+      screen.queryByText(levelsAccordionInfo[0].content),
+    ).not.toBeInTheDocument()
   })
 })

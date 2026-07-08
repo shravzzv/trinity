@@ -17,7 +17,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from './ui/accordion'
-import { levelsInfo } from '@/constants/gamification'
+import { levelsAccordionInfo } from '@/constants/gamification'
 import { Card, CardContent } from './ui/card'
 import { Separator } from './ui/separator'
 
@@ -98,7 +98,7 @@ export default function LevelsDialog() {
         </div>
 
         <Accordion type='single' collapsible>
-          {levelsInfo.map((item) => (
+          {levelsAccordionInfo.map((item) => (
             <AccordionItem key={item.value} value={item.value}>
               <AccordionTrigger>{item.trigger}</AccordionTrigger>
               <AccordionContent>{item.content}</AccordionContent>

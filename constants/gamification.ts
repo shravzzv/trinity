@@ -1,6 +1,6 @@
 import type { AccordionInfo } from '@/types/gamification'
 
-export const anchorsInfo: AccordionInfo[] = [
+export const anchorsAccordionInfo: AccordionInfo[] = [
   {
     value: 'what',
     trigger: 'What are Anchors?',
@@ -19,7 +19,7 @@ export const anchorsInfo: AccordionInfo[] = [
   },
 ]
 
-export const levelsInfo: AccordionInfo[] = [
+export const levelsAccordionInfo: AccordionInfo[] = [
   {
     value: 'about',
     trigger: 'About levels',

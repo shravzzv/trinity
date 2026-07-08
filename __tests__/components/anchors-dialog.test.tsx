@@ -1,7 +1,7 @@
 import AnchorsDialog from '@/components/anchors-dialog'
 import { render, screen } from '@testing-library/react'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
-import { anchorsInfo } from '@/constants/gamification'
+import { anchorsAccordionInfo } from '@/constants/gamification'
 
 const renderComponent = () => {
   render(<AnchorsDialog />)
@@ -68,7 +68,7 @@ describe('AnchorsDialog', () => {
     const { user } = renderComponent()
     await openDialog(user)
 
-    for (const item of anchorsInfo) {
+    for (const item of anchorsAccordionInfo) {
       expect(
         screen.getByRole('button', { name: item.trigger }),
       ).toBeInTheDocument()
@@ -81,11 +81,13 @@ describe('AnchorsDialog', () => {
 
     await user.click(
       screen.getByRole('button', {
-        name: anchorsInfo[0].trigger,
+        name: anchorsAccordionInfo[0].trigger,
       }),
     )
 
-    expect(screen.getByText(anchorsInfo[0].content)).toBeInTheDocument()
+    expect(
+      screen.getByText(anchorsAccordionInfo[0].content),
+    ).toBeInTheDocument()
   })
 
   it('collapses an expanded help topic', async () => {
@@ -93,15 +95,19 @@ describe('AnchorsDialog', () => {
     await openDialog(user)
 
     const trigger = screen.getByRole('button', {
-      name: anchorsInfo[0].trigger,
+      name: anchorsAccordionInfo[0].trigger,
     })
 
     await user.click(trigger)
 
-    expect(screen.getByText(anchorsInfo[0].content)).toBeInTheDocument()
+    expect(
+      screen.getByText(anchorsAccordionInfo[0].content),
+    ).toBeInTheDocument()
 
     await user.click(trigger)
 
-    expect(screen.queryByText(anchorsInfo[0].content)).not.toBeInTheDocument()
+    expect(
+      screen.queryByText(anchorsAccordionInfo[0].content),
+    ).not.toBeInTheDocument()
   })
 })

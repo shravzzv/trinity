@@ -17,7 +17,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import { anchorsInfo } from '@/constants/gamification'
+import { anchorsAccordionInfo } from '@/constants/gamification'
 import { Card, CardContent } from './ui/card'
 
 export default function AnchorsDialog() {
@@ -73,7 +73,7 @@ export default function AnchorsDialog() {
         </div>
 
         <Accordion type='single' collapsible>
-          {anchorsInfo.map((item) => (
+          {anchorsAccordionInfo.map((item) => (
             <AccordionItem key={item.value} value={item.value}>
               <AccordionTrigger>{item.trigger}</AccordionTrigger>
               <AccordionContent>{item.content}</AccordionContent>
