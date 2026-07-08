@@ -83,7 +83,10 @@ export default function ActiveFastingTimer({
 
   const handleSessionChange = async () => {
     try {
-      if (isFasting) {
+      if (isAnchored) {
+        await startFasting(selectedEndedAt)
+        toast.success('Fasting session started')
+      } else if (isFasting) {
         await endFasting(selectedEndedAt)
         toast.success('Fast ended')
       } else {

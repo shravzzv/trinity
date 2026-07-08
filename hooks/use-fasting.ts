@@ -215,8 +215,11 @@ export const useFasting = (): UseFastingResult => {
 
     const newSessionStartedAtISO = newSessionStartedAt.toISOString()
 
-    // Record the completed fasting session when transitioning from fasting to eating.
-    if (status === 'eating' && session?.status === 'fasting') {
+    const isLeavingFastingSession =
+      session?.status === 'fasting' &&
+      (status === 'eating' || session.isAnchored)
+
+    if (isLeavingFastingSession) {
       await addFast({
         planId,
         id: uuidv4(),
