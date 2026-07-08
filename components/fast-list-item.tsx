@@ -25,10 +25,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
-import type { StreakStatus } from '@/types/gamification'
 import StreakStatusBadge from './streak-status-badge'
 import { cn } from '@/lib/utils'
 import { Badge } from './ui/badge'
+import { getStreakStatusBorderClasses } from '@/lib/gamification'
 
 interface FastListItemProps {
   fast: Fast
@@ -46,26 +46,13 @@ export default function FastListItem({
   const [deleting, setDeleting] = useState(false)
   const [editing, setEditing] = useState(false)
 
-  const streakStatus: StreakStatus = 'missed'
-
-  const getBorderStyles = (streakStatus: StreakStatus) => {
-    switch (streakStatus) {
-      case 'completed':
-        return 'border border-green-500/20'
-
-      case 'missed':
-        return 'border border-destructive/30'
-
-      case 'anchored':
-        return 'border border-primary/30'
-
-      default:
-        return ''
-    }
-  }
-
   return (
-    <Card className={cn(getBorderStyles(streakStatus), 'relative')}>
+    <Card
+      className={cn(
+        getStreakStatusBorderClasses(fast.streakStatus),
+        'relative',
+      )}
+    >
       <CardContent className='space-y-4'>
         <div className='space-y-1 text-center'>
           <p className='text-2xl font-semibold'>
@@ -105,8 +92,8 @@ export default function FastListItem({
         </div>
 
         <CardFooter className='flex items-center justify-center gap-2'>
-          <StreakStatusBadge streakStatus={streakStatus} />
-          <Badge variant='outline'>23:1</Badge>
+          <StreakStatusBadge streakStatus={fast.streakStatus} />
+          <Badge variant='outline'>{fast.planId}</Badge>
         </CardFooter>
       </CardContent>
 

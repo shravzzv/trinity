@@ -56,3 +56,36 @@ export const getStreakStatus = ({
 
   return endedEarly ? 'missed' : 'completed'
 }
+
+/**
+ * Returns the border CSS classes associated with a fasting session's
+ * streak outcome.
+ *
+ * This is a presentation helper used to visually distinguish completed,
+ * missed, and anchored fasts throughout the UI. The returned classes can
+ * be applied directly to cards, list items, or other containers that
+ * represent a {@link StreakStatus}.
+ *
+ * Mapping:
+ *
+ * - `completed` → success-themed border.
+ * - `missed` → destructive-themed border.
+ * - `anchored` → primary-themed border.
+ *
+ * @param streakStatus The streak outcome to style.
+ * @returns Tailwind CSS classes for the corresponding border styling.
+ */
+export const getStreakStatusBorderClasses = (
+  streakStatus: StreakStatus,
+): string => {
+  switch (streakStatus) {
+    case 'completed':
+      return 'border border-green-500/20'
+
+    case 'missed':
+      return 'border border-destructive/30'
+
+    case 'anchored':
+      return 'border border-primary/30'
+  }
+}
