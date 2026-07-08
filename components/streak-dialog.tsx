@@ -16,6 +16,8 @@ import { Separator } from './ui/separator'
 import { Badge } from './ui/badge'
 import type { StreakStatus } from '@/types/gamification'
 import { cn } from '@/lib/utils'
+import type { Fast } from '@/types/fasting'
+import { getStreakCalendarDays } from '@/lib/gamification'
 
 const streakCalendarStyles = {
   completed:
@@ -37,15 +39,12 @@ const streakLegend = [
   label: string
 }[]
 
-export default function StreakDialog() {
-  const completedDays = [
-    new Date(2026, 6, 1),
-    new Date(2026, 6, 3),
-    new Date(2026, 6, 5),
-    new Date(2026, 6, 7),
-  ]
-  const missedDays = [new Date(2026, 6, 2), new Date(2026, 6, 6)]
-  const anchoredDays = [new Date(2026, 6, 4)]
+interface StreakDialogProps {
+  fasts: Fast[]
+}
+
+export default function StreakDialog({ fasts }: StreakDialogProps) {
+  const { completed, missed, anchored } = getStreakCalendarDays(fasts)
 
   const currentStreak = 0
   const longestStreak = 0
@@ -85,11 +84,7 @@ export default function StreakDialog() {
               selected={undefined}
               onSelect={() => {}}
               showOutsideDays={false}
-              modifiers={{
-                missed: missedDays,
-                anchored: anchoredDays,
-                completed: completedDays,
-              }}
+              modifiers={{ missed, anchored, completed }}
               classNames={{
                 today: 'ring-2 ring-primary border-transparent',
                 day_button:

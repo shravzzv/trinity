@@ -43,7 +43,7 @@ export default function Page() {
   return (
     <main className='mx-auto max-w-xl space-y-6 px-6 py-6'>
       <Header />
-      <ProgressCard />
+      <ProgressCard fasts={fasts} />
 
       <FastingTimer
         fasts={fasts}

@@ -22,7 +22,7 @@
  */
 
 import { fastingPlans } from '@/constants/fasting-plans'
-import type { FastingPlanId } from '@/types/fasting'
+import type { Fast, FastingPlanId } from '@/types/fasting'
 import type { StreakStatus } from '@/types/gamification'
 
 /**
@@ -113,5 +113,46 @@ export const getStreakStatusChartColor = (
 
     case 'anchored':
       return 'var(--anchor)'
+  }
+}
+
+/**
+ * Groups completed fasts into calendar modifier arrays based on their
+ * streak outcome.
+ *
+ * Each returned array contains the calendar day on which the fast
+ * started. These arrays are intended to be passed directly to the
+ * `modifiers` prop of the streak calendar.
+ *
+ * @param fasts The fasting history to group.
+ * @returns Calendar day arrays for completed, missed, and anchored fasts.
+ */
+export const getStreakCalendarDays = (fasts: Fast[]) => {
+  const missed: Date[] = []
+  const anchored: Date[] = []
+  const completed: Date[] = []
+
+  for (const fast of fasts) {
+    const day = new Date(fast.startedAt)
+
+    switch (fast.streakStatus) {
+      case 'completed':
+        completed.push(day)
+        break
+
+      case 'missed':
+        missed.push(day)
+        break
+
+      case 'anchored':
+        anchored.push(day)
+        break
+    }
+  }
+
+  return {
+    missed,
+    anchored,
+    completed,
   }
 }

@@ -1,9 +1,10 @@
 import StreakDialog from '@/components/streak-dialog'
+import { Fast } from '@/types/fasting'
 import { render, screen } from '@testing-library/react'
 import userEvent, { UserEvent } from '@testing-library/user-event'
 
-const renderComponent = () => {
-  render(<StreakDialog />)
+const renderComponent = (fasts: Fast[] = []) => {
+  render(<StreakDialog fasts={fasts} />)
 
   return {
     user: userEvent.setup({
@@ -83,6 +84,36 @@ describe('StreakDialog', () => {
   it('renders the calendar', async () => {
     const { user } = renderComponent()
     await openDialog(user)
+
+    expect(screen.getByRole('grid')).toBeInTheDocument()
+  })
+
+  it('renders streak days from fasting history', async () => {
+    const { user } = renderComponent([
+      {
+        id: '1',
+        startedAt: '2026-07-01T18:00:00.000Z',
+        endedAt: '2026-07-02T17:00:00.000Z',
+        streakStatus: 'completed',
+        planId: '23:1',
+      },
+      {
+        id: '2',
+        startedAt: '2026-07-02T18:00:00.000Z',
+        endedAt: '2026-07-03T12:00:00.000Z',
+        streakStatus: 'missed',
+        planId: '23:1',
+      },
+      {
+        id: '3',
+        startedAt: '2026-07-03T18:00:00.000Z',
+        endedAt: '2026-07-04T17:00:00.000Z',
+        streakStatus: 'anchored',
+        planId: '23:1',
+      },
+    ])
+
+    await user.click(screen.getByRole('button', { name: /streak/i }))
 
     expect(screen.getByRole('grid')).toBeInTheDocument()
   })
