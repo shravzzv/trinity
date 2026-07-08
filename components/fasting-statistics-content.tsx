@@ -4,7 +4,6 @@ import { Bar, BarChart, CartesianGrid, LabelList, XAxis } from 'recharts'
 import {
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart'
 import {
@@ -43,7 +42,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { toast } from 'sonner'
 import { FASTING_STATISTICS_CADENCE_STORAGE_KEY } from '@/constants/storage-keys'
 import { Button } from './ui/button'
-import { getStreakStatus } from '@/lib/gamification'
+import { getStreakStatus, getStreakStatusChartColor } from '@/lib/gamification'
 
 interface FastingStatisticsContentProps {
   fasts: Fast[]
@@ -53,6 +52,13 @@ interface FastingStatisticsContentProps {
   updateFast: (updatedFast: Fast) => Promise<void>
   preferredFastStartTime: PreferredFastStartTime | null
 }
+
+const chartConfig = {
+  fasts: {
+    label: 'Fasts',
+    color: 'var(--chart-3)',
+  },
+} satisfies ChartConfig
 
 export default function FastingStatisticsContent({
   fasts,
@@ -128,15 +134,9 @@ export default function FastingStatisticsContent({
           ? { day: 'numeric', month: 'short', year: 'numeric' }
           : { day: 'numeric', month: 'short' },
     ),
-    length: getFastDurationHours(fast).toFixed(1),
+    length: Number(getFastDurationHours(fast).toFixed(1)),
+    streakStatus: fast.streakStatus,
   }))
-
-  const chartConfig = {
-    fasts: {
-      label: 'Fasts',
-      color: 'var(--chart-3)',
-    },
-  } satisfies ChartConfig
 
   const handleAddFast = async (startedAt: Date, endedAt: Date) => {
     if (!planId) return
@@ -200,8 +200,56 @@ export default function FastingStatisticsContent({
               tickMargin={10}
               axisLine={false}
             />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <Bar dataKey='length' fill='var(--color-fasts)' radius={10}>
+            <ChartTooltip
+              cursor={false}
+              content={({ active, payload }) => {
+                if (!active || !payload?.length) return null
+
+                const data = payload[0].payload
+
+                return (
+                  <div className='bg-background rounded-lg border px-3 py-2 shadow-lg'>
+                    <p className='font-medium'>{data.date}</p>
+
+                    <p className='text-muted-foreground text-xs'>
+                      {data.length.toFixed(1)} hours
+                    </p>
+                    <div className='mt-2 flex items-center gap-2'>
+                      <div
+                        className='size-2 rounded-full'
+                        style={{
+                          background: getStreakStatusChartColor(
+                            data.streakStatus,
+                          ),
+                        }}
+                      />
+
+                      <span className='text-xs capitalize'>
+                        {data.streakStatus}
+                      </span>
+                    </div>
+                  </div>
+                )
+              }}
+            />
+            <Bar
+              dataKey='length'
+              shape={(props) => {
+                const { x, y, width, height, payload } = props
+
+                return (
+                  <rect
+                    x={x}
+                    y={y}
+                    width={width}
+                    height={height}
+                    rx={10}
+                    ry={10}
+                    fill={getStreakStatusChartColor(payload.streakStatus)}
+                  />
+                )
+              }}
+            >
               {cadence === 'week' && (
                 <LabelList
                   position='top'
@@ -213,6 +261,21 @@ export default function FastingStatisticsContent({
             </Bar>
           </BarChart>
         </ChartContainer>
+
+        <div className='flex items-center justify-center gap-5 py-2 text-xs'>
+          <div className='flex items-center gap-2'>
+            <div className='size-3 rounded-full bg-green-600' />
+            <span>Completed</span>
+          </div>
+          <div className='flex items-center gap-2'>
+            <div className='bg-destructive size-3 rounded-full' />
+            Missed
+          </div>
+          <div className='flex items-center gap-2'>
+            <div className='bg-primary size-3 rounded-full' />
+            Anchored
+          </div>
+        </div>
       </CardContent>
 
       <CardFooter className='flex flex-col gap-4'>

@@ -89,3 +89,29 @@ export const getStreakStatusBorderClasses = (
       return 'border border-primary/30'
   }
 }
+
+/**
+ * Returns the chart color associated with a streak outcome.
+ *
+ * This provides a consistent visual mapping between streak statuses
+ * and their corresponding colors across charts and other data
+ * visualizations.
+ *
+ * - `completed` → green
+ * - `missed` → destructive
+ * - `anchored` → primary
+ */
+export const getStreakStatusChartColor = (
+  streakStatus: StreakStatus,
+): string => {
+  switch (streakStatus) {
+    case 'completed':
+      return 'oklch(62.7% 0.194 149.214)'
+
+    case 'anchored':
+      return 'var(--primary)'
+
+    case 'missed':
+      return 'var(--destructive)'
+  }
+}
