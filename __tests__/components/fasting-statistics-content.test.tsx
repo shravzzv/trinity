@@ -168,6 +168,8 @@ describe('FastingStatisticsContent', () => {
       id: 'test-uuid',
       startedAt: '2026-01-01T10:00:00.000Z',
       endedAt: '2026-01-01T18:00:00.000Z',
+      planId: '16:8',
+      streakStatus: 'missed',
     })
   })
 
