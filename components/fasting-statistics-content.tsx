@@ -262,20 +262,7 @@ export default function FastingStatisticsContent({
           </BarChart>
         </ChartContainer>
 
-        <div className='flex items-center justify-center gap-5 py-2 text-xs'>
-          <div className='flex items-center gap-2'>
-            <div className='size-3 rounded-full bg-green-600' />
-            <span>Completed</span>
-          </div>
-          <div className='flex items-center gap-2'>
-            <div className='bg-destructive size-3 rounded-full' />
-            Missed
-          </div>
-          <div className='flex items-center gap-2'>
-            <div className='bg-primary size-3 rounded-full' />
-            Anchored
-          </div>
-        </div>
+        <FastingStatisticsChartLegend />
       </CardContent>
 
       <CardFooter className='flex flex-col gap-4'>
@@ -322,5 +309,24 @@ export default function FastingStatisticsContent({
         </div>
       </CardFooter>
     </Card>
+  )
+}
+
+const FastingStatisticsChartLegend = () => {
+  return (
+    <div className='flex items-center justify-center gap-5 py-2 text-xs'>
+      <div className='flex items-center gap-2'>
+        <div className='bg-primary size-3 rounded-full' />
+        <span>Completed</span>
+      </div>
+      <div className='flex items-center gap-2'>
+        <div className='bg-destructive size-3 rounded-full' />
+        Missed
+      </div>
+      <div className='flex items-center gap-2'>
+        <div className='bg-anchor size-3 rounded-full' />
+        Anchored
+      </div>
+    </div>
   )
 }

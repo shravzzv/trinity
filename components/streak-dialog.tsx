@@ -74,10 +74,9 @@ export default function StreakDialog() {
                   'hover:bg-transparent hover:text-foreground cursor-default',
               }}
               modifiersClassNames={{
+                completed: 'border-2 border-primary bg-primary/10',
                 missed: 'border-2 border-destructive bg-destructive/10',
-                anchored: 'border-2 border-sky-500 bg-sky-500/10 border-dotted',
-                completed:
-                  'border-2 border-green-600 bg-green-600/10 font-medium',
+                anchored: 'border-2 border-anchor bg-anchor/10',
               }}
               footer={<StreakCalendarLegend />}
             />
@@ -123,7 +122,7 @@ const StreakCalendarLegend = () => {
   return (
     <footer className='flex items-center justify-center gap-3 py-2 text-xs'>
       <div className='flex items-center gap-1'>
-        <div className='size-3 rounded-full border-2 border-green-600 bg-green-600/10' />
+        <div className='border-primary bg-primary/10 size-3 rounded-full border-2' />
         <span>Completed</span>
       </div>
       <div className='flex items-center gap-1'>
@@ -131,7 +130,7 @@ const StreakCalendarLegend = () => {
         Missed
       </div>
       <div className='flex items-center gap-1'>
-        <div className='size-3 rounded-full border-2 border-dotted border-sky-500 bg-sky-500/10' />
+        <div className='border-anchor bg-anchor/10 size-3 rounded-full border-2' />
         Anchored
       </div>
     </footer>

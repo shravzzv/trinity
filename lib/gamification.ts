@@ -80,13 +80,13 @@ export const getStreakStatusBorderClasses = (
 ): string => {
   switch (streakStatus) {
     case 'completed':
-      return 'border border-green-500/20'
+      return 'border border-primary/20'
 
     case 'missed':
       return 'border border-destructive/30'
 
     case 'anchored':
-      return 'border border-primary/30'
+      return 'border border-anchor/30'
   }
 }
 
@@ -106,12 +106,12 @@ export const getStreakStatusChartColor = (
 ): string => {
   switch (streakStatus) {
     case 'completed':
-      return 'oklch(62.7% 0.194 149.214)'
-
-    case 'anchored':
       return 'var(--primary)'
 
     case 'missed':
       return 'var(--destructive)'
+
+    case 'anchored':
+      return 'var(--anchor)'
   }
 }

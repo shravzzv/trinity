@@ -12,7 +12,7 @@ export default function StreakStatusBadge({
   switch (streakStatus) {
     case 'completed': {
       return (
-        <Badge className='bg-green-600'>
+        <Badge className='bg-primary'>
           <CheckCircle /> Completed
         </Badge>
       )
@@ -28,7 +28,7 @@ export default function StreakStatusBadge({
 
     case 'anchored': {
       return (
-        <Badge>
+        <Badge className='bg-anchor text-amber-950'>
           <Anchor /> Anchored
         </Badge>
       )
