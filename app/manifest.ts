@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: 'Trinity',
     description:
       'A simple, offline-first intermittent fasting tracker focused on consistency, progress, and data ownership.',
-    start_url: '/',
+    start_url: '/home',
     display: 'standalone',
     background_color: '#10131A',
     theme_color: '#10131A',
