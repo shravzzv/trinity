@@ -10,6 +10,7 @@ import { useFasting } from '@/hooks/use-fasting'
 import { useWeight } from '@/hooks/use-weight'
 import ProgressCard from '@/components/progress-card'
 import { useGamification } from '@/hooks/use-gamification'
+import CelebrationDialog from '@/components/celebration-dialog'
 
 export default function Page() {
   const {
@@ -50,11 +51,22 @@ export default function Page() {
     spendAnchor,
     resetStreak,
     incrementStreak,
+    currentAchievement,
+    dismissAchievement,
     isLoading: isGamificationLoading,
   } = useGamification()
 
   return (
     <main className='mx-auto max-w-xl space-y-6 px-6 py-6'>
+      <CelebrationDialog
+        open={currentAchievement !== null}
+        title={currentAchievement?.title ?? ''}
+        description={currentAchievement?.description ?? ''}
+        onOpenChange={(open) => {
+          if (!open) dismissAchievement()
+        }}
+      />
+
       <Header />
 
       <ProgressCard

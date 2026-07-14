@@ -6,6 +6,8 @@ import {
   STREAK_STORAGE_KEY,
   XP_STORAGE_KEY,
 } from '@/constants/storage-keys'
+import { getLevelForXp, shouldCelebrateStreak } from '@/lib/gamification'
+import type { Achievement } from '@/types/gamification'
 import { useEffect, useState } from 'react'
 
 /**
@@ -63,6 +65,20 @@ interface UseGamificationResult {
    * Resets the user's current streak to zero.
    */
   resetStreak: () => void
+
+  /**
+   * The next achievement waiting to be presented to the user.
+   *
+   * Returns `null` when there are no pending achievements.
+   */
+  currentAchievement: Achievement | null
+
+  /**
+   * Dismisses the current achievement.
+   *
+   * If additional achievements are waiting, the next one becomes current.
+   */
+  dismissAchievement: () => void
 }
 
 /**
@@ -80,15 +96,41 @@ interface UseGamificationResult {
 export const useGamification = (): UseGamificationResult => {
   const [xp, setXp] = useState(0)
   const [streak, setStreak] = useState(0)
-  const [anchors, setAnchors] = useState(INITIAL_ANCHORS)
   const [isLoading, setIsLoading] = useState(true)
+  const [anchors, setAnchors] = useState(INITIAL_ANCHORS)
+  const [achievements, setAchievements] = useState<Achievement[]>([])
+
+  const queueAchievement = (achievement: Achievement) => {
+    setAchievements((prev) => [...prev, achievement])
+  }
 
   const awardXp = (amount: number) => {
-    setXp((prev) => prev + amount)
+    setXp((prev) => {
+      const next = prev + amount
+      const previousLevel = getLevelForXp(prev)
+      const nextLevel = getLevelForXp(next)
+
+      if (nextLevel > previousLevel) {
+        queueAchievement({
+          type: 'level',
+          title: `Level ${nextLevel} reached!`,
+          description:
+            'Keep going. Every fast brings you closer to your next milestone.',
+        })
+      }
+
+      return next
+    })
   }
 
   const awardAnchor = () => {
     setAnchors((prev) => prev + 1)
+
+    queueAchievement({
+      type: 'anchor',
+      title: 'Anchor earned!',
+      description: 'You earned an Anchor by maintaining your fasting streak.',
+    })
   }
 
   const spendAnchor = () => {
@@ -99,7 +141,24 @@ export const useGamification = (): UseGamificationResult => {
   }
 
   const incrementStreak = () => {
-    setStreak((prev) => prev + 1)
+    setStreak((prev) => {
+      const next = prev + 1
+
+      if (shouldCelebrateStreak(next)) {
+        queueAchievement({
+          type: 'streak',
+          title: `${next} day streak!`,
+          description:
+            'Your consistency is paying off. Keep the momentum going!',
+        })
+      }
+
+      return next
+    })
+  }
+
+  const dismissAchievement = () => {
+    setAchievements((prev) => prev.slice(1))
   }
 
   const resetStreak = () => {
@@ -220,5 +279,7 @@ export const useGamification = (): UseGamificationResult => {
     spendAnchor,
     resetStreak,
     incrementStreak,
+    dismissAchievement,
+    currentAchievement: achievements[0] ?? null,
   }
 }

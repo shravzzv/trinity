@@ -6,6 +6,7 @@ import {
   getStreakCalendarDays,
   getStreakStatus,
   shouldAwardAnchor,
+  shouldCelebrateStreak,
 } from '@/lib/gamification'
 import type { Fast } from '@/types/fasting'
 import type { StreakStatus } from '@/types/gamification'
@@ -333,5 +334,41 @@ describe('shouldAwardAnchor', () => {
   it('awards an Anchor at subsequent multiples of the requirement', () => {
     expect(shouldAwardAnchor(ANCHOR_STREAK_REQUIREMENT * 2)).toBe(true)
     expect(shouldAwardAnchor(ANCHOR_STREAK_REQUIREMENT * 3)).toBe(true)
+  })
+})
+
+describe('shouldCelebrateStreak', () => {
+  it('celebrates a 7 day streak', () => {
+    expect(shouldCelebrateStreak(7)).toBe(true)
+  })
+
+  it('celebrates a 25 day streak', () => {
+    expect(shouldCelebrateStreak(25)).toBe(true)
+  })
+
+  it('celebrates a 50 day streak', () => {
+    expect(shouldCelebrateStreak(50)).toBe(true)
+  })
+
+  it('celebrates every 100 day milestone', () => {
+    expect(shouldCelebrateStreak(100)).toBe(true)
+    expect(shouldCelebrateStreak(200)).toBe(true)
+    expect(shouldCelebrateStreak(300)).toBe(true)
+    expect(shouldCelebrateStreak(1000)).toBe(true)
+  })
+
+  it('does not celebrate non-milestone streaks', () => {
+    expect(shouldCelebrateStreak(0)).toBe(false)
+    expect(shouldCelebrateStreak(1)).toBe(false)
+    expect(shouldCelebrateStreak(6)).toBe(false)
+    expect(shouldCelebrateStreak(8)).toBe(false)
+    expect(shouldCelebrateStreak(24)).toBe(false)
+    expect(shouldCelebrateStreak(26)).toBe(false)
+    expect(shouldCelebrateStreak(49)).toBe(false)
+    expect(shouldCelebrateStreak(51)).toBe(false)
+    expect(shouldCelebrateStreak(99)).toBe(false)
+    expect(shouldCelebrateStreak(101)).toBe(false)
+    expect(shouldCelebrateStreak(150)).toBe(false)
+    expect(shouldCelebrateStreak(299)).toBe(false)
   })
 })

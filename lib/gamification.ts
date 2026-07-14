@@ -270,3 +270,24 @@ export const getLevelProgress = (xp: number) => {
 export const shouldAwardAnchor = (streak: number): boolean => {
   return streak > 0 && streak % ANCHOR_STREAK_REQUIREMENT === 0
 }
+
+/**
+ * Returns whether a streak should be celebrated.
+ *
+ * Celebrations occur at:
+ * - 7 days
+ * - 25 days
+ * - 50 days
+ * - every 100 days thereafter.
+ *
+ * @param streak The current streak length.
+ * @returns Whether the streak reached a celebration milestone.
+ */
+export const shouldCelebrateStreak = (streak: number): boolean => {
+  return (
+    streak === 7 ||
+    streak === 25 ||
+    streak === 50 ||
+    (streak >= 100 && streak % 100 === 0)
+  )
+}
