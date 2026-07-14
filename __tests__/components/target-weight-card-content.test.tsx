@@ -6,12 +6,20 @@ import TargetWeightCardContent from '@/components/target-weight-card-content'
 jest.mock('sonner')
 
 const update = jest.fn()
+const clear = jest.fn()
+const mockAwardXp = jest.fn()
 
 const renderComponent = (
   props: Partial<React.ComponentProps<typeof TargetWeightCardContent>> = {},
 ) => {
   render(
-    <TargetWeightCardContent targetWeight={null} update={update} {...props} />,
+    <TargetWeightCardContent
+      clear={clear}
+      update={update}
+      targetWeight={null}
+      awardXp={mockAwardXp}
+      {...props}
+    />,
   )
 }
 
