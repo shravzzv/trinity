@@ -6,8 +6,8 @@ import type { Fast } from '@/types/fasting'
 import ProgressCardSkeleton from './progress-card-skeleton'
 
 interface ProgressCardProps {
-  fasts: Fast[]
   xp: number
+  fasts: Fast[]
   level: number
   streak: number
   anchors: number
@@ -15,8 +15,8 @@ interface ProgressCardProps {
 }
 
 export default function ProgressCard({
-  fasts,
   xp,
+  fasts,
   level,
   streak,
   anchors,

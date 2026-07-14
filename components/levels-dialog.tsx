@@ -17,7 +17,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from './ui/accordion'
-import { levelsAccordionInfo } from '@/constants/gamification'
+import { levels, levelsAccordionInfo } from '@/constants/gamification'
 import { Card, CardContent } from './ui/card'
 import { Separator } from './ui/separator'
 
@@ -30,7 +30,8 @@ export default function LevelsDialog({ xp, level }: LevelsDialogProps) {
   const xpEarned = xp
   const xpRequired = 100
   const currentLevel = level
-  const nextLevel = currentLevel + 1
+  const maxLevel = levels[levels.length - 1].level
+  const nextLevel = Math.max(currentLevel + 1, maxLevel)
   const progress = (xpEarned / xpRequired) * 100
 
   return (
