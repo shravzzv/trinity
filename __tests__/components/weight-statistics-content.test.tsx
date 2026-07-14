@@ -72,9 +72,11 @@ const renderComponent = (
   const addWeight = jest.fn().mockResolvedValue(undefined)
   const updateWeight = jest.fn().mockResolvedValue(undefined)
   const deleteWeight = jest.fn().mockResolvedValue(undefined)
+  const mockAwardXp = jest.fn()
 
   render(
     <WeightStatisticsContent
+      awardXp={mockAwardXp}
       entries={entries}
       targetWeight={75}
       addWeight={addWeight}
