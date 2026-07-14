@@ -45,6 +45,7 @@ import {
 import WeightDialog from './weight-dialog'
 import { toast } from 'sonner'
 import EditWeightsSheet from './edit-weights-sheet'
+import { xpRewards } from '@/constants/gamification'
 
 const chartConfig = {
   weights: {
@@ -56,13 +57,15 @@ const chartConfig = {
 interface WeightStatisticsContentProps {
   entries: WeightEntry[]
   targetWeight: number | null
+  awardXp: (amount: number) => void
+  deleteWeight: (id: string) => Promise<void>
   addWeight: (weightKg: number, recordedAt: Date) => Promise<void>
   updateWeight: (updatedWeightEntry: WeightEntry) => Promise<void>
-  deleteWeight: (id: string) => Promise<void>
 }
 
 export default function WeightStatisticsContent({
   entries,
+  awardXp,
   addWeight,
   targetWeight,
   updateWeight,
@@ -127,6 +130,7 @@ export default function WeightStatisticsContent({
   const handleAddWeight = async (weightKg: number, recordedAt: Date) => {
     try {
       await addWeight(weightKg, recordedAt)
+      awardXp(xpRewards.addedWeightEntry)
       toast.success('Weight added')
     } catch (error) {
       if (error instanceof Error) toast.error(error.message)

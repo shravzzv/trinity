@@ -8,6 +8,7 @@ interface WeightStatisticsProps {
   isLoading: boolean
   entries: WeightEntry[]
   targetWeight: number | null
+  awardXp: (amount: number) => void
   deleteWeight: (id: string) => Promise<void>
   addWeight: (weightKg: number, recordedAt: Date) => Promise<void>
   updateWeight: (updatedWeightEntry: WeightEntry) => Promise<void>
