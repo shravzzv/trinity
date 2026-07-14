@@ -8,9 +8,11 @@ import { toast } from 'sonner'
 import { type UseFastingResult } from '@/hooks/use-fasting'
 import type { FastingPlanId, PreferredFastStartTime } from '@/types/fasting'
 import { getInitialSessionStartedAt } from '@/lib/fasting'
+import { xpRewards } from '@/constants/gamification'
 
 interface InactiveFastingTimerProps {
   planId: FastingPlanId | null
+  awardXp: (amount: number) => void
   updatePlanId: UseFastingResult['updatePlanId']
   startFasting: (startedAt?: Date) => Promise<void>
   preferredFastStartTime: PreferredFastStartTime | null
@@ -18,6 +20,7 @@ interface InactiveFastingTimerProps {
 
 export default function InactiveFastingTimer({
   planId,
+  awardXp,
   startFasting,
   updatePlanId,
   preferredFastStartTime,
@@ -42,6 +45,7 @@ export default function InactiveFastingTimer({
               selectedPlanId={null}
               onSubmit={(selectedPlanId) => {
                 updatePlanId(selectedPlanId)
+                awardXp(xpRewards.selectedFastingPlan)
                 toast.success('Fasting plan selected')
               }}
             >

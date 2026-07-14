@@ -68,6 +68,7 @@ export const xpRewards = {
   anchoredFast: 4,
   completedFast: 10,
   startedFirstFast: 15,
+  selectedFastingPlan: 5,
   setPreferredFastingTime: 5,
 
   // weight

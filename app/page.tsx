@@ -71,6 +71,7 @@ export default function Page() {
         streak={streak}
         anchors={anchors}
         session={session}
+        awardXp={awardXp}
         endFasting={endFasting}
         resetStreak={resetStreak}
         awardAnchor={awardAnchor}
@@ -88,6 +89,7 @@ export default function Page() {
         fasts={fasts}
         planId={planId}
         addFast={addFast}
+        awardXp={awardXp}
         updateFast={updateFast}
         deleteFast={deleteFast}
         isLoading={isFastingStateLoading}
@@ -96,6 +98,7 @@ export default function Page() {
 
       <WeightStatistics
         entries={entries}
+        awardXp={awardXp}
         addWeight={addWeightEntry}
         targetWeight={targetWeightKg}
         updateWeight={updateWeightEntry}
@@ -105,6 +108,7 @@ export default function Page() {
 
       <FastingPlanCard
         planId={planId}
+        awardXp={awardXp}
         updatePlanId={updatePlanId}
         isLoading={isFastingStateLoading}
         preferredFastStartTime={preferredFastStartTime}
@@ -113,6 +117,7 @@ export default function Page() {
       />
 
       <TargetWeightCard
+        awardXp={awardXp}
         clear={clearTargetWeight}
         update={updateTargetWeight}
         targetWeight={targetWeightKg}

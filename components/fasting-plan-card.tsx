@@ -20,10 +20,12 @@ import FastingPlanCardSkeleton from './skeletons/fasting-plan-card-skeleton'
 import { Separator } from './ui/separator'
 import { formatPreferredTime, getPreferredFastSchedule } from '@/lib/fasting'
 import PreferredFastTimeDialog from './preferred-fast-time-dialog'
+import { xpRewards } from '@/constants/gamification'
 
 interface FastingPlanCardProps {
   isLoading: boolean
   planId: FastingPlanId | null
+  awardXp: (amount: number) => void
   updatePlanId: UseFastingResult['updatePlanId']
   preferredFastStartTime: PreferredFastStartTime | null
   updatePreferredFastStartTime: (hour: number, minute: number) => void
@@ -32,6 +34,7 @@ interface FastingPlanCardProps {
 
 export default function FastingPlanCard({
   planId,
+  awardXp,
   isLoading,
   updatePlanId,
   preferredFastStartTime,
@@ -82,7 +85,8 @@ export default function FastingPlanCard({
             allowClose={!!planId}
             onSubmit={(selectedPlanId) => {
               updatePlanId(selectedPlanId)
-              toast.success('Fasting plan updated')
+              if (!planId) awardXp(xpRewards.selectedFastingPlan)
+              toast.success(`Fasting plan ${planId ? 'updated' : 'set'}`)
             }}
           >
             {planId ? (

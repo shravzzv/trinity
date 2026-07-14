@@ -23,6 +23,7 @@ interface FastingTimerProps {
   planId: FastingPlanId | null
   session: FastingSession | null
   startAnchoredSession: () => void
+  awardXp: (amount: number) => void
   endFasting: (endedAt?: Date) => Promise<void>
   updatePlanId: UseFastingResult['updatePlanId']
   startFasting: (startedAt?: Date) => Promise<void>
@@ -33,6 +34,7 @@ interface FastingTimerProps {
 export default function FastingTimer({
   planId,
   session,
+  awardXp,
   isLoading,
   updatePlanId,
   preferredFastStartTime,
@@ -44,6 +46,7 @@ export default function FastingTimer({
     return (
       <InactiveFastingTimer
         planId={planId}
+        awardXp={awardXp}
         updatePlanId={updatePlanId}
         startFasting={rest.startFasting}
         preferredFastStartTime={preferredFastStartTime}
