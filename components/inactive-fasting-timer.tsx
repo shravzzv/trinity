@@ -28,6 +28,12 @@ export default function InactiveFastingTimer({
   const hasPlan = planId !== null
   const fastStartsAt = getInitialSessionStartedAt(preferredFastStartTime)
 
+  const handleStartFasting = () => {
+    startFasting(fastStartsAt ?? undefined)
+    awardXp(xpRewards.startedFirstFast)
+    toast.success('First fast started')
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -35,9 +41,7 @@ export default function InactiveFastingTimer({
 
         <CardAction>
           {hasPlan ? (
-            <Button onClick={() => startFasting(fastStartsAt ?? undefined)}>
-              Start fasting
-            </Button>
+            <Button onClick={handleStartFasting}>Start fasting</Button>
           ) : (
             <FastingPlanDialog
               dialogTitle='Select your fasting plan'
