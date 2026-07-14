@@ -11,7 +11,7 @@ export interface LevelDefinition {
   requiredXp: number
 }
 
-type AchievementType = 'level' | 'anchor' | 'streak'
+export type AchievementType = 'level' | 'anchor' | 'streak'
 
 export interface Achievement {
   type: AchievementType

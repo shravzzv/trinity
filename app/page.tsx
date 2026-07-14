@@ -59,12 +59,8 @@ export default function Page() {
   return (
     <main className='mx-auto max-w-xl space-y-6 px-6 py-6'>
       <CelebrationDialog
-        open={currentAchievement !== null}
-        title={currentAchievement?.title ?? ''}
-        description={currentAchievement?.description ?? ''}
-        onOpenChange={(open) => {
-          if (!open) dismissAchievement()
-        }}
+        achievement={currentAchievement}
+        onDismiss={dismissAchievement}
       />
 
       <Header />
