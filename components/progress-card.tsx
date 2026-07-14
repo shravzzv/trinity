@@ -8,7 +8,6 @@ import ProgressCardSkeleton from './progress-card-skeleton'
 interface ProgressCardProps {
   xp: number
   fasts: Fast[]
-  level: number
   streak: number
   anchors: number
   isLoading: boolean
@@ -17,7 +16,6 @@ interface ProgressCardProps {
 export default function ProgressCard({
   xp,
   fasts,
-  level,
   streak,
   anchors,
   isLoading,
@@ -29,7 +27,7 @@ export default function ProgressCard({
       <CardContent className='grid grid-cols-3 gap-2 px-2'>
         <StreakDialog fasts={fasts} streak={streak} />
         <AnchorsDialog anchors={anchors} streak={streak} />
-        <LevelsDialog xp={xp} level={level} />
+        <LevelsDialog xp={xp} />
       </CardContent>
     </Card>
   )

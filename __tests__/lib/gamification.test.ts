@@ -1,5 +1,6 @@
 import {
   getLevelForXp,
+  getLevelProgress,
   getLongestStreak,
   getStreakCalendarDays,
   getStreakStatus,
@@ -247,5 +248,61 @@ describe('getLongestStreak', () => {
         createFast({ streakStatus: 'missed' }),
       ]),
     ).toBe(0)
+  })
+})
+
+describe('getLevelProgress', () => {
+  it('returns level 0 progress for a new user', () => {
+    expect(getLevelProgress(0)).toEqual({
+      currentLevel: 0,
+      nextLevel: 1,
+      progress: 0,
+      xpRemaining: 100,
+    })
+  })
+
+  it('calculates progress within level 0', () => {
+    expect(getLevelProgress(50)).toEqual({
+      currentLevel: 0,
+      nextLevel: 1,
+      progress: 50,
+      xpRemaining: 50,
+    })
+  })
+
+  it('returns 0% progress immediately after leveling up', () => {
+    expect(getLevelProgress(100)).toEqual({
+      currentLevel: 1,
+      nextLevel: 2,
+      progress: 0,
+      xpRemaining: 150,
+    })
+  })
+
+  it('calculates progress within an intermediate level', () => {
+    expect(getLevelProgress(175)).toEqual({
+      currentLevel: 1,
+      nextLevel: 2,
+      progress: 50,
+      xpRemaining: 75,
+    })
+  })
+
+  it('returns 100% progress at the maximum level', () => {
+    expect(getLevelProgress(1000)).toEqual({
+      currentLevel: 5,
+      nextLevel: 5,
+      progress: 100,
+      xpRemaining: 0,
+    })
+  })
+
+  it('returns 100% progress when XP exceeds the maximum level', () => {
+    expect(getLevelProgress(5000)).toEqual({
+      currentLevel: 5,
+      nextLevel: 5,
+      progress: 100,
+      xpRemaining: 0,
+    })
   })
 })

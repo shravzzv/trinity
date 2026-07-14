@@ -211,3 +211,46 @@ export const getLongestStreak = (fasts: Fast[]): number => {
 
   return longestStreak
 }
+
+/**
+ * Returns the user's progression towards the next level.
+ *
+ * Progression is calculated from the user's current XP relative to the
+ * current level's XP threshold and the next level's XP threshold.
+ *
+ * Once the highest level has been reached, progress is fixed at 100%
+ * and no further XP is required.
+ *
+ * @param xp The user's total experience points.
+ * @returns An object containing:
+ * - `currentLevel` — the user's current level.
+ * - `nextLevel` — the next attainable level, or the current level if the maximum level has been reached.
+ * - `progress` — percentage progress towards the next level.
+ * - `xpRemaining` — XP still required to reach the next level.
+ */
+export const getLevelProgress = (xp: number) => {
+  const currentLevel = getLevelForXp(xp)
+  const maxLevel = levels.at(-1)!.level
+
+  if (currentLevel === maxLevel) {
+    return {
+      currentLevel,
+      nextLevel: maxLevel,
+      progress: 100,
+      xpRemaining: 0,
+    }
+  }
+
+  const current = levels.find((l) => l.level === currentLevel)!
+  const next = levels.find((l) => l.level === currentLevel + 1)!
+
+  const progress =
+    ((xp - current.requiredXp) / (next.requiredXp - current.requiredXp)) * 100
+
+  return {
+    progress,
+    currentLevel,
+    nextLevel: next.level,
+    xpRemaining: next.requiredXp - xp,
+  }
+}

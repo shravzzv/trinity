@@ -61,7 +61,6 @@ export default function Page() {
       <ProgressCard
         xp={xp}
         fasts={fasts}
-        level={level}
         streak={streak}
         anchors={anchors}
         isLoading={isGamificationLoading}
