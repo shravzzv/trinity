@@ -17,7 +17,7 @@ import { Badge } from './ui/badge'
 import type { StreakStatus } from '@/types/gamification'
 import { cn } from '@/lib/utils'
 import type { Fast } from '@/types/fasting'
-import { getStreakCalendarDays } from '@/lib/gamification'
+import { getLongestStreak, getStreakCalendarDays } from '@/lib/gamification'
 
 const streakCalendarStyles = {
   completed:
@@ -42,10 +42,6 @@ const streakLegend = [
 interface StreakDialogProps {
   fasts: Fast[]
   streak: number
-}
-
-const getLongestStreak = (fasts: Fast[]): number => {
-  return fasts.length
 }
 
 export default function StreakDialog({ fasts, streak }: StreakDialogProps) {

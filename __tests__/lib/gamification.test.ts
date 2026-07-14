@@ -1,8 +1,11 @@
 import {
   getLevelForXp,
+  getLongestStreak,
   getStreakCalendarDays,
   getStreakStatus,
 } from '@/lib/gamification'
+import type { Fast } from '@/types/fasting'
+import type { StreakStatus } from '@/types/gamification'
 
 describe('getStreakStatus', () => {
   it('returns anchored when an Anchor was used', () => {
@@ -172,5 +175,77 @@ describe('getLevelForXp', () => {
   it('returns the highest configured level for XP beyond the final threshold', () => {
     expect(getLevelForXp(1500)).toBe(5)
     expect(getLevelForXp(Number.MAX_SAFE_INTEGER)).toBe(5)
+  })
+})
+
+describe('getLongestStreak', () => {
+  const createFast = ({
+    streakStatus,
+  }: {
+    streakStatus: StreakStatus
+  }): Fast => ({
+    id: crypto.randomUUID(),
+    planId: '16:8',
+    startedAt: '2026-07-01T00:00:00.000Z',
+    endedAt: '2026-07-01T16:00:00.000Z',
+    streakStatus,
+  })
+
+  it('returns 0 when there are no fasts', () => {
+    expect(getLongestStreak([])).toBe(0)
+  })
+
+  it('returns the length of a streak of completed fasts', () => {
+    expect(
+      getLongestStreak([
+        createFast({ streakStatus: 'completed' }),
+        createFast({ streakStatus: 'completed' }),
+        createFast({ streakStatus: 'completed' }),
+      ]),
+    ).toBe(3)
+  })
+
+  it('counts anchored fasts as part of a streak', () => {
+    expect(
+      getLongestStreak([
+        createFast({ streakStatus: 'completed' }),
+        createFast({ streakStatus: 'anchored' }),
+        createFast({ streakStatus: 'completed' }),
+      ]),
+    ).toBe(3)
+  })
+
+  it('resets the current streak after a missed fast', () => {
+    expect(
+      getLongestStreak([
+        createFast({ streakStatus: 'completed' }),
+        createFast({ streakStatus: 'completed' }),
+        createFast({ streakStatus: 'missed' }),
+        createFast({ streakStatus: 'completed' }),
+      ]),
+    ).toBe(2)
+  })
+
+  it('returns the longest streak when multiple streaks exist', () => {
+    expect(
+      getLongestStreak([
+        createFast({ streakStatus: 'completed' }),
+        createFast({ streakStatus: 'missed' }),
+        createFast({ streakStatus: 'completed' }),
+        createFast({ streakStatus: 'anchored' }),
+        createFast({ streakStatus: 'completed' }),
+        createFast({ streakStatus: 'missed' }),
+        createFast({ streakStatus: 'completed' }),
+      ]),
+    ).toBe(3)
+  })
+
+  it('returns 0 when all fasts are missed', () => {
+    expect(
+      getLongestStreak([
+        createFast({ streakStatus: 'missed' }),
+        createFast({ streakStatus: 'missed' }),
+      ]),
+    ).toBe(0)
   })
 })

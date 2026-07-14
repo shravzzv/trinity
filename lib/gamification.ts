@@ -178,3 +178,36 @@ export const getLevelForXp = (xp: number): number => {
 
   return 0
 }
+
+/**
+ * Returns the longest streak contained in the provided fasting history.
+ *
+ * A streak is increased by both completed and anchored fasts, since
+ * Anchors preserve streak continuity. Missed fasts end the current
+ * streak and start a new one.
+ *
+ * The supplied fasts must be sorted in ascending chronological order.
+ *
+ * @param fasts The user's fasting history.
+ * @returns The length of the longest streak.
+ */
+export const getLongestStreak = (fasts: Fast[]): number => {
+  let currentStreak = 0
+  let longestStreak = 0
+
+  for (const fast of fasts) {
+    switch (fast.streakStatus) {
+      case 'completed':
+      case 'anchored':
+        currentStreak++
+        longestStreak = Math.max(longestStreak, currentStreak)
+        break
+
+      case 'missed':
+        currentStreak = 0
+        break
+    }
+  }
+
+  return longestStreak
+}
