@@ -30,7 +30,7 @@ export default function WeightStatisticsSkeleton() {
           <Skeleton className='h-10 w-36' />
         </div>
 
-        <div className='h-[20vh]'>
+        <div className='h-[35vh]'>
           <svg
             className='h-full w-full animate-pulse'
             viewBox='0 0 100 40'
