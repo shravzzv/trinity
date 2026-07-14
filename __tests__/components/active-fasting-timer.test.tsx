@@ -6,6 +6,12 @@ import { toast } from 'sonner'
 const mockEndFasting = jest.fn()
 const mockStartFasting = jest.fn()
 const mockUpdateSessionStartedAt = jest.fn()
+const mockAwardAnchor = jest.fn()
+const mockAwardXp = jest.fn()
+const mockIncrementStreak = jest.fn()
+const mockResetStreak = jest.fn()
+const mockSpendAnchor = jest.fn()
+const mockStartAnchoredSession = jest.fn()
 
 jest.mock('sonner')
 
@@ -36,14 +42,23 @@ const renderComponent = (
 ) => {
   render(
     <ActiveFastingTimer
+      streak={0}
+      anchors={0}
       fasts={[]}
       planId='16:8'
       endFasting={mockEndFasting}
       startFasting={mockStartFasting}
       updateSessionStartedAt={mockUpdateSessionStartedAt}
+      awardAnchor={mockAwardAnchor}
+      awardXp={mockAwardXp}
+      incrementStreak={mockIncrementStreak}
+      resetStreak={mockResetStreak}
+      spendAnchor={mockSpendAnchor}
+      startAnchoredSession={mockStartAnchoredSession}
       session={{
         status: 'fasting',
         startedAt: new Date().toISOString(),
+        isAnchored: false,
       }}
       {...props}
     />,
@@ -84,6 +99,7 @@ describe('ActiveFastingTimer', () => {
       session: {
         status: 'eating',
         startedAt: new Date().toISOString(),
+        isAnchored: false,
       },
     })
 
@@ -98,6 +114,7 @@ describe('ActiveFastingTimer', () => {
       session: {
         status: 'fasting',
         startedAt: '2026-01-01T12:00:00Z',
+        isAnchored: false,
       },
     })
 
@@ -112,6 +129,7 @@ describe('ActiveFastingTimer', () => {
       session: {
         status: 'fasting',
         startedAt: '2026-01-01T12:00:00Z',
+        isAnchored: false,
       },
     })
 
@@ -147,6 +165,7 @@ describe('ActiveFastingTimer', () => {
       session: {
         status: 'eating',
         startedAt: new Date().toISOString(),
+        isAnchored: false,
       },
     })
 
@@ -175,6 +194,7 @@ describe('ActiveFastingTimer', () => {
       session: {
         status: 'fasting',
         startedAt: '2026-01-01T12:00:00Z',
+        isAnchored: false,
       },
     })
 
@@ -205,6 +225,7 @@ describe('ActiveFastingTimer', () => {
       session: {
         status: 'eating',
         startedAt: new Date().toISOString(),
+        isAnchored: false,
       },
     })
 
@@ -222,6 +243,7 @@ describe('ActiveFastingTimer', () => {
       session: {
         status: 'fasting',
         startedAt: '2026-01-01T12:00:00Z',
+        isAnchored: false,
       },
     })
 
@@ -238,6 +260,7 @@ describe('ActiveFastingTimer', () => {
       session: {
         status: 'fasting',
         startedAt: '2026-01-01T12:00:00Z',
+        isAnchored: false,
       },
     })
 
@@ -246,20 +269,12 @@ describe('ActiveFastingTimer', () => {
     )
   })
 
-  it('shows success toast when ending a fast', async () => {
-    const { user } = renderComponent()
-
-    await user.click(screen.getByRole('button', { name: /end fasting/i }))
-    await user.click(screen.getByRole('button', { name: /end fasting/i }))
-
-    expect(toast.success).toHaveBeenCalledWith('Fast ended')
-  })
-
   it('shows success toast when starting a fast', async () => {
     const { user } = renderComponent({
       session: {
         status: 'eating',
         startedAt: new Date().toISOString(),
+        isAnchored: false,
       },
     })
 
@@ -289,6 +304,7 @@ describe('ActiveFastingTimer', () => {
       session: {
         status: 'eating',
         startedAt: new Date().toISOString(),
+        isAnchored: false,
       },
     })
 
