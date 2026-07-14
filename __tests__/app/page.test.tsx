@@ -1,4 +1,4 @@
-import Page from '@/app/page'
+import Page from '@/app/(site)/page'
 import { render, screen, waitFor } from '@testing-library/react'
 
 jest.mock('@/components/fasting-plan-card', () => ({
