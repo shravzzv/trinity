@@ -14,15 +14,28 @@ import {
   AlertDialogTrigger,
 } from './ui/alert-dialog'
 import { Button } from './ui/button'
+import { getNextScheduledFastStartedAt } from '@/lib/fasting'
+import { formatRelativeDay } from '@/lib/time'
 
 interface AnchorConfirmationDialogProps {
+  anchors: number
+  startedAt: string
   onSubmit: () => void
 }
 
 export default function AnchorConfirmationDialog({
+  anchors,
   onSubmit,
+  startedAt,
 }: AnchorConfirmationDialogProps) {
-  const anchorsAvailable: number = 1
+  const anchorsAvailable = anchors
+
+  const nextStartedAt = getNextScheduledFastStartedAt(new Date(startedAt))
+  const nextStartedAtRelativeDay = formatRelativeDay(nextStartedAt)
+  const nextStartedAtFormatted = nextStartedAt.toLocaleTimeString([], {
+    hour: 'numeric',
+    minute: '2-digit',
+  })
 
   return (
     <AlertDialog>
@@ -50,14 +63,19 @@ export default function AnchorConfirmationDialog({
             <span>
               You can start another fast at any time. Otherwise, your next
               scheduled fasting session begins at{' '}
-              <span className='font-medium'>6:00 p.m. tomorrow</span> after the
-              next eating window.
+              <span className='font-medium'>
+                {nextStartedAtFormatted} {nextStartedAtRelativeDay}
+              </span>
+              .
             </span>
 
             <span>
               This action is <span className='font-medium'>irreversible</span>.
               After use, you&apos;ll have{' '}
-              <span className='font-medium'>0 Anchors remaining</span>.
+              <span className='font-medium'>
+                {anchorsAvailable - 1} Anchors remaining
+              </span>
+              .
             </span>
           </AlertDialogDescription>
         </AlertDialogHeader>

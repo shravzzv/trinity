@@ -570,3 +570,18 @@ export const getInitialSessionStartedAt = (
 
   return startedAt
 }
+
+/**
+ * Returns the start time of the next scheduled fasting session.
+ *
+ * The returned value preserves the original time of day and advances
+ * the calendar date by one day. The input date is not mutated.
+ *
+ * @param startedAt The current fasting session's start time.
+ * @returns The next scheduled fasting session's start time.
+ */
+export const getNextScheduledFastStartedAt = (startedAt: Date): Date => {
+  const next = new Date(startedAt)
+  next.setDate(next.getDate() + 1)
+  return next
+}

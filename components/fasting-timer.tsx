@@ -13,8 +13,10 @@ import FastingTimerSkeleton from './skeletons/fasting-timer-skeleton'
 
 interface FastingTimerProps {
   fasts: Fast[]
+  anchors: number
   isLoading: boolean
   resetStreak: () => void
+  spendAnchor: () => void
   incrementStreak: () => void
   planId: FastingPlanId | null
   session: FastingSession | null

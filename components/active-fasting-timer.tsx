@@ -43,8 +43,10 @@ import { cn } from '@/lib/utils'
 
 interface ActiveFastingTimerProps {
   fasts: Fast[]
+  anchors: number
   planId: FastingPlanId
   session: FastingSession
+  spendAnchor: () => void
   resetStreak: () => void
   incrementStreak: () => void
   startAnchoredSession: () => void
@@ -56,8 +58,10 @@ interface ActiveFastingTimerProps {
 export default function ActiveFastingTimer({
   fasts,
   planId,
+  anchors,
   endFasting,
   resetStreak,
+  spendAnchor,
   startFasting,
   incrementStreak,
   startAnchoredSession,
@@ -261,8 +265,11 @@ export default function ActiveFastingTimer({
         {!isAnchored && isFasting && (
           <div className='flex justify-center'>
             <AnchorConfirmationDialog
+              anchors={anchors}
+              startedAt={startedAt}
               onSubmit={() => {
                 startAnchoredSession()
+                spendAnchor()
                 toast.success('Anchored fasting session started')
               }}
             />

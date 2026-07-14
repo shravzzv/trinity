@@ -85,7 +85,7 @@ interface UseGamificationResult {
 export const useGamification = (): UseGamificationResult => {
   const [xp, setXp] = useState(0)
   const [streak, setStreak] = useState(0)
-  const [anchors, setAnchors] = useState(0)
+  const [anchors, setAnchors] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
 
   const level = getLevelForXp(xp)
