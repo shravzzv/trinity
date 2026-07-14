@@ -1,9 +1,11 @@
+import { ANCHOR_STREAK_REQUIREMENT } from '@/constants/gamification'
 import {
   getLevelForXp,
   getLevelProgress,
   getLongestStreak,
   getStreakCalendarDays,
   getStreakStatus,
+  shouldAwardAnchor,
 } from '@/lib/gamification'
 import type { Fast } from '@/types/fasting'
 import type { StreakStatus } from '@/types/gamification'
@@ -304,5 +306,28 @@ describe('getLevelProgress', () => {
       progress: 100,
       xpRemaining: 0,
     })
+  })
+})
+
+describe('shouldAwardAnchor', () => {
+  it('does not award an Anchor for a streak of zero', () => {
+    expect(shouldAwardAnchor(0)).toBe(false)
+  })
+
+  it('does not award an Anchor before reaching the requirement', () => {
+    expect(shouldAwardAnchor(ANCHOR_STREAK_REQUIREMENT - 1)).toBe(false)
+  })
+
+  it('awards an Anchor when the requirement is reached', () => {
+    expect(shouldAwardAnchor(ANCHOR_STREAK_REQUIREMENT)).toBe(true)
+  })
+
+  it('does not award an Anchor between milestones', () => {
+    expect(shouldAwardAnchor(ANCHOR_STREAK_REQUIREMENT + 1)).toBe(false)
+  })
+
+  it('awards an Anchor at subsequent multiples of the requirement', () => {
+    expect(shouldAwardAnchor(ANCHOR_STREAK_REQUIREMENT * 2)).toBe(true)
+    expect(shouldAwardAnchor(ANCHOR_STREAK_REQUIREMENT * 3)).toBe(true)
   })
 })

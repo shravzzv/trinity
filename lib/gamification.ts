@@ -22,7 +22,7 @@
  */
 
 import { fastingPlans } from '@/constants/fasting-plans'
-import { levels } from '@/constants/gamification'
+import { ANCHOR_STREAK_REQUIREMENT, levels } from '@/constants/gamification'
 import type { Fast, FastingPlanId } from '@/types/fasting'
 import type { StreakStatus } from '@/types/gamification'
 
@@ -253,4 +253,20 @@ export const getLevelProgress = (xp: number) => {
     nextLevel: next.level,
     xpRemaining: next.requiredXp - xp,
   }
+}
+
+/**
+ * Returns whether completing a fast with the given streak should award
+ * an Anchor.
+ *
+ * An Anchor is awarded each time the user's completed-fast streak
+ * reaches a multiple of {@link ANCHOR_STREAK_REQUIREMENT}.
+ *
+ * Anchored fasts are excluded from this calculation by the caller.
+ *
+ * @param streak The completed-fast streak after the current fast.
+ * @returns Whether an Anchor should be awarded.
+ */
+export const shouldAwardAnchor = (streak: number): boolean => {
+  return streak > 0 && streak % ANCHOR_STREAK_REQUIREMENT === 0
 }

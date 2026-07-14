@@ -68,10 +68,12 @@ export default function Page() {
       <FastingTimer
         fasts={fasts}
         planId={planId}
+        streak={streak}
         anchors={anchors}
         session={session}
         endFasting={endFasting}
         resetStreak={resetStreak}
+        awardAnchor={awardAnchor}
         spendAnchor={spendAnchor}
         startFasting={startFasting}
         updatePlanId={updatePlanId}

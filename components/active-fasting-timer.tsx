@@ -40,12 +40,15 @@ import { getActiveSessionStatistics } from '@/lib/fasting'
 import { Badge } from './ui/badge'
 import AnchorConfirmationDialog from './anchor-confirmation-dialog'
 import { cn } from '@/lib/utils'
+import { shouldAwardAnchor } from '@/lib/gamification'
 
 interface ActiveFastingTimerProps {
   fasts: Fast[]
+  streak: number
   anchors: number
   planId: FastingPlanId
   session: FastingSession
+  awardAnchor: () => void
   spendAnchor: () => void
   resetStreak: () => void
   incrementStreak: () => void
@@ -58,9 +61,11 @@ interface ActiveFastingTimerProps {
 export default function ActiveFastingTimer({
   fasts,
   planId,
+  streak,
   anchors,
   endFasting,
   resetStreak,
+  awardAnchor,
   spendAnchor,
   startFasting,
   incrementStreak,
@@ -90,7 +95,8 @@ export default function ActiveFastingTimer({
   })
 
   const shouldIncrementStreak =
-    isAnchored || (isFasting && hasExceededSessionLength)
+    (isFasting && hasExceededSessionLength) || isAnchored
+  const shouldResetStreak = isFasting && !shouldIncrementStreak
 
   const handleSessionChange = async () => {
     try {
@@ -105,8 +111,14 @@ export default function ActiveFastingTimer({
         toast.success('Fast started')
       }
 
-      if (shouldIncrementStreak) incrementStreak()
-      else if (isFasting) resetStreak()
+      if (shouldIncrementStreak) {
+        incrementStreak()
+
+        const nextStreak = streak + 1
+        if (shouldAwardAnchor(nextStreak)) awardAnchor()
+      }
+
+      if (shouldResetStreak) resetStreak()
     } catch (error) {
       if (error instanceof Error) toast.error(error.message)
     }
