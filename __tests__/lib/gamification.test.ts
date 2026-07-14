@@ -179,6 +179,10 @@ describe('getLevelForXp', () => {
     expect(getLevelForXp(1500)).toBe(5)
     expect(getLevelForXp(Number.MAX_SAFE_INTEGER)).toBe(5)
   })
+
+  it('returns 0 for an invalid Xp', () => {
+    expect(getLevelForXp(-Infinity)).toBe(0)
+  })
 })
 
 describe('getLongestStreak', () => {
