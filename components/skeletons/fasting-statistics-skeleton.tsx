@@ -23,14 +23,25 @@ export default function FastingStatisticsSkeleton() {
         </CardAction>
       </CardHeader>
 
-      <CardContent className='flex h-[25vh] items-end justify-around gap-2'>
-        <Skeleton className='h-16 flex-1 rounded-lg' />
-        <Skeleton className='h-28 flex-1 rounded-lg' />
-        <Skeleton className='h-20 flex-1 rounded-lg' />
-        <Skeleton className='h-36 flex-1 rounded-lg' />
-        <Skeleton className='h-24 flex-1 rounded-lg' />
-        <Skeleton className='h-40 flex-1 rounded-lg' />
-        <Skeleton className='h-30 flex-1 rounded-lg' />
+      <CardContent>
+        <div className='flex h-[35vh] items-end justify-around gap-2'>
+          <Skeleton className='h-16 flex-1 rounded-lg' />
+          <Skeleton className='h-28 flex-1 rounded-lg' />
+          <Skeleton className='h-20 flex-1 rounded-lg' />
+          <Skeleton className='h-36 flex-1 rounded-lg' />
+          <Skeleton className='h-24 flex-1 rounded-lg' />
+          <Skeleton className='h-40 flex-1 rounded-lg' />
+          <Skeleton className='h-30 flex-1 rounded-lg' />
+        </div>
+
+        <div className='flex items-center justify-center gap-5 py-2 text-xs'>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className='flex items-center gap-2'>
+              <Skeleton className='size-3 rounded-full' />
+              <Skeleton className='h-3 w-14 md:w-16' />
+            </div>
+          ))}
+        </div>
       </CardContent>
 
       <CardFooter className='flex flex-col gap-4'>
