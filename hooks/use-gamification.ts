@@ -70,6 +70,8 @@ interface UseGamificationResult {
   resetStreak: () => void
 }
 
+const INITIAL_ANCHORS = 1
+
 /**
  * Manages Trinity's gamification state.
  *
@@ -85,7 +87,7 @@ interface UseGamificationResult {
 export const useGamification = (): UseGamificationResult => {
   const [xp, setXp] = useState(0)
   const [streak, setStreak] = useState(0)
-  const [anchors, setAnchors] = useState(1)
+  const [anchors, setAnchors] = useState(INITIAL_ANCHORS)
   const [isLoading, setIsLoading] = useState(true)
 
   const level = getLevelForXp(xp)
