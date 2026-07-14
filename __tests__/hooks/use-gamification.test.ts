@@ -241,4 +241,128 @@ describe('useGamification', () => {
       expect(localStorage.getItem(ANCHORS_STORAGE_KEY)).toBe('2')
     })
   })
+
+  describe('achievements', () => {
+    it('has no current achievement initially', async () => {
+      const { result } = renderHook(() => useGamification())
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+      expect(result.current.currentAchievement).toBeNull()
+    })
+
+    it('queues a level achievement when reaching a new level', async () => {
+      const { result } = renderHook(() => useGamification())
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+      act(() => {
+        result.current.awardXp(100)
+      })
+
+      expect(result.current.currentAchievement).toEqual({
+        type: 'level',
+        title: 'Level 1 reached!',
+        description:
+          'Keep going. Every fast brings you closer to your next milestone.',
+      })
+    })
+
+    it('does not queue a level achievement when staying within the same level', async () => {
+      const { result } = renderHook(() => useGamification())
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+      act(() => {
+        result.current.awardXp(25)
+      })
+
+      expect(result.current.currentAchievement).toBeNull()
+    })
+
+    it('queues an Anchor achievement', async () => {
+      const { result } = renderHook(() => useGamification())
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+      act(() => {
+        result.current.awardAnchor()
+      })
+
+      expect(result.current.currentAchievement).toEqual({
+        type: 'anchor',
+        title: 'Anchor earned!',
+        description: 'You earned an Anchor by maintaining your fasting streak.',
+      })
+    })
+
+    it('queues a streak achievement at a milestone', async () => {
+      const { result } = renderHook(() => useGamification())
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+      act(() => {
+        for (let i = 0; i < 7; i++) {
+          result.current.incrementStreak()
+        }
+      })
+
+      expect(result.current.currentAchievement).toEqual({
+        type: 'streak',
+        title: '7 day streak!',
+        description: 'Your consistency is paying off. Keep the momentum going!',
+      })
+    })
+
+    it('does not queue a streak achievement before a milestone', async () => {
+      const { result } = renderHook(() => useGamification())
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+      act(() => {
+        for (let i = 0; i < 6; i++) {
+          result.current.incrementStreak()
+        }
+      })
+
+      expect(result.current.currentAchievement).toBeNull()
+    })
+
+    it('dismisses the current achievement', async () => {
+      const { result } = renderHook(() => useGamification())
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+      act(() => {
+        result.current.awardAnchor()
+      })
+
+      expect(result.current.currentAchievement).not.toBeNull()
+
+      act(() => {
+        result.current.dismissAchievement()
+      })
+
+      expect(result.current.currentAchievement).toBeNull()
+    })
+
+    it('shows queued achievements in the order they were earned', async () => {
+      const { result } = renderHook(() => useGamification())
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false))
+
+      act(() => {
+        result.current.awardAnchor()
+        result.current.awardXp(100)
+      })
+
+      expect(result.current.currentAchievement?.type).toBe('anchor')
+
+      act(() => {
+        result.current.dismissAchievement()
+      })
+
+      expect(result.current.currentAchievement?.type).toBe('level')
+    })
+  })
 })
