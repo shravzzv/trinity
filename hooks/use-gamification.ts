@@ -1,11 +1,11 @@
 'use client'
 
+import { INITIAL_ANCHORS } from '@/constants/gamification'
 import {
   ANCHORS_STORAGE_KEY,
   STREAK_STORAGE_KEY,
   XP_STORAGE_KEY,
 } from '@/constants/storage-keys'
-import { getLevelForXp } from '@/lib/gamification'
 import { useEffect, useState } from 'react'
 
 /**
@@ -19,11 +19,6 @@ interface UseGamificationResult {
    * The user's total experience points.
    */
   xp: number
-
-  /**
-   * The user's current level.
-   */
-  level: number
 
   /**
    * The user's current consecutive streak.
@@ -70,8 +65,6 @@ interface UseGamificationResult {
   resetStreak: () => void
 }
 
-const INITIAL_ANCHORS = 1
-
 /**
  * Manages Trinity's gamification state.
  *
@@ -90,8 +83,6 @@ export const useGamification = (): UseGamificationResult => {
   const [anchors, setAnchors] = useState(INITIAL_ANCHORS)
   const [isLoading, setIsLoading] = useState(true)
 
-  const level = getLevelForXp(xp)
-
   const awardXp = (amount: number) => {
     setXp((prev) => prev + amount)
   }
@@ -101,8 +92,10 @@ export const useGamification = (): UseGamificationResult => {
   }
 
   const spendAnchor = () => {
-    if (anchors < 1) return
-    setAnchors((prev) => prev - 1)
+    setAnchors((prev) => {
+      if (prev < 1) return prev
+      return prev - 1
+    })
   }
 
   const incrementStreak = () => {
@@ -219,7 +212,6 @@ export const useGamification = (): UseGamificationResult => {
 
   return {
     xp,
-    level,
     streak,
     anchors,
     awardXp,

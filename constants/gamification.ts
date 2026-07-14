@@ -78,3 +78,5 @@ export const xpRewards = {
 } as const
 
 export const ANCHOR_STREAK_REQUIREMENT = 7
+
+export const INITIAL_ANCHORS = 1
