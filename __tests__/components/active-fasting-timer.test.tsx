@@ -1,4 +1,5 @@
 import ActiveFastingTimer from '@/components/active-fasting-timer'
+import { ANCHOR_STREAK_REQUIREMENT, xpRewards } from '@/constants/gamification'
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { toast } from 'sonner'
@@ -6,6 +7,12 @@ import { toast } from 'sonner'
 const mockEndFasting = jest.fn()
 const mockStartFasting = jest.fn()
 const mockUpdateSessionStartedAt = jest.fn()
+const mockAwardAnchor = jest.fn()
+const mockAwardXp = jest.fn()
+const mockIncrementStreak = jest.fn()
+const mockResetStreak = jest.fn()
+const mockSpendAnchor = jest.fn()
+const mockStartAnchoredSession = jest.fn()
 
 jest.mock('sonner')
 
@@ -36,14 +43,23 @@ const renderComponent = (
 ) => {
   render(
     <ActiveFastingTimer
+      streak={0}
+      anchors={0}
       fasts={[]}
       planId='16:8'
       endFasting={mockEndFasting}
       startFasting={mockStartFasting}
       updateSessionStartedAt={mockUpdateSessionStartedAt}
+      awardAnchor={mockAwardAnchor}
+      awardXp={mockAwardXp}
+      incrementStreak={mockIncrementStreak}
+      resetStreak={mockResetStreak}
+      spendAnchor={mockSpendAnchor}
+      startAnchoredSession={mockStartAnchoredSession}
       session={{
         status: 'fasting',
         startedAt: new Date().toISOString(),
+        isAnchored: false,
       }}
       {...props}
     />,
@@ -76,7 +92,7 @@ describe('ActiveFastingTimer', () => {
   it('renders fasting status', () => {
     renderComponent()
 
-    expect(screen.getByText('Fasting')).toBeInTheDocument()
+    expect(screen.getByText(/^Fasting$/)).toBeInTheDocument()
   })
 
   it('renders eating status', () => {
@@ -84,10 +100,11 @@ describe('ActiveFastingTimer', () => {
       session: {
         status: 'eating',
         startedAt: new Date().toISOString(),
+        isAnchored: false,
       },
     })
 
-    expect(screen.getByText('Eating')).toBeInTheDocument()
+    expect(screen.getByText(/^Eating$/)).toBeInTheDocument()
   })
 
   it('renders countdown timer', () => {
@@ -98,6 +115,7 @@ describe('ActiveFastingTimer', () => {
       session: {
         status: 'fasting',
         startedAt: '2026-01-01T12:00:00Z',
+        isAnchored: false,
       },
     })
 
@@ -112,6 +130,7 @@ describe('ActiveFastingTimer', () => {
       session: {
         status: 'fasting',
         startedAt: '2026-01-01T12:00:00Z',
+        isAnchored: false,
       },
     })
 
@@ -147,6 +166,7 @@ describe('ActiveFastingTimer', () => {
       session: {
         status: 'eating',
         startedAt: new Date().toISOString(),
+        isAnchored: false,
       },
     })
 
@@ -175,6 +195,7 @@ describe('ActiveFastingTimer', () => {
       session: {
         status: 'fasting',
         startedAt: '2026-01-01T12:00:00Z',
+        isAnchored: false,
       },
     })
 
@@ -195,9 +216,12 @@ describe('ActiveFastingTimer', () => {
     const { user } = renderComponent()
 
     await user.click(screen.getByRole('button', { name: /end fasting/i }))
-    await user.click(screen.getByRole('button', { name: /continue/i }))
+    await user.click(screen.getByRole('button', { name: /end fasting/i }))
 
     expect(mockEndFasting).toHaveBeenCalledTimes(1)
+    expect(mockEndFasting).toHaveBeenCalledTimes(1)
+    expect(mockAwardXp).toHaveBeenCalledWith(xpRewards.missedFast)
+    expect(mockResetStreak).toHaveBeenCalled()
   })
 
   it('calls startFasting when confirmed during eating', async () => {
@@ -205,13 +229,20 @@ describe('ActiveFastingTimer', () => {
       session: {
         status: 'eating',
         startedAt: new Date().toISOString(),
+        isAnchored: false,
       },
     })
 
     await user.click(screen.getByRole('button', { name: /start fasting/i }))
-    await user.click(screen.getByRole('button', { name: /continue/i }))
+    await user.click(screen.getByRole('button', { name: /start fasting/i }))
 
     expect(mockStartFasting).toHaveBeenCalledTimes(1)
+    expect(mockStartFasting).toHaveBeenCalledTimes(1)
+
+    expect(mockAwardXp).not.toHaveBeenCalled()
+    expect(mockIncrementStreak).not.toHaveBeenCalled()
+    expect(mockResetStreak).not.toHaveBeenCalled()
+    expect(mockAwardAnchor).not.toHaveBeenCalled()
   })
 
   it('shows remaining time in confirmation dialog', async () => {
@@ -222,6 +253,7 @@ describe('ActiveFastingTimer', () => {
       session: {
         status: 'fasting',
         startedAt: '2026-01-01T12:00:00Z',
+        isAnchored: false,
       },
     })
 
@@ -238,6 +270,7 @@ describe('ActiveFastingTimer', () => {
       session: {
         status: 'fasting',
         startedAt: '2026-01-01T12:00:00Z',
+        isAnchored: false,
       },
     })
 
@@ -246,25 +279,17 @@ describe('ActiveFastingTimer', () => {
     )
   })
 
-  it('shows success toast when ending a fast', async () => {
-    const { user } = renderComponent()
-
-    await user.click(screen.getByRole('button', { name: /end fasting/i }))
-    await user.click(screen.getByRole('button', { name: /continue/i }))
-
-    expect(toast.success).toHaveBeenCalledWith('Fast ended')
-  })
-
   it('shows success toast when starting a fast', async () => {
     const { user } = renderComponent({
       session: {
         status: 'eating',
         startedAt: new Date().toISOString(),
+        isAnchored: false,
       },
     })
 
     await user.click(screen.getByRole('button', { name: /start fasting/i }))
-    await user.click(screen.getByRole('button', { name: /continue/i }))
+    await user.click(screen.getByRole('button', { name: /start fasting/i }))
 
     expect(toast.success).toHaveBeenCalledWith('Fast started')
   })
@@ -275,7 +300,7 @@ describe('ActiveFastingTimer', () => {
     const { user } = renderComponent()
 
     await user.click(screen.getByRole('button', { name: /end fasting/i }))
-    await user.click(screen.getByRole('button', { name: /continue/i }))
+    await user.click(screen.getByRole('button', { name: /end fasting/i }))
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('Boom')
@@ -289,11 +314,12 @@ describe('ActiveFastingTimer', () => {
       session: {
         status: 'eating',
         startedAt: new Date().toISOString(),
+        isAnchored: false,
       },
     })
 
     await user.click(screen.getByRole('button', { name: /start fasting/i }))
-    await user.click(screen.getByRole('button', { name: /continue/i }))
+    await user.click(screen.getByRole('button', { name: /start fasting/i }))
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('Boom')
@@ -324,5 +350,105 @@ describe('ActiveFastingTimer', () => {
     )
 
     expect(toast.success).toHaveBeenCalledWith('Session updated')
+  })
+
+  it('awards completed fast XP when the fasting goal has been reached', async () => {
+    jest.setSystemTime(new Date('2026-01-02T05:00:00Z'))
+
+    const { user } = renderComponent({
+      session: {
+        status: 'fasting',
+        startedAt: '2026-01-01T12:00:00Z',
+        isAnchored: false,
+      },
+    })
+
+    await user.click(screen.getByRole('button', { name: /end fasting/i }))
+    await user.click(screen.getByRole('button', { name: /end fasting/i }))
+
+    expect(mockAwardXp).toHaveBeenCalledWith(xpRewards.completedFast)
+  })
+
+  it('increments the streak after completing a fast', async () => {
+    jest.setSystemTime(new Date('2026-01-02T05:00:00Z'))
+
+    const { user } = renderComponent({
+      session: {
+        status: 'fasting',
+        startedAt: '2026-01-01T12:00:00Z',
+        isAnchored: false,
+      },
+    })
+
+    await user.click(screen.getByRole('button', { name: /end fasting/i }))
+    await user.click(screen.getByRole('button', { name: /end fasting/i }))
+
+    expect(mockIncrementStreak).toHaveBeenCalled()
+  })
+
+  it('awards an Anchor when the streak reaches the requirement', async () => {
+    jest.setSystemTime(new Date('2026-01-02T05:00:00Z'))
+
+    const { user } = renderComponent({
+      streak: ANCHOR_STREAK_REQUIREMENT - 1,
+      session: {
+        status: 'fasting',
+        startedAt: '2026-01-01T12:00:00Z',
+        isAnchored: false,
+      },
+    })
+
+    await user.click(screen.getByRole('button', { name: /end fasting/i }))
+    await user.click(screen.getByRole('button', { name: /end fasting/i }))
+
+    expect(mockAwardAnchor).toHaveBeenCalled()
+  })
+
+  it('does not award an Anchor before the streak requirement is reached', async () => {
+    jest.setSystemTime(new Date('2026-01-02T05:00:00Z'))
+
+    const { user } = renderComponent({
+      streak: 2,
+      session: {
+        status: 'fasting',
+        startedAt: '2026-01-01T12:00:00Z',
+        isAnchored: false,
+      },
+    })
+
+    await user.click(screen.getByRole('button', { name: /end fasting/i }))
+    await user.click(screen.getByRole('button', { name: /end fasting/i }))
+
+    expect(mockAwardAnchor).not.toHaveBeenCalled()
+  })
+
+  it('starts a new fast when ending an anchored fast', async () => {
+    const { user } = renderComponent({
+      session: {
+        status: 'fasting',
+        startedAt: new Date().toISOString(),
+        isAnchored: true,
+      },
+    })
+
+    await user.click(screen.getByRole('button', { name: /start fasting/i }))
+    await user.click(screen.getByRole('button', { name: /start fasting/i }))
+
+    expect(mockStartFasting).toHaveBeenCalled()
+    expect(mockAwardXp).toHaveBeenCalledWith(xpRewards.completedAnchoredFast)
+    expect(mockIncrementStreak).toHaveBeenCalled()
+  })
+
+  it('starts an anchored fast and spends an Anchor', async () => {
+    const { user } = renderComponent({
+      anchors: 1,
+    })
+
+    await user.click(screen.getByRole('button', { name: /use anchor/i }))
+    await user.click(screen.getByRole('button', { name: /use anchor/i }))
+
+    expect(mockStartAnchoredSession).toHaveBeenCalled()
+    expect(mockSpendAnchor).toHaveBeenCalled()
+    expect(mockAwardXp).toHaveBeenCalledWith(xpRewards.startedAnchoredFast)
   })
 })

@@ -1,0 +1,34 @@
+import { Card, CardContent } from './ui/card'
+import StreakDialog from './streak-dialog'
+import AnchorsDialog from './anchors-dialog'
+import LevelsDialog from './levels-dialog'
+import type { Fast } from '@/types/fasting'
+import ProgressCardSkeleton from './progress-card-skeleton'
+
+interface ProgressCardProps {
+  xp: number
+  fasts: Fast[]
+  streak: number
+  anchors: number
+  isLoading: boolean
+}
+
+export default function ProgressCard({
+  xp,
+  fasts,
+  streak,
+  anchors,
+  isLoading,
+}: ProgressCardProps) {
+  if (isLoading) return <ProgressCardSkeleton />
+
+  return (
+    <Card className='py-2'>
+      <CardContent className='grid grid-cols-3 gap-2 px-2'>
+        <StreakDialog fasts={fasts} streak={streak} />
+        <AnchorsDialog anchors={anchors} streak={streak} />
+        <LevelsDialog xp={xp} />
+      </CardContent>
+    </Card>
+  )
+}

@@ -48,13 +48,15 @@ jest.mock('@/components/preferred-fast-time-dialog', () => {
 const mockUpdatePlanId = jest.fn()
 const mockUpdatePreferredFastStartTime = jest.fn()
 const mockClearPreferredFastStartTime = jest.fn()
+const mockAwardXp = jest.fn()
 
 const renderFastingPlanCard = (props = {}) =>
   render(
     <FastingPlanCard
-      isLoading={false}
       planId='16:8'
+      isLoading={false}
       preferredFastStartTime={null}
+      awardXp={mockAwardXp}
       updatePlanId={mockUpdatePlanId}
       updatePreferredFastStartTime={mockUpdatePreferredFastStartTime}
       clearPreferredFastStartTime={mockClearPreferredFastStartTime}

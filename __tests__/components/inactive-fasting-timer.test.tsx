@@ -16,6 +16,7 @@ jest.mock('@/lib/fasting', () => ({
 
 const startFastingMock = jest.fn()
 const updatePlanIdMock = jest.fn()
+const mockAwardXp = jest.fn()
 
 const renderComponent = ({
   planId = '16:8' as FastingPlanId | null,
@@ -26,6 +27,7 @@ const renderComponent = ({
   render(
     <InactiveFastingTimer
       planId={planId}
+      awardXp={mockAwardXp}
       startFasting={startFastingMock}
       updatePlanId={updatePlanIdMock}
       preferredFastStartTime={preferredFastStartTime}

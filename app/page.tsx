@@ -8,6 +8,9 @@ import TargetWeightCard from '@/components/target-weight-card'
 import WeightStatistics from '@/components/weight-statistics'
 import { useFasting } from '@/hooks/use-fasting'
 import { useWeight } from '@/hooks/use-weight'
+import ProgressCard from '@/components/progress-card'
+import { useGamification } from '@/hooks/use-gamification'
+import CelebrationDialog from '@/components/celebration-dialog'
 
 export default function Page() {
   const {
@@ -20,6 +23,7 @@ export default function Page() {
     endFasting,
     startFasting,
     updatePlanId,
+    startAnchoredSession,
     preferredFastStartTime,
     updateSessionStartedAt,
     clearPreferredFastStartTime,
@@ -38,18 +42,53 @@ export default function Page() {
     isLoading: isWeightStateLoading,
   } = useWeight()
 
+  const {
+    xp,
+    streak,
+    anchors,
+    awardXp,
+    awardAnchor,
+    spendAnchor,
+    resetStreak,
+    incrementStreak,
+    currentAchievement,
+    dismissAchievement,
+    isLoading: isGamificationLoading,
+  } = useGamification()
+
   return (
     <main className='mx-auto max-w-xl space-y-6 px-6 py-6'>
+      <CelebrationDialog
+        achievement={currentAchievement}
+        onDismiss={dismissAchievement}
+      />
+
       <Header />
+
+      <ProgressCard
+        xp={xp}
+        fasts={fasts}
+        streak={streak}
+        anchors={anchors}
+        isLoading={isGamificationLoading}
+      />
 
       <FastingTimer
         fasts={fasts}
         planId={planId}
+        streak={streak}
+        anchors={anchors}
         session={session}
+        awardXp={awardXp}
         endFasting={endFasting}
+        resetStreak={resetStreak}
+        awardAnchor={awardAnchor}
+        spendAnchor={spendAnchor}
         startFasting={startFasting}
         updatePlanId={updatePlanId}
+        incrementStreak={incrementStreak}
         isLoading={isFastingStateLoading}
+        startAnchoredSession={startAnchoredSession}
         updateSessionStartedAt={updateSessionStartedAt}
         preferredFastStartTime={preferredFastStartTime}
       />
@@ -66,6 +105,7 @@ export default function Page() {
 
       <WeightStatistics
         entries={entries}
+        awardXp={awardXp}
         addWeight={addWeightEntry}
         targetWeight={targetWeightKg}
         updateWeight={updateWeightEntry}
@@ -75,6 +115,7 @@ export default function Page() {
 
       <FastingPlanCard
         planId={planId}
+        awardXp={awardXp}
         updatePlanId={updatePlanId}
         isLoading={isFastingStateLoading}
         preferredFastStartTime={preferredFastStartTime}
@@ -83,6 +124,7 @@ export default function Page() {
       />
 
       <TargetWeightCard
+        awardXp={awardXp}
         clear={clearTargetWeight}
         update={updateTargetWeight}
         targetWeight={targetWeightKg}

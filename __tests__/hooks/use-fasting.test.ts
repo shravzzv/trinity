@@ -6,6 +6,7 @@ import {
   PREFERRED_FAST_START_TIME_STORAGE_KEY,
 } from '@/constants/storage-keys'
 import { getFasts, addFast, updateFast, deleteFast } from '@/lib/indexed-db'
+import type { Fast } from '@/types/fasting'
 
 jest.mock('uuid')
 jest.mock('@/lib/indexed-db', () => ({
@@ -21,6 +22,14 @@ const mockedUpdateFast = jest.mocked(updateFast)
 const mockedDeleteFast = jest.mocked(deleteFast)
 
 const renderUseFasting = () => renderHook(() => useFasting())
+
+const createFast = (): Fast => ({
+  id: 'fast-1',
+  startedAt: '2026-01-01T10:00:00.000Z',
+  endedAt: '2026-01-01T18:00:00.000Z',
+  planId: '23:1',
+  streakStatus: 'completed',
+})
 
 describe('useFasting', () => {
   let consoleErrorSpy: jest.SpyInstance
@@ -75,6 +84,27 @@ describe('useFasting', () => {
       expect(result.current.session).toEqual({
         status: 'fasting',
         startedAt: '2026-01-01T00:00:00.000Z',
+        isAnchored: false,
+      })
+    })
+  })
+
+  it('migrates a session without isAnchored', async () => {
+    localStorage.setItem(
+      FASTING_SESSION_STORAGE_KEY,
+      JSON.stringify({
+        status: 'fasting',
+        startedAt: '2026-01-01T00:00:00.000Z',
+      }),
+    )
+
+    const { result } = renderUseFasting()
+
+    await waitFor(() => {
+      expect(result.current.session).toEqual({
+        status: 'fasting',
+        startedAt: '2026-01-01T00:00:00.000Z',
+        isAnchored: false,
       })
     })
   })
@@ -104,13 +134,18 @@ describe('useFasting', () => {
         id: 'fast-1',
         startedAt: '2026-01-01T10:00:00.000Z',
         endedAt: '2026-01-01T18:00:00.000Z',
-      },
+      } as Fast,
     ])
 
     const { result } = renderUseFasting()
 
     await waitFor(() => {
       expect(result.current.fasts).toHaveLength(1)
+    })
+
+    expect(result.current.fasts[0]).toMatchObject({
+      streakStatus: 'completed',
+      planId: '23:1',
     })
   })
 
@@ -265,6 +300,10 @@ describe('useFasting', () => {
       expect(result.current.isLoading).toBe(false)
     })
 
+    act(() => {
+      result.current.updatePlanId('23:1')
+    })
+
     await act(async () => {
       await result.current.startFasting()
     })
@@ -279,11 +318,37 @@ describe('useFasting', () => {
       expect(result.current.isLoading).toBe(false)
     })
 
+    act(() => {
+      result.current.updatePlanId('23:1')
+    })
+
     await act(async () => {
       await result.current.endFasting()
     })
 
     expect(result.current.session?.status).toBe('eating')
+  })
+
+  it('starts an anchored session', async () => {
+    const { result } = renderUseFasting()
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    act(() => {
+      result.current.updatePlanId('23:1')
+    })
+
+    await act(async () => {
+      await result.current.startFasting()
+    })
+
+    act(() => {
+      result.current.startAnchoredSession()
+    })
+
+    expect(result.current.session?.isAnchored).toBe(true)
   })
 
   it('creates a completed fast when transitioning from fasting to eating', async () => {
@@ -297,18 +362,21 @@ describe('useFasting', () => {
       expect(result.current.isLoading).toBe(false)
     })
 
+    act(() => {
+      result.current.updatePlanId('23:1')
+    })
+
     await act(async () => {
       await result.current.startFasting()
     })
 
-    jest.setSystemTime(new Date('2026-01-01T18:00:00.000Z'))
+    jest.setSystemTime(new Date('2026-01-02T09:00:00.000Z'))
 
     await act(async () => {
       await result.current.endFasting()
     })
 
     expect(mockedAddFast).toHaveBeenCalled()
-
     expect(result.current.fasts).toHaveLength(1)
     expect(result.current.session?.status).toBe('eating')
   })
@@ -321,11 +389,7 @@ describe('useFasting', () => {
     })
 
     await act(async () => {
-      await result.current.addFast({
-        id: 'fast-1',
-        startedAt: '2026-01-01T10:00:00.000Z',
-        endedAt: '2026-01-01T18:00:00.000Z',
-      })
+      await result.current.addFast(createFast())
     })
 
     expect(result.current.fasts).toHaveLength(1)
@@ -339,11 +403,7 @@ describe('useFasting', () => {
 
     await expect(
       act(async () => {
-        await result.current.addFast({
-          id: 'fast-1',
-          startedAt: '2026-01-01T10:00:00.000Z',
-          endedAt: '2026-01-01T18:00:00.000Z',
-        })
+        await result.current.addFast(createFast())
       }),
     ).rejects.toThrow('Failed to save the fast')
 
@@ -354,11 +414,7 @@ describe('useFasting', () => {
     const { result } = renderUseFasting()
 
     await act(async () => {
-      await result.current.addFast({
-        id: 'fast-1',
-        startedAt: '2026-01-01T10:00:00.000Z',
-        endedAt: '2026-01-01T18:00:00.000Z',
-      })
+      await result.current.addFast(createFast())
     })
 
     await act(async () => {
@@ -379,11 +435,7 @@ describe('useFasting', () => {
     })
 
     await act(async () => {
-      await result.current.addFast({
-        id: 'fast-1',
-        startedAt: '2026-01-01T10:00:00.000Z',
-        endedAt: '2026-01-01T18:00:00.000Z',
-      })
+      await result.current.addFast(createFast())
     })
 
     await expect(
@@ -399,16 +451,12 @@ describe('useFasting', () => {
     const { result } = renderUseFasting()
 
     await act(async () => {
-      await result.current.addFast({
-        id: 'fast-1',
-        startedAt: '2026-01-01T10:00:00.000Z',
-        endedAt: '2026-01-01T18:00:00.000Z',
-      })
+      await result.current.addFast(createFast())
     })
 
     await act(async () => {
       await result.current.updateFast({
-        id: 'fast-1',
+        ...createFast(),
         startedAt: '2026-01-01T12:00:00.000Z',
         endedAt: '2026-01-01T20:00:00.000Z',
       })
@@ -427,17 +475,13 @@ describe('useFasting', () => {
     })
 
     await act(async () => {
-      await result.current.addFast({
-        id: 'fast-1',
-        startedAt: '2026-01-01T10:00:00.000Z',
-        endedAt: '2026-01-01T18:00:00.000Z',
-      })
+      await result.current.addFast(createFast())
     })
 
     await expect(
       act(async () => {
         await result.current.updateFast({
-          id: 'fast-1',
+          ...createFast(),
           startedAt: '2026-01-02T10:00:00.000Z',
           endedAt: '2026-01-02T18:00:00.000Z',
         })
@@ -467,6 +511,10 @@ describe('useFasting', () => {
       expect(result.current.isLoading).toBe(false)
     })
 
+    act(() => {
+      result.current.updatePlanId('23:1')
+    })
+
     await act(async () => {
       await result.current.startFasting(new Date('2026-01-01T18:00:00.000Z'))
     })
@@ -480,6 +528,7 @@ describe('useFasting', () => {
     expect(result.current.session).toEqual({
       status: 'fasting',
       startedAt: '2026-01-01T20:30:00.000Z',
+      isAnchored: false,
     })
   })
 
@@ -508,6 +557,10 @@ describe('useFasting', () => {
       expect(result.current.isLoading).toBe(false)
     })
 
+    act(() => {
+      result.current.updatePlanId('23:1')
+    })
+
     await act(async () => {
       await result.current.startFasting(new Date('2026-01-01T18:00:00.000Z'))
     })
@@ -525,6 +578,7 @@ describe('useFasting', () => {
       JSON.stringify({
         status: 'fasting',
         startedAt: '2026-01-01T20:30:00.000Z',
+        isAnchored: false,
       }),
     )
   })

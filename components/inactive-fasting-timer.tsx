@@ -8,9 +8,11 @@ import { toast } from 'sonner'
 import { type UseFastingResult } from '@/hooks/use-fasting'
 import type { FastingPlanId, PreferredFastStartTime } from '@/types/fasting'
 import { getInitialSessionStartedAt } from '@/lib/fasting'
+import { xpRewards } from '@/constants/gamification'
 
 interface InactiveFastingTimerProps {
   planId: FastingPlanId | null
+  awardXp: (amount: number) => void
   updatePlanId: UseFastingResult['updatePlanId']
   startFasting: (startedAt?: Date) => Promise<void>
   preferredFastStartTime: PreferredFastStartTime | null
@@ -18,12 +20,19 @@ interface InactiveFastingTimerProps {
 
 export default function InactiveFastingTimer({
   planId,
+  awardXp,
   startFasting,
   updatePlanId,
   preferredFastStartTime,
 }: InactiveFastingTimerProps) {
   const hasPlan = planId !== null
   const fastStartsAt = getInitialSessionStartedAt(preferredFastStartTime)
+
+  const handleStartFasting = () => {
+    startFasting(fastStartsAt ?? undefined)
+    awardXp(xpRewards.startedFirstFast)
+    toast.success('First fast started')
+  }
 
   return (
     <Card>
@@ -32,9 +41,7 @@ export default function InactiveFastingTimer({
 
         <CardAction>
           {hasPlan ? (
-            <Button onClick={() => startFasting(fastStartsAt ?? undefined)}>
-              Start fasting
-            </Button>
+            <Button onClick={handleStartFasting}>Start fasting</Button>
           ) : (
             <FastingPlanDialog
               dialogTitle='Select your fasting plan'
@@ -42,6 +49,7 @@ export default function InactiveFastingTimer({
               selectedPlanId={null}
               onSubmit={(selectedPlanId) => {
                 updatePlanId(selectedPlanId)
+                awardXp(xpRewards.selectedFastingPlan)
                 toast.success('Fasting plan selected')
               }}
             >

@@ -24,16 +24,19 @@ import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { MIN_TARGET_WEIGHT_KG, MAX_TARGET_WEIGHT_KG } from '@/constants/weight'
+import { xpRewards } from '@/constants/gamification'
 
 interface TargetWeightCardContentProps {
   clear: () => void
   targetWeight: number | null
+  awardXp: (amount: number) => void
   update: (newTarget: number) => void
 }
 
 export default function TargetWeightCardContent({
   clear,
   update,
+  awardXp,
   targetWeight,
 }: TargetWeightCardContentProps) {
   const [input, setInput] = useState<number | null>(null)
@@ -52,6 +55,7 @@ export default function TargetWeightCardContent({
 
     update(input)
     setOpen(false)
+    awardXp(xpRewards.setTargetWeight)
     toast.success(`Target weight ${targetWeight === null ? 'set' : 'updated'}`)
   }
 

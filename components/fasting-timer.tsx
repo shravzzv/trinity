@@ -13,9 +13,17 @@ import FastingTimerSkeleton from './skeletons/fasting-timer-skeleton'
 
 interface FastingTimerProps {
   fasts: Fast[]
+  streak: number
+  anchors: number
   isLoading: boolean
+  resetStreak: () => void
+  awardAnchor: () => void
+  spendAnchor: () => void
+  incrementStreak: () => void
   planId: FastingPlanId | null
   session: FastingSession | null
+  startAnchoredSession: () => void
+  awardXp: (amount: number) => void
   endFasting: (endedAt?: Date) => Promise<void>
   updatePlanId: UseFastingResult['updatePlanId']
   startFasting: (startedAt?: Date) => Promise<void>
@@ -26,6 +34,7 @@ interface FastingTimerProps {
 export default function FastingTimer({
   planId,
   session,
+  awardXp,
   isLoading,
   updatePlanId,
   preferredFastStartTime,
@@ -37,6 +46,7 @@ export default function FastingTimer({
     return (
       <InactiveFastingTimer
         planId={planId}
+        awardXp={awardXp}
         updatePlanId={updatePlanId}
         startFasting={rest.startFasting}
         preferredFastStartTime={preferredFastStartTime}
@@ -44,5 +54,12 @@ export default function FastingTimer({
     )
   }
 
-  return <ActiveFastingTimer {...rest} session={session} planId={planId} />
+  return (
+    <ActiveFastingTimer
+      {...rest}
+      planId={planId}
+      session={session}
+      awardXp={awardXp}
+    />
+  )
 }

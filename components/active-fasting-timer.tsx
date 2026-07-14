@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { Flame, Pen, UtensilsCrossed } from 'lucide-react'
+import { Anchor, Flame, Pen, UtensilsCrossed } from 'lucide-react'
 import { toast } from 'sonner'
 import { Separator } from './ui/separator'
 import EditSessionStartedAtDialog from './edit-session-started-at-dialog'
@@ -37,11 +37,24 @@ import {
 } from '@/components/ui/alert'
 import EditSessionEndedAtDrawer from './edit-session-ended-at-drawer'
 import { getActiveSessionStatistics } from '@/lib/fasting'
+import { Badge } from './ui/badge'
+import AnchorConfirmationDialog from './anchor-confirmation-dialog'
+import { cn } from '@/lib/utils'
+import { shouldAwardAnchor } from '@/lib/gamification'
+import { xpRewards } from '@/constants/gamification'
 
 interface ActiveFastingTimerProps {
   fasts: Fast[]
+  streak: number
+  anchors: number
   planId: FastingPlanId
   session: FastingSession
+  awardAnchor: () => void
+  spendAnchor: () => void
+  resetStreak: () => void
+  incrementStreak: () => void
+  startAnchoredSession: () => void
+  awardXp: (amount: number) => void
   endFasting: (endedAt?: Date) => Promise<void>
   startFasting: (startedAt?: Date) => Promise<void>
   updateSessionStartedAt: (updatedStartedAt: Date) => void
@@ -50,10 +63,18 @@ interface ActiveFastingTimerProps {
 export default function ActiveFastingTimer({
   fasts,
   planId,
+  streak,
+  anchors,
+  awardXp,
   endFasting,
+  resetStreak,
+  awardAnchor,
+  spendAnchor,
   startFasting,
+  incrementStreak,
+  startAnchoredSession,
   updateSessionStartedAt,
-  session: { status, startedAt },
+  session: { status, startedAt, isAnchored },
 }: ActiveFastingTimerProps) {
   const [now, setNow] = useState(() => Date.now())
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
@@ -76,15 +97,34 @@ export default function ActiveFastingTimer({
     startedAt: new Date(startedAt),
   })
 
+  const shouldIncrementStreak =
+    (isFasting && hasExceededSessionLength) || isAnchored
+  const shouldResetStreak = isFasting && !shouldIncrementStreak
+
   const handleSessionChange = async () => {
     try {
-      if (isFasting) {
+      if (isAnchored) {
+        await startFasting(selectedEndedAt)
+        awardXp(xpRewards.completedAnchoredFast)
+        toast.success('Fasting session started')
+      } else if (isFasting) {
         await endFasting(selectedEndedAt)
+        if (hasExceededSessionLength) awardXp(xpRewards.completedFast)
+        else awardXp(xpRewards.missedFast)
         toast.success('Fast ended')
       } else {
         await startFasting(selectedEndedAt)
         toast.success('Fast started')
       }
+
+      if (shouldIncrementStreak) {
+        incrementStreak()
+
+        const nextStreak = streak + 1
+        if (shouldAwardAnchor(nextStreak)) awardAnchor()
+      }
+
+      if (shouldResetStreak) resetStreak()
     } catch (error) {
       if (error instanceof Error) toast.error(error.message)
     }
@@ -111,31 +151,42 @@ export default function ActiveFastingTimer({
   }, [])
 
   return (
-    <Card>
+    <Card className={cn(isAnchored && 'border-primary/30 border')}>
       <CardHeader>
         <CardTitle>Fasting timer</CardTitle>
 
         <CardAction>
           <AlertDialog onOpenChange={handleAlertDialogOpenChange}>
             <AlertDialogTrigger asChild>
-              <Button>{isFasting ? 'End' : 'Start'} fasting</Button>
+              <Button>
+                {isAnchored ? 'Start' : isFasting ? 'End' : 'Start'} fasting
+              </Button>
             </AlertDialogTrigger>
 
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogMedia>
-                  {isFasting ? <UtensilsCrossed /> : <Flame />}
+                  {isAnchored ? (
+                    <Flame />
+                  ) : isFasting ? (
+                    <UtensilsCrossed />
+                  ) : (
+                    <Flame />
+                  )}
                 </AlertDialogMedia>
 
                 <AlertDialogTitle>
-                  {isFasting ? 'End' : 'Start'} fasting session?
+                  {isAnchored ? 'Start' : isFasting ? 'End' : 'Start'} fasting
+                  session?
                 </AlertDialogTitle>
 
                 <AlertDialogDescription className='flex flex-col gap-1 space-y-2'>
                   <span>
-                    {isFasting
-                      ? 'This will end your current fasting session and start your eating window.'
-                      : 'This will end your current eating window and start a new fasting session.'}
+                    {isAnchored
+                      ? 'This will end your current anchored fasting session and start a new fast.'
+                      : isFasting
+                        ? 'This will end your current fasting session and start your eating window.'
+                        : 'This will end your current eating window and start a new fasting session.'}
                   </span>
 
                   {!hasExceededSessionLength && (
@@ -186,7 +237,7 @@ export default function ActiveFastingTimer({
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction onClick={handleSessionChange}>
-                  Continue
+                  {isAnchored ? 'Start' : isFasting ? 'End' : 'Start'} fasting
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -195,24 +246,54 @@ export default function ActiveFastingTimer({
       </CardHeader>
 
       <CardContent className='space-y-4'>
-        <div className='flex items-center justify-center gap-2 font-medium'>
-          {isFasting ? (
-            <Flame className='size-4' />
-          ) : (
-            <UtensilsCrossed className='size-4' />
-          )}
+        {isAnchored ? (
+          <div className='border-primary/20 bg-primary/5 mx-auto w-fit space-y-1 rounded-full border px-8 py-3'>
+            <div className='flex items-center justify-center gap-2 font-medium'>
+              <Anchor className='size-4' />
+              <p>Anchor in use</p>
+              <Badge variant='outline'>{planId}</Badge>
+            </div>
 
-          <p>{isFasting ? 'Fasting' : 'Eating'}</p>
-        </div>
+            <p className='text-muted-foreground text-center text-xs'>
+              Your streak is protected.
+            </p>
+          </div>
+        ) : (
+          <div className='flex items-center justify-center gap-2 font-medium'>
+            {isFasting ? (
+              <Flame className='size-4' />
+            ) : (
+              <UtensilsCrossed className='size-4' />
+            )}
+
+            <p>{isFasting ? 'Fasting' : 'Eating'}</p>
+            <Badge variant='outline'>{planId}</Badge>
+          </div>
+        )}
 
         <h1
-          className='flex-1 text-center text-3xl font-bold'
+          className='flex-1 text-center text-4xl font-bold'
           aria-label='fasting-timer'
         >
           {hasExceededSessionLength
             ? `+${formatDuration(excessMs)}`
             : formatDuration(remainingMs)}
         </h1>
+
+        {!isAnchored && isFasting && (
+          <div className='flex justify-center'>
+            <AnchorConfirmationDialog
+              anchors={anchors}
+              startedAt={startedAt}
+              onSubmit={() => {
+                startAnchoredSession()
+                spendAnchor()
+                awardXp(xpRewards.startedAnchoredFast)
+                toast.success('Anchored fasting session started')
+              }}
+            />
+          </div>
+        )}
 
         <Progress
           value={progress}

@@ -7,6 +7,7 @@ interface TargetWeightCardProps {
   clear: () => void
   isLoading: boolean
   targetWeight: number | null
+  awardXp: (amount: number) => void
   update: (newTarget: number) => void
 }
 
