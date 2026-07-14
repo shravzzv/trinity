@@ -24,13 +24,15 @@ import {
 import { Card, CardContent } from './ui/card'
 
 interface AnchorsDialogProps {
+  streak: number
   anchors: number
 }
 
-export default function AnchorsDialog({ anchors }: AnchorsDialogProps) {
-  const fastsCompleted = 0
+export default function AnchorsDialog({ anchors, streak }: AnchorsDialogProps) {
   const anchorsAvailable = anchors
-  const progress = (fastsCompleted / ANCHOR_STREAK_REQUIREMENT) * 100
+  const fastsCompletedTowardsNextAnchor = streak % ANCHOR_STREAK_REQUIREMENT
+  const progress =
+    (fastsCompletedTowardsNextAnchor / ANCHOR_STREAK_REQUIREMENT) * 100
 
   return (
     <Dialog>
@@ -68,14 +70,15 @@ export default function AnchorsDialog({ anchors }: AnchorsDialogProps) {
         </Card>
 
         <p className='text-center'>
-          Next Anchor in {ANCHOR_STREAK_REQUIREMENT - fastsCompleted} completed
-          fasts.
+          Next Anchor in{' '}
+          {ANCHOR_STREAK_REQUIREMENT - fastsCompletedTowardsNextAnchor}{' '}
+          completed fasts.
         </p>
 
         <div className='flex items-center gap-2'>
           <Progress value={progress} className='flex-3 lg:flex-4' />
           <p className='flex-1 text-center'>
-            {fastsCompleted}/{ANCHOR_STREAK_REQUIREMENT} fasts
+            {fastsCompletedTowardsNextAnchor}/{ANCHOR_STREAK_REQUIREMENT} fasts
           </p>
         </div>
 

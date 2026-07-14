@@ -28,7 +28,7 @@ export default function ProgressCard({
     <Card className='py-2'>
       <CardContent className='grid grid-cols-3 gap-2 px-2'>
         <StreakDialog fasts={fasts} streak={streak} />
-        <AnchorsDialog anchors={anchors} />
+        <AnchorsDialog anchors={anchors} streak={streak} />
         <LevelsDialog xp={xp} level={level} />
       </CardContent>
     </Card>
