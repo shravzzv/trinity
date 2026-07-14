@@ -45,6 +45,8 @@ interface ActiveFastingTimerProps {
   fasts: Fast[]
   planId: FastingPlanId
   session: FastingSession
+  resetStreak: () => void
+  incrementStreak: () => void
   startAnchoredSession: () => void
   endFasting: (endedAt?: Date) => Promise<void>
   startFasting: (startedAt?: Date) => Promise<void>
@@ -55,7 +57,9 @@ export default function ActiveFastingTimer({
   fasts,
   planId,
   endFasting,
+  resetStreak,
   startFasting,
+  incrementStreak,
   startAnchoredSession,
   updateSessionStartedAt,
   session: { status, startedAt, isAnchored },
@@ -81,6 +85,9 @@ export default function ActiveFastingTimer({
     startedAt: new Date(startedAt),
   })
 
+  const shouldIncrementStreak =
+    isAnchored || (isFasting && hasExceededSessionLength)
+
   const handleSessionChange = async () => {
     try {
       if (isAnchored) {
@@ -93,6 +100,9 @@ export default function ActiveFastingTimer({
         await startFasting(selectedEndedAt)
         toast.success('Fast started')
       }
+
+      if (shouldIncrementStreak) incrementStreak()
+      else if (isFasting) resetStreak()
     } catch (error) {
       if (error instanceof Error) toast.error(error.message)
     }

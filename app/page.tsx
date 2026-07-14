@@ -43,7 +43,6 @@ export default function Page() {
 
   const {
     xp,
-    level,
     streak,
     anchors,
     awardXp,
@@ -71,8 +70,10 @@ export default function Page() {
         planId={planId}
         session={session}
         endFasting={endFasting}
+        resetStreak={resetStreak}
         startFasting={startFasting}
         updatePlanId={updatePlanId}
+        incrementStreak={incrementStreak}
         isLoading={isFastingStateLoading}
         startAnchoredSession={startAnchoredSession}
         updateSessionStartedAt={updateSessionStartedAt}

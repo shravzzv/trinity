@@ -14,6 +14,8 @@ import FastingTimerSkeleton from './skeletons/fasting-timer-skeleton'
 interface FastingTimerProps {
   fasts: Fast[]
   isLoading: boolean
+  resetStreak: () => void
+  incrementStreak: () => void
   planId: FastingPlanId | null
   session: FastingSession | null
   startAnchoredSession: () => void
