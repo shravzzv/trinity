@@ -55,6 +55,7 @@ export default function FastingPlanCard({
 
   const handleSave = (hour: number, minute: number) => {
     updatePreferredFastStartTime(hour, minute)
+    awardXp(xpRewards.selectedFastingPlan)
     toast.success('Fasting schedule set')
   }
 

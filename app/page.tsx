@@ -89,7 +89,6 @@ export default function Page() {
         fasts={fasts}
         planId={planId}
         addFast={addFast}
-        awardXp={awardXp}
         updateFast={updateFast}
         deleteFast={deleteFast}
         isLoading={isFastingStateLoading}
