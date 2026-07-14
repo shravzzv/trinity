@@ -3,8 +3,11 @@ import EditFastsSheet from '@/components/edit-fasts-sheet'
 import FastDialog from '@/components/fast-dialog'
 import type { Fast } from '@/types/fasting'
 import FastingStatisticsContent from '@/components/fasting-statistics-content'
+import { toast } from 'sonner'
+import { FASTING_STATISTICS_CADENCE_STORAGE_KEY } from '@/constants/storage-keys'
 
 jest.mock('uuid')
+jest.mock('sonner')
 
 jest.mock('@/components/edit-fasts-sheet', () => ({
   __esModule: true,
@@ -43,11 +46,15 @@ const fasts: Fast[] = [
     id: '1',
     startedAt: '2026-01-01T10:00:00.000Z',
     endedAt: '2026-01-01T18:00:00.000Z',
+    streakStatus: 'completed',
+    planId: '',
   },
   {
     id: '2',
     startedAt: '2026-01-02T10:00:00.000Z',
     endedAt: '2026-01-02T22:00:00.000Z',
+    streakStatus: 'completed',
+    planId: '',
   },
 ]
 
@@ -179,5 +186,45 @@ describe('FastingStatisticsContent', () => {
     const props = (FastDialog as jest.Mock).mock.calls[0][0]
 
     expect(props.existingFasts).toEqual(fasts)
+  })
+
+  it('shows an error toast when adding a fast fails', async () => {
+    addFast.mockRejectedValueOnce(new Error('Boom'))
+
+    renderComponent()
+
+    const props = (FastDialog as jest.Mock).mock.calls[0][0]
+
+    await props.onSubmit(
+      new Date('2026-01-01T10:00:00.000Z'),
+      new Date('2026-01-01T18:00:00.000Z'),
+    )
+
+    expect(toast.error).toHaveBeenCalledWith('Boom')
+  })
+
+  it('shows a success toast when adding a fast', async () => {
+    renderComponent()
+
+    const props = (FastDialog as jest.Mock).mock.calls[0][0]
+
+    await props.onSubmit(
+      new Date('2026-01-01T10:00:00.000Z'),
+      new Date('2026-01-01T18:00:00.000Z'),
+    )
+
+    expect(toast.success).toHaveBeenCalledWith('Fast added')
+  })
+
+  it('hydrates cadence from local storage', () => {
+    localStorage.setItem(FASTING_STATISTICS_CADENCE_STORAGE_KEY, 'month')
+
+    renderComponent()
+
+    expect(
+      screen.getByRole('combobox', {
+        name: /fasting statistics cadence/i,
+      }),
+    ).toBeInTheDocument()
   })
 })
