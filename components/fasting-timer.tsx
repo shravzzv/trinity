@@ -54,5 +54,12 @@ export default function FastingTimer({
     )
   }
 
-  return <ActiveFastingTimer {...rest} session={session} planId={planId} />
+  return (
+    <ActiveFastingTimer
+      {...rest}
+      planId={planId}
+      session={session}
+      awardXp={awardXp}
+    />
+  )
 }

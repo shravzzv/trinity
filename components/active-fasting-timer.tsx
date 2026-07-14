@@ -41,6 +41,7 @@ import { Badge } from './ui/badge'
 import AnchorConfirmationDialog from './anchor-confirmation-dialog'
 import { cn } from '@/lib/utils'
 import { shouldAwardAnchor } from '@/lib/gamification'
+import { xpRewards } from '@/constants/gamification'
 
 interface ActiveFastingTimerProps {
   fasts: Fast[]
@@ -53,6 +54,7 @@ interface ActiveFastingTimerProps {
   resetStreak: () => void
   incrementStreak: () => void
   startAnchoredSession: () => void
+  awardXp: (amount: number) => void
   endFasting: (endedAt?: Date) => Promise<void>
   startFasting: (startedAt?: Date) => Promise<void>
   updateSessionStartedAt: (updatedStartedAt: Date) => void
@@ -63,6 +65,7 @@ export default function ActiveFastingTimer({
   planId,
   streak,
   anchors,
+  awardXp,
   endFasting,
   resetStreak,
   awardAnchor,
@@ -102,9 +105,12 @@ export default function ActiveFastingTimer({
     try {
       if (isAnchored) {
         await startFasting(selectedEndedAt)
+        awardXp(xpRewards.completedAnchoredFast)
         toast.success('Fasting session started')
       } else if (isFasting) {
         await endFasting(selectedEndedAt)
+        if (hasExceededSessionLength) awardXp(xpRewards.completedFast)
+        else awardXp(xpRewards.missedFast)
         toast.success('Fast ended')
       } else {
         await startFasting(selectedEndedAt)
@@ -282,6 +288,7 @@ export default function ActiveFastingTimer({
               onSubmit={() => {
                 startAnchoredSession()
                 spendAnchor()
+                awardXp(xpRewards.startedAnchoredFast)
                 toast.success('Anchored fasting session started')
               }}
             />

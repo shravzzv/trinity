@@ -65,8 +65,9 @@ export const levels: LevelDefinition[] = [
 export const xpRewards = {
   // fasting
   missedFast: 2,
-  anchoredFast: 4,
   completedFast: 10,
+  startedAnchoredFast: 2,
+  completedAnchoredFast: 4,
   startedFirstFast: 15,
   selectedFastingPlan: 5,
   setPreferredFastingTime: 5,
