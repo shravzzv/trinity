@@ -12,7 +12,6 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import { cn } from '@/lib/utils'
-import { Home, Settings } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -23,11 +22,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { motion } from 'motion/react'
-
-const links = [
-  { name: 'Home', href: '/home', icon: Home },
-  { name: 'Settings', href: '/settings', icon: Settings },
-]
+import { appLinks } from '@/constants/navigation'
 
 export function AppSidebar() {
   const pathname = usePathname()
@@ -75,7 +70,7 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>
-            {links.map((link) => {
+            {appLinks.map((link) => {
               const isActive = pathname.startsWith(link.href)
 
               return (
@@ -84,7 +79,6 @@ export function AppSidebar() {
                     asChild
                     tooltip={link.name}
                     isActive={isActive}
-                    // className={cn(isActive && 'bg-primary/20!')}
                   >
                     <Link href={link.href}>
                       <link.icon />
