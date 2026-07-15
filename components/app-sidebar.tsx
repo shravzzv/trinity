@@ -16,6 +16,12 @@ import { Home, Settings } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Kbd } from './ui/kbd'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 const links = [
   { name: 'Home', href: '/home', icon: Home },
@@ -49,7 +55,15 @@ export function AppSidebar() {
             </div>
           )}
 
-          <SidebarTrigger />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <SidebarTrigger />
+            </TooltipTrigger>
+            <TooltipContent>
+              Toggle sidebar
+              <Kbd>Ctrl + B</Kbd>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </SidebarHeader>
 
