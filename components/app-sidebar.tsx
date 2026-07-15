@@ -3,6 +3,7 @@
 import {
   Sidebar,
   SidebarContent,
+  SidebarGroup,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -31,7 +32,7 @@ export function AppSidebar() {
       <SidebarHeader className='gap-2'>
         <div className='flex items-center justify-between py-2'>
           {open && (
-            <Link href='/home' className='flex items-center gap-2'>
+            <div className='flex items-center gap-2'>
               <Image
                 src='/icons/icon-512x512.png'
                 alt='Trinity'
@@ -41,7 +42,7 @@ export function AppSidebar() {
               />
 
               <span className='font-semibold'>Trinity</span>
-            </Link>
+            </div>
           )}
 
           <SidebarTrigger />
@@ -49,27 +50,29 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarMenu>
-          {links.map((link) => {
-            const isActive = pathname.startsWith(link.href)
+        <SidebarGroup>
+          <SidebarMenu>
+            {links.map((link) => {
+              const isActive = pathname.startsWith(link.href)
 
-            return (
-              <SidebarMenuItem key={link.name}>
-                <SidebarMenuButton
-                  asChild
-                  tooltip={link.name}
-                  isActive={isActive}
-                  className={cn(isActive && 'bg-primary/20!')}
-                >
-                  <Link href={link.href}>
-                    <link.icon />
-                    <span>{link.name}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            )
-          })}
-        </SidebarMenu>
+              return (
+                <SidebarMenuItem key={link.name}>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={link.name}
+                    isActive={isActive}
+                    className={cn(isActive && 'bg-primary/20!')}
+                  >
+                    <Link href={link.href}>
+                      <link.icon />
+                      <span>{link.name}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )
+            })}
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
 
       <SidebarRail />
