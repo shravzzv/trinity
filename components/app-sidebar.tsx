@@ -22,6 +22,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { motion } from 'motion/react'
 
 const links = [
   { name: 'Home', href: '/home', icon: Home },
@@ -42,7 +43,11 @@ export function AppSidebar() {
           )}
         >
           {open && (
-            <div className='flex items-center gap-2'>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className='flex items-center gap-2'
+            >
               <Image
                 src='/icons/icon-512x512.png'
                 alt='Trinity'
@@ -52,7 +57,7 @@ export function AppSidebar() {
               />
 
               <span className='font-semibold'>Trinity</span>
-            </div>
+            </motion.div>
           )}
 
           <Tooltip>
