@@ -8,7 +8,7 @@ export default function Layout({
   return (
     <>
       <SiteNavbar />
-      <main>{children}</main>
+      <main className='p-6'>{children}</main>
     </>
   )
 }
