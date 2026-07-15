@@ -1,15 +1,13 @@
 'use client'
 
-import FastingPlanCard from '@/components/fasting-plan-card'
 import FastingStatistics from '@/components/fasting-statistics'
 import FastingTimer from '@/components/fasting-timer'
-import TargetWeightCard from '@/components/target-weight-card'
 import WeightStatistics from '@/components/weight-statistics'
-import { useFasting } from '@/hooks/use-fasting'
-import { useWeight } from '@/hooks/use-weight'
 import ProgressCard from '@/components/progress-card'
-import { useGamification } from '@/hooks/use-gamification'
 import CelebrationDialog from '@/components/celebration-dialog'
+import { useFastingContext } from '@/providers/fasting-provider'
+import { useWeightContext } from '@/providers/weight-provider'
+import { useGamificationContext } from '@/providers/gamification-provider'
 
 export default function Page() {
   const {
@@ -25,21 +23,17 @@ export default function Page() {
     startAnchoredSession,
     preferredFastStartTime,
     updateSessionStartedAt,
-    clearPreferredFastStartTime,
-    updatePreferredFastStartTime,
     isLoading: isFastingStateLoading,
-  } = useFasting()
+  } = useFastingContext()
 
   const {
     entries,
     targetWeightKg,
     addWeightEntry,
-    clearTargetWeight,
     updateWeightEntry,
     deleteWeightEntry,
-    updateTargetWeight,
     isLoading: isWeightStateLoading,
-  } = useWeight()
+  } = useWeightContext()
 
   const {
     xp,
@@ -53,7 +47,7 @@ export default function Page() {
     currentAchievement,
     dismissAchievement,
     isLoading: isGamificationLoading,
-  } = useGamification()
+  } = useGamificationContext()
 
   return (
     <div className='space-y-6'>
@@ -107,24 +101,6 @@ export default function Page() {
         targetWeight={targetWeightKg}
         updateWeight={updateWeightEntry}
         deleteWeight={deleteWeightEntry}
-        isLoading={isWeightStateLoading}
-      />
-
-      <FastingPlanCard
-        planId={planId}
-        awardXp={awardXp}
-        updatePlanId={updatePlanId}
-        isLoading={isFastingStateLoading}
-        preferredFastStartTime={preferredFastStartTime}
-        clearPreferredFastStartTime={clearPreferredFastStartTime}
-        updatePreferredFastStartTime={updatePreferredFastStartTime}
-      />
-
-      <TargetWeightCard
-        awardXp={awardXp}
-        clear={clearTargetWeight}
-        update={updateTargetWeight}
-        targetWeight={targetWeightKg}
         isLoading={isWeightStateLoading}
       />
     </div>
