@@ -15,7 +15,7 @@ export default function AppBottomNav() {
       aria-label='primary-navigation'
       initial={{ opacity: 0, scale: 0.9, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      className='bg-background/50 fixed bottom-5 left-1/2 z-50 mx-auto flex w-fit -translate-x-1/2 items-center justify-between gap-2 rounded-full border px-2 py-2 shadow-lg backdrop-blur-xl lg:hidden'
+      className='bg-background/50 fixed bottom-5 left-1/2 z-50 mx-auto flex w-fit -translate-x-1/2 items-center justify-between gap-2 rounded-full border px-2 py-2 shadow-lg backdrop-blur-xl md:hidden'
     >
       {appLinks.map((link) => {
         const isActive = pathname.startsWith(link.href)
