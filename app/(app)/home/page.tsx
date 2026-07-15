@@ -50,59 +50,63 @@ export default function Page() {
   } = useGamificationContext()
 
   return (
-    <div className='space-y-6'>
+    <div className='mx-auto max-w-6xl space-y-6'>
       <CelebrationDialog
         achievement={currentAchievement}
         onDismiss={dismissAchievement}
       />
 
-      <ProgressCard
-        xp={xp}
-        fasts={fasts}
-        streak={streak}
-        anchors={anchors}
-        isLoading={isGamificationLoading}
-      />
+      <div className='mx-auto max-w-xl space-y-6'>
+        <ProgressCard
+          xp={xp}
+          fasts={fasts}
+          streak={streak}
+          anchors={anchors}
+          isLoading={isGamificationLoading}
+        />
 
-      <FastingTimer
-        fasts={fasts}
-        planId={planId}
-        streak={streak}
-        anchors={anchors}
-        session={session}
-        awardXp={awardXp}
-        endFasting={endFasting}
-        resetStreak={resetStreak}
-        awardAnchor={awardAnchor}
-        spendAnchor={spendAnchor}
-        startFasting={startFasting}
-        updatePlanId={updatePlanId}
-        incrementStreak={incrementStreak}
-        isLoading={isFastingStateLoading}
-        startAnchoredSession={startAnchoredSession}
-        updateSessionStartedAt={updateSessionStartedAt}
-        preferredFastStartTime={preferredFastStartTime}
-      />
+        <FastingTimer
+          fasts={fasts}
+          planId={planId}
+          streak={streak}
+          anchors={anchors}
+          session={session}
+          awardXp={awardXp}
+          endFasting={endFasting}
+          resetStreak={resetStreak}
+          awardAnchor={awardAnchor}
+          spendAnchor={spendAnchor}
+          startFasting={startFasting}
+          updatePlanId={updatePlanId}
+          incrementStreak={incrementStreak}
+          isLoading={isFastingStateLoading}
+          startAnchoredSession={startAnchoredSession}
+          updateSessionStartedAt={updateSessionStartedAt}
+          preferredFastStartTime={preferredFastStartTime}
+        />
+      </div>
 
-      <FastingStatistics
-        fasts={fasts}
-        planId={planId}
-        addFast={addFast}
-        updateFast={updateFast}
-        deleteFast={deleteFast}
-        isLoading={isFastingStateLoading}
-        preferredFastStartTime={preferredFastStartTime}
-      />
+      <div className='mx-auto grid max-w-xl gap-6 lg:max-w-6xl lg:grid-cols-2'>
+        <FastingStatistics
+          fasts={fasts}
+          planId={planId}
+          addFast={addFast}
+          updateFast={updateFast}
+          deleteFast={deleteFast}
+          isLoading={isFastingStateLoading}
+          preferredFastStartTime={preferredFastStartTime}
+        />
 
-      <WeightStatistics
-        entries={entries}
-        awardXp={awardXp}
-        addWeight={addWeightEntry}
-        targetWeight={targetWeightKg}
-        updateWeight={updateWeightEntry}
-        deleteWeight={deleteWeightEntry}
-        isLoading={isWeightStateLoading}
-      />
+        <WeightStatistics
+          entries={entries}
+          awardXp={awardXp}
+          addWeight={addWeightEntry}
+          targetWeight={targetWeightKg}
+          updateWeight={updateWeightEntry}
+          deleteWeight={deleteWeightEntry}
+          isLoading={isWeightStateLoading}
+        />
+      </div>
     </div>
   )
 }

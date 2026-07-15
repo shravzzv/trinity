@@ -20,9 +20,7 @@ export default async function Layout({
         <GamificationProvider>
           <SidebarProvider defaultOpen={defaultOpen}>
             <AppSidebar />
-            <main className='mx-auto w-full max-w-xl p-6 pb-24 lg:pb-6'>
-              {children}
-            </main>
+            <main className='w-full p-6 pb-24 lg:pb-6'>{children}</main>
             <AppBottomNav />
           </SidebarProvider>
         </GamificationProvider>

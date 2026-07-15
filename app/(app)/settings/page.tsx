@@ -27,7 +27,7 @@ export default function Page() {
   const { awardXp } = useGamificationContext()
 
   return (
-    <div className='space-y-6'>
+    <div className='mx-auto w-full max-w-xl space-y-6'>
       <ThemeToggleCard />
 
       <FastingPlanCard
