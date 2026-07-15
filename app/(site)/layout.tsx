@@ -1,7 +1,14 @@
+import SiteNavbar from '@/components/site-navbar'
+
 export default function Layout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  return children
+  return (
+    <>
+      <SiteNavbar />
+      <main>{children}</main>
+    </>
+  )
 }
