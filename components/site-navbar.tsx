@@ -12,7 +12,7 @@ export default function SiteNavbar() {
   const pathname = usePathname()
 
   return (
-    <header className='sticky top-0 backdrop-blur-xl'>
+    <header className='bg-background/80 sticky top-0 backdrop-blur-xl'>
       <nav className='mx-auto flex h-16 w-full max-w-6xl items-center px-6'>
         <Link href='/' className='flex items-center gap-2'>
           <Image
@@ -49,7 +49,7 @@ export default function SiteNavbar() {
           </div>
         </div>
 
-        <div className='ml-auto flex items-center gap-2 lg:gap-2'>
+        <div className='ml-auto flex items-center gap-2'>
           <Button
             asChild
             size='lg'
