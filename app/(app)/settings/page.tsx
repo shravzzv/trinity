@@ -5,6 +5,7 @@ import TargetWeightCard from '@/components/target-weight-card'
 import { useFastingContext } from '@/providers/fasting-provider'
 import { useWeightContext } from '@/providers/weight-provider'
 import { useGamificationContext } from '@/providers/gamification-provider'
+import ThemeToggleCard from '@/components/theme-toggle-card'
 
 export default function Page() {
   const {
@@ -27,6 +28,8 @@ export default function Page() {
 
   return (
     <div className='space-y-6'>
+      <ThemeToggleCard />
+
       <FastingPlanCard
         planId={planId}
         awardXp={awardXp}
