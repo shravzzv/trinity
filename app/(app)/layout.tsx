@@ -1,5 +1,5 @@
 import { AppSidebar } from '@/components/app-sidebar'
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { SidebarProvider } from '@/components/ui/sidebar'
 import { cookies } from 'next/headers'
 
 export default async function Layout({
@@ -13,11 +13,7 @@ export default async function Layout({
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
       <AppSidebar />
-      <SidebarInset>
-        <main className='h-[96dvh] overflow-y-auto'>
-          <div className='mx-auto w-full max-w-xl p-6'>{children}</div>
-        </main>
-      </SidebarInset>
+      <main className='mx-auto w-full max-w-xl p-6'>{children}</main>
     </SidebarProvider>
   )
 }

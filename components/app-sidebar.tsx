@@ -8,7 +8,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar'
@@ -28,9 +27,14 @@ export function AppSidebar() {
   const { open } = useSidebar()
 
   return (
-    <Sidebar variant='inset' collapsible='icon'>
+    <Sidebar variant='floating' collapsible='icon'>
       <SidebarHeader className='gap-2'>
-        <div className='flex items-center justify-between py-2'>
+        <div
+          className={cn(
+            open ? 'px-2' : 'px-1',
+            'flex items-center justify-between py-2',
+          )}
+        >
           {open && (
             <div className='flex items-center gap-2'>
               <Image
@@ -61,7 +65,7 @@ export function AppSidebar() {
                     asChild
                     tooltip={link.name}
                     isActive={isActive}
-                    className={cn(isActive && 'bg-primary/20!')}
+                    // className={cn(isActive && 'bg-primary/20!')}
                   >
                     <Link href={link.href}>
                       <link.icon />
@@ -74,8 +78,6 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-
-      <SidebarRail />
     </Sidebar>
   )
 }
