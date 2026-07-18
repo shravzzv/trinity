@@ -1,27 +1,58 @@
 'use client'
 
 import { siteLinks } from '@/constants/navigation'
-import { cn } from '@/lib/utils'
-import { AnimatePresence, motion } from 'motion/react'
-import { Menu, X } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
 import { Button } from './ui/button'
+import { Menu, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
+import SiteNavbarOverlay from './site-navbar-overlay'
 
 export default function SiteNavbar() {
   const pathname = usePathname()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
-  const closeMenu = () => setIsMenuOpen(false)
+  // Prevent background scrolling when menu is open.
+  useEffect(() => {
+    document.body.style.overflow = isMenuOpen ? 'hidden' : ''
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isMenuOpen])
+
+  // Allow escape key to close the menu.
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsMenuOpen(false)
+      }
+    }
+
+    window.addEventListener('keydown', handler)
+
+    return () => {
+      window.removeEventListener('keydown', handler)
+    }
+  }, [])
+
+  // Close menu when navigated programatically.
+  useEffect(() => {
+    ;(() => {
+      setIsMenuOpen(false)
+    })()
+  }, [pathname])
 
   return (
     <>
-      {/* Desktop navbar */}
-      <header className='bg-background/80 sticky top-0 z-50 hidden backdrop-blur-xl lg:block'>
+      <header className='bg-background/80 sticky top-0 z-50 backdrop-blur-xl'>
         <nav className='mx-auto flex h-16 max-w-6xl items-center px-6'>
-          <Link href='/' className='flex items-center gap-2'>
+          <Link
+            href='/'
+            className='flex items-center gap-2'
+            onClick={() => setIsMenuOpen(false)}
+          >
             <Image
               src='/icons/icon-512x512.png'
               alt='Trinity'
@@ -30,23 +61,20 @@ export default function SiteNavbar() {
               className='rounded-lg'
             />
 
-            <span className='font-semibold'>Trinity</span>
+            <span className='text-lg font-semibold'>Trinity</span>
           </Link>
 
-          <div className='flex flex-1 justify-center gap-2'>
+          <div className='hidden flex-1 justify-center gap-1 lg:flex lg:gap-2'>
             {siteLinks.map((link) => {
               const isActive = pathname.startsWith(link.href)
 
               return (
                 <Button
-                  key={link.href}
                   asChild
-                  variant='link'
                   size='lg'
-                  className={cn(
-                    'text-foreground font-normal',
-                    isActive && 'underline',
-                  )}
+                  key={link.href}
+                  className={'text-foreground font-normal'}
+                  variant={isActive ? 'secondary' : 'ghost'}
                 >
                   <Link href={link.href}>{link.name}</Link>
                 </Button>
@@ -54,152 +82,66 @@ export default function SiteNavbar() {
             })}
           </div>
 
-          <div className='flex items-center gap-2'>
+          <div className='ml-auto flex items-center gap-2'>
             <Button
               asChild
-              variant='link'
               size='lg'
-              className='text-foreground font-normal'
+              variant={pathname.startsWith('/signin') ? 'secondary' : 'ghost'}
+              className={'text-foreground hidden font-normal lg:flex'}
             >
               <Link href='/signin'>Sign in</Link>
             </Button>
 
-            <Button asChild>
+            <Button asChild size='lg'>
               <Link href='/home'>Get started</Link>
+            </Button>
+
+            <Button
+              size='icon-lg'
+              variant='ghost'
+              className='relative lg:hidden'
+              onClick={() => setIsMenuOpen((prev) => !prev)}
+            >
+              <AnimatePresence mode='wait' initial={false}>
+                <motion.div
+                  key={isMenuOpen ? 'close' : 'menu'}
+                  initial={{
+                    opacity: 0,
+                    rotate: -45,
+                    scale: 0.9,
+                  }}
+                  animate={{
+                    opacity: 1,
+                    rotate: 0,
+                    scale: 1,
+                  }}
+                  exit={{
+                    opacity: 0,
+                    rotate: 90,
+                    scale: 0.8,
+                  }}
+                  transition={{ duration: 0.15 }}
+                  aria-label={
+                    isMenuOpen
+                      ? 'Close navigation menu'
+                      : 'Open navigation menu'
+                  }
+                >
+                  {isMenuOpen ? (
+                    <X className='size-5' />
+                  ) : (
+                    <Menu className='size-5' />
+                  )}
+                </motion.div>
+              </AnimatePresence>
             </Button>
           </div>
         </nav>
       </header>
 
-      {/* Mobile navigation */}
-      <AnimatePresence mode='wait'>
-        {!isMenuOpen ? (
-          <motion.header className='bg-background/80 sticky top-0 z-50 backdrop-blur-xl lg:hidden'>
-            <nav className='mx-auto flex h-16 items-center px-6'>
-              <Link href='/' className='flex items-center gap-2'>
-                <Image
-                  src='/icons/icon-512x512.png'
-                  alt='Trinity'
-                  width={32}
-                  height={32}
-                  className='rounded-lg'
-                />
-
-                <span className='font-semibold'>Trinity</span>
-              </Link>
-
-              <div className='ml-auto flex items-center gap-2'>
-                <Button asChild>
-                  <Link href='/home'>Get started</Link>
-                </Button>
-
-                <Button
-                  variant='ghost'
-                  size='icon-lg'
-                  aria-label='Open navigation menu'
-                  onClick={() => setIsMenuOpen(true)}
-                >
-                  <Menu className='size-5' />
-                </Button>
-              </div>
-            </nav>
-          </motion.header>
-        ) : (
-          <motion.div className='bg-background fixed inset-0 z-50 flex flex-col lg:hidden'>
-            {/* Header */}
-            <header>
-              <nav className='mx-auto flex h-16 items-center px-6'>
-                <Link
-                  href='/'
-                  onClick={closeMenu}
-                  className='flex items-center gap-2'
-                >
-                  <Image
-                    src='/icons/icon-512x512.png'
-                    alt='Trinity'
-                    width={32}
-                    height={32}
-                    className='rounded-lg'
-                  />
-
-                  <span className='font-semibold'>Trinity</span>
-                </Link>
-
-                <div className='ml-auto flex items-center gap-2'>
-                  <Button asChild>
-                    <Link href='/home' onClick={closeMenu}>
-                      Get started
-                    </Link>
-                  </Button>
-
-                  <Button
-                    size='icon-lg'
-                    variant='ghost'
-                    onClick={closeMenu}
-                    aria-label='Close navigation menu'
-                  >
-                    <X className='size-5' />
-                  </Button>
-                </div>
-              </nav>
-            </header>
-
-            <motion.div
-              initial='hidden'
-              animate='visible'
-              variants={{
-                hidden: {},
-                visible: {
-                  transition: { staggerChildren: 0.05 },
-                },
-              }}
-              className='flex flex-1 flex-col px-6 py-8'
-            >
-              {siteLinks.map((link) => {
-                const isActive = pathname.startsWith(link.href)
-
-                return (
-                  <motion.div
-                    key={link.href}
-                    variants={{
-                      hidden: {
-                        opacity: 0,
-                        y: 12,
-                      },
-                      visible: {
-                        opacity: 1,
-                        y: 0,
-                      },
-                    }}
-                  >
-                    <Button
-                      asChild
-                      size='lg'
-                      variant={isActive ? 'secondary' : 'ghost'}
-                      className='mb-1 w-full justify-start text-lg'
-                    >
-                      <Link href={link.href} onClick={closeMenu}>
-                        {link.name}
-                      </Link>
-                    </Button>
-                  </motion.div>
-                )
-              })}
-
-              <div className='mt-6 border-t pt-6'>
-                <Button
-                  asChild
-                  size='lg'
-                  variant='ghost'
-                  className='w-full justify-start text-lg'
-                >
-                  <Link href='/signin' onClick={closeMenu}>
-                    Sign in
-                  </Link>
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
+      <AnimatePresence>
+        {isMenuOpen && (
+          <SiteNavbarOverlay onClose={() => setIsMenuOpen(false)} />
         )}
       </AnimatePresence>
     </>
