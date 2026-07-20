@@ -121,17 +121,37 @@ export default function Page() {
 
       {/* timer */}
       <section className='mx-auto grid max-w-6xl items-center gap-16 px-6 py-20 lg:grid-cols-[3fr_2fr]'>
-        <motion.div
-          variants={mediaLeftVariants}
-          initial='hidden'
-          whileInView='visible'
-          viewport={{ once: true, amount: 0.25 }}
-          whileHover={{
-            scale: 1.01,
-            y: -2,
-          }}
-          className='bg-muted border-border aspect-video rounded-2xl border'
-        />
+        <div className='relative'>
+          <motion.video
+            variants={mediaLeftVariants}
+            initial='hidden'
+            whileInView='visible'
+            transition={{ duration: 0.2 }}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload='metadata'
+            className='border-border bg-muted aspect-video w-full rounded-2xl border object-cover shadow-xl dark:hidden'
+          >
+            <source src='/videos/fasting-timer-light.mp4' type='video/mp4' />
+          </motion.video>
+
+          <motion.video
+            variants={mediaLeftVariants}
+            initial='hidden'
+            whileInView='visible'
+            transition={{ duration: 0.2 }}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload='metadata'
+            className='border-border bg-muted hidden aspect-video w-full rounded-2xl border object-cover shadow-xl dark:block'
+          >
+            <source src='/videos/fasting-timer-dark.mp4' type='video/mp4' />
+          </motion.video>
+        </div>
 
         <motion.div
           variants={textRightVariants}
