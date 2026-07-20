@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { motion, type Variants } from 'motion/react'
+import Image from 'next/image'
 
 const containerVariants: Variants = {
   hidden: {},
@@ -127,12 +128,13 @@ export default function Page() {
             initial='hidden'
             whileInView='visible'
             transition={{ duration: 0.2 }}
+            viewport={{ once: true }}
             autoPlay
             muted
             loop
             playsInline
             preload='metadata'
-            className='border-border bg-muted aspect-video w-full rounded-2xl border object-cover shadow-xl dark:hidden'
+            className='bg-muted aspect-video w-full rounded-2xl object-cover dark:hidden'
           >
             <source src='/videos/fasting-timer-light.mp4' type='video/mp4' />
           </motion.video>
@@ -142,12 +144,13 @@ export default function Page() {
             initial='hidden'
             whileInView='visible'
             transition={{ duration: 0.2 }}
+            viewport={{ once: true }}
             autoPlay
             muted
             loop
             playsInline
             preload='metadata'
-            className='border-border bg-muted hidden aspect-video w-full rounded-2xl border object-cover shadow-xl dark:block'
+            className='bg-muted hidden aspect-video w-full rounded-2xl object-cover shadow-xl dark:block'
           >
             <source src='/videos/fasting-timer-dark.mp4' type='video/mp4' />
           </motion.video>
@@ -209,7 +212,7 @@ export default function Page() {
           </h2>
 
           <p className='text-muted-foreground leading-7'>
-            Whether you&apos;re beginning with 12:12, following 16:8, or
+            Whether you&apos;re beginning with 16:8, following 18:6, or
             practicing OMAD, Trinity helps you choose a fasting schedule that
             fits your lifestyle instead of forcing you into one.
           </p>
@@ -232,13 +235,26 @@ export default function Page() {
           variants={mediaRightVariants}
           initial='hidden'
           whileInView='visible'
-          viewport={{ once: true, amount: 0.25 }}
-          whileHover={{
-            scale: 1.01,
-            y: -2,
-          }}
-          className='bg-muted border-border order-1 aspect-video rounded-2xl border lg:order-2'
-        />
+          viewport={{ amount: 0.25 }}
+          whileHover={{ y: -2 }}
+          className='bg-muted/20 order-1 flex items-center justify-center rounded-3xl border p-8 lg:order-2'
+        >
+          <Image
+            src='/screenshots/fasting-plans-light.webp'
+            alt='Choose a fasting plan'
+            width={588}
+            height={699}
+            className='h-auto max-h-130 w-auto rounded-2xl shadow-2xl dark:hidden'
+          />
+
+          <Image
+            src='/screenshots/fasting-plans-dark.webp'
+            alt='Choose a fasting plan'
+            width={589}
+            height={701}
+            className='hidden h-auto max-h-130 w-auto rounded-2xl shadow-2xl dark:block'
+          />
+        </motion.div>
       </section>
 
       {/* Statistics */}
