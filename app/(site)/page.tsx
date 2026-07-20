@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { motion } from 'motion/react'
+import Image from 'next/image'
 import Link from 'next/link'
 
 export default function Page() {
@@ -56,6 +57,60 @@ export default function Page() {
           </Button>
         </motion.div>
       </div>
+
+      <motion.div
+        initial={{
+          opacity: 0,
+          y: 32,
+          scale: 0.98,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+          scale: 1,
+        }}
+        transition={{
+          delay: 0.45,
+          duration: 0.6,
+          ease: 'easeOut',
+        }}
+      >
+        <div className='relative mx-auto max-w-6xl px-6'>
+          <div className='absolute inset-0 -z-10 rounded-full bg-blue-500/10 blur-3xl' />
+          <Image
+            src={'/screenshots/hero-banner-desktop-light.webp'}
+            alt='hero'
+            width={1920}
+            height={911}
+            loading='eager'
+            className='border-border z-10 mx-auto hidden w-full max-w-6xl rounded-2xl border shadow-2xl md:block dark:hidden'
+          />
+          <Image
+            src={'/screenshots/hero-banner-desktop-dark.webp'}
+            alt='hero'
+            width={1920}
+            height={911}
+            loading='eager'
+            className='border-border z-10 mx-auto hidden w-full max-w-6xl rounded-2xl border shadow-2xl dark:hidden md:dark:block'
+          />
+          <Image
+            src={'/screenshots/hero-banner-mobile-light.webp'}
+            alt='hero'
+            width={1078}
+            height={2216}
+            loading='eager'
+            className='border-border z-10 mx-auto block w-full max-w-sm rounded-2xl border shadow-2xl md:hidden dark:hidden'
+          />
+          <Image
+            src={'/screenshots/hero-banner-mobile-dark.webp'}
+            alt='hero'
+            width={1080}
+            height={2216}
+            loading='eager'
+            className='border-border z-10 mx-auto hidden w-full max-w-sm rounded-2xl border shadow-2xl md:hidden dark:block dark:md:hidden'
+          />
+        </div>
+      </motion.div>
     </div>
   )
 }
