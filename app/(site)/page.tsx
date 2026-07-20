@@ -143,7 +143,7 @@ export default function Page() {
         </div>
       </motion.div>
 
-      <section className='bg-muted/20 mx-auto w-full max-w-6xl space-y-12 px-6 py-20 md:p-28'>
+      <section className='mx-auto w-full max-w-6xl space-y-12 px-6 py-20 md:p-28'>
         <motion.h2
           initial={{
             opacity: 0,
