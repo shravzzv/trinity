@@ -8,9 +8,33 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { GitPullRequestArrow, Tag, UserLock, WifiOff } from 'lucide-react'
-import { motion } from 'motion/react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { motion, type Variants } from 'motion/react'
+
+const containerVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.16,
+    },
+  },
+}
+
+const itemVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 24,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.45,
+      ease: 'easeOut',
+    },
+  },
+}
 
 export default function Page() {
   return (
@@ -120,71 +144,102 @@ export default function Page() {
       </motion.div>
 
       <section className='bg-muted/20 mx-auto w-full max-w-6xl space-y-12 px-6 py-20 md:p-28'>
-        <h2 className='text-center text-3xl font-bold tracking-tight md:text-6xl'>
+        <motion.h2
+          initial={{
+            opacity: 0,
+            y: 16,
+          }}
+          whileInView={{
+            opacity: 1,
+            y: 0,
+          }}
+          viewport={{
+            once: true,
+            amount: 0.8,
+          }}
+          className='text-center text-3xl font-bold tracking-tight md:text-6xl'
+        >
           Built for consistency.
-        </h2>
+        </motion.h2>
 
-        <div className='grid gap-6 md:grid-cols-2'>
-          <Card>
-            <CardHeader className='space-y-3'>
-              <CardTitle className='flex items-center gap-2'>
-                <div className='bg-primary/10 text-primary rounded-xl p-2'>
-                  <WifiOff className='size-6' />
-                </div>
-                <span>Offline first</span>
-              </CardTitle>
-              <CardDescription>
-                Keep tracking even without an internet connection. Your data is
-                always available when you need it.
-              </CardDescription>
-            </CardHeader>
-          </Card>
+        <motion.div
+          variants={containerVariants}
+          initial='hidden'
+          whileInView='visible'
+          viewport={{
+            once: true,
+            amount: 0.2,
+          }}
+          className='grid gap-6 md:grid-cols-2'
+        >
+          <motion.div variants={itemVariants}>
+            <Card>
+              <CardHeader className='space-y-3'>
+                <CardTitle className='flex items-center gap-2'>
+                  <div className='bg-primary/10 text-primary rounded-xl p-2'>
+                    <WifiOff className='size-6' />
+                  </div>
+                  <span>Offline first</span>
+                </CardTitle>
+                <CardDescription>
+                  Keep tracking even without an internet connection. Your data
+                  is always available when you need it.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </motion.div>
 
-          <Card>
-            <CardHeader className='space-y-3'>
-              <CardTitle className='flex items-center gap-2'>
-                <div className='bg-primary/10 text-primary rounded-xl p-2'>
-                  <Tag className='text-primary size-6' />
-                </div>
-                <span>No ads</span>
-              </CardTitle>
-              <CardDescription>
-                Stay focused on your fasts without interruptions, banners, or
-                distractions.
-              </CardDescription>
-            </CardHeader>
-          </Card>
+          <motion.div variants={itemVariants}>
+            <Card>
+              <CardHeader className='space-y-3'>
+                <CardTitle className='flex items-center gap-2'>
+                  <div className='bg-primary/10 text-primary rounded-xl p-2'>
+                    <Tag className='text-primary size-6' />
+                  </div>
+                  <span>No ads</span>
+                </CardTitle>
+                <CardDescription>
+                  Stay focused on your fasts without interruptions, banners, or
+                  distractions.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </motion.div>
 
-          <Card>
-            <CardHeader className='space-y-3'>
-              <CardTitle className='flex items-center gap-2'>
-                <div className='bg-primary/10 text-primary rounded-xl p-2'>
-                  <UserLock className='text-primary size-6' />
-                </div>
-                <span>Privacy focused</span>
-              </CardTitle>
-              <CardDescription>
-                Your fasting journey belongs to you. Trinity is designed with
-                privacy in mind.
-              </CardDescription>
-            </CardHeader>
-          </Card>
+          <motion.div variants={itemVariants}>
+            <Card>
+              <CardHeader className='space-y-3'>
+                <CardTitle className='flex items-center gap-2'>
+                  <div className='bg-primary/10 text-primary rounded-xl p-2'>
+                    <UserLock className='text-primary size-6' />
+                  </div>
+                  <span>Privacy focused</span>
+                </CardTitle>
+                <CardDescription>
+                  Your fasting journey belongs to you. Trinity is designed with
+                  privacy in mind.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </motion.div>
 
-          <Card>
-            <CardHeader className='space-y-3'>
-              <CardTitle className='flex items-center gap-2'>
-                <div className='bg-primary/10 text-primary rounded-xl p-2'>
-                  <GitPullRequestArrow className='text-primary size-6' />
-                </div>
-                <span>Open source</span>
-              </CardTitle>
-              <CardDescription>
-                Built transparently with a public codebase, where anyone can
-                inspect the source and contribute improvements.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        </div>
+          <motion.div variants={itemVariants}>
+            <Card>
+              <CardHeader className='space-y-3'>
+                <CardTitle className='flex items-center gap-2'>
+                  <div className='bg-primary/10 text-primary rounded-xl p-2'>
+                    <GitPullRequestArrow className='text-primary size-6' />
+                  </div>
+                  <span>Open source</span>
+                </CardTitle>
+                <CardDescription>
+                  Built transparently with a public codebase, where anyone can
+                  inspect the source and contribute improvements.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </motion.div>
+        </motion.div>
       </section>
     </div>
   )
