@@ -1,3 +1,4 @@
+import SiteFooter from '@/components/site-footer'
 import SiteNavbar from '@/components/site-navbar'
 
 export default function Layout({
@@ -9,6 +10,7 @@ export default function Layout({
     <>
       <SiteNavbar />
       <main className='p-6'>{children}</main>
+      <SiteFooter />
     </>
   )
 }
