@@ -1,6 +1,13 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { GitPullRequestArrow, Tag, UserLock, WifiOff } from 'lucide-react'
 import { motion } from 'motion/react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -111,6 +118,74 @@ export default function Page() {
           />
         </div>
       </motion.div>
+
+      <section className='bg-muted/20 mx-auto w-full max-w-6xl space-y-12 px-6 py-20 md:p-28'>
+        <h2 className='text-center text-3xl font-bold tracking-tight md:text-6xl'>
+          Built for consistency.
+        </h2>
+
+        <div className='grid gap-6 md:grid-cols-2'>
+          <Card>
+            <CardHeader className='space-y-3'>
+              <CardTitle className='flex items-center gap-2'>
+                <div className='bg-primary/10 text-primary rounded-xl p-2'>
+                  <WifiOff className='size-6' />
+                </div>
+                <span>Offline first</span>
+              </CardTitle>
+              <CardDescription>
+                Keep tracking even without an internet connection. Your data is
+                always available when you need it.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card>
+            <CardHeader className='space-y-3'>
+              <CardTitle className='flex items-center gap-2'>
+                <div className='bg-primary/10 text-primary rounded-xl p-2'>
+                  <Tag className='text-primary size-6' />
+                </div>
+                <span>No ads</span>
+              </CardTitle>
+              <CardDescription>
+                Stay focused on your fasts without interruptions, banners, or
+                distractions.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card>
+            <CardHeader className='space-y-3'>
+              <CardTitle className='flex items-center gap-2'>
+                <div className='bg-primary/10 text-primary rounded-xl p-2'>
+                  <UserLock className='text-primary size-6' />
+                </div>
+                <span>Privacy focused</span>
+              </CardTitle>
+              <CardDescription>
+                Your fasting journey belongs to you. Trinity is designed with
+                privacy in mind.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card>
+            <CardHeader className='space-y-3'>
+              <CardTitle className='flex items-center gap-2'>
+                <div className='bg-primary/10 text-primary rounded-xl p-2'>
+                  <GitPullRequestArrow className='text-primary size-6' />
+                </div>
+                <span>Open source</span>
+              </CardTitle>
+              <CardDescription>
+                Built transparently with a public codebase, where anyone can
+                inspect the source and contribute improvements.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+      </section>
     </div>
   )
 }
