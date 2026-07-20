@@ -93,6 +93,7 @@ export default function Page() {
           className='text-primary font-medium'
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
         >
           Features
         </motion.p>
@@ -101,7 +102,7 @@ export default function Page() {
           className='mt-4 text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl'
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          transition={{ delay: 0.3 }}
         >
           Everything you need to build consistent fasting habits.
         </motion.h1>
@@ -110,7 +111,7 @@ export default function Page() {
           className='text-muted-foreground mt-6 max-w-2xl text-lg leading-relaxed'
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.6 }}
         >
           Trinity combines a beautiful fasting experience with thoughtful tools
           designed to help you stay consistent over the long term. No clutter.
