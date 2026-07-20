@@ -264,12 +264,25 @@ export default function Page() {
           initial='hidden'
           whileInView='visible'
           viewport={{ once: true, amount: 0.25 }}
-          whileHover={{
-            scale: 1.01,
-            y: -2,
-          }}
-          className='bg-muted border-border aspect-video rounded-2xl border'
-        />
+          whileHover={{ y: -2 }}
+          className='bg-muted/20 flex items-center justify-center rounded-3xl border p-8'
+        >
+          <Image
+            src='/screenshots/fasting-statistics-light.webp'
+            alt='Fasting statistics'
+            width={706}
+            height={637}
+            className='h-auto max-h-130 w-auto rounded-2xl shadow-2xl dark:hidden'
+          />
+
+          <Image
+            src='/screenshots/fasting-statistics-dark.webp'
+            alt='Fasting statistics'
+            width={706}
+            height={637}
+            className='hidden h-auto max-h-130 w-auto rounded-2xl shadow-2xl dark:block'
+          />
+        </motion.div>
 
         <motion.div
           variants={textRightVariants}
