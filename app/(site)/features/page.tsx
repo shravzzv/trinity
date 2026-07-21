@@ -121,8 +121,8 @@ export default function Page() {
       </section>
 
       {/* timer */}
-      <section className='mx-auto grid max-w-6xl items-center gap-16 px-6 py-20 lg:grid-cols-[3fr_2fr]'>
-        <div className='relative'>
+      <section className='mx-auto grid max-w-6xl items-center gap-16 px-6 py-8 md:py-20 lg:grid-cols-[3fr_2fr]'>
+        <div className='bg-background flex items-center justify-center rounded-3xl border p-8'>
           <motion.video
             variants={mediaLeftVariants}
             initial='hidden'
@@ -150,7 +150,7 @@ export default function Page() {
             loop
             playsInline
             preload='metadata'
-            className='bg-muted hidden aspect-video w-full rounded-2xl object-cover shadow-xl dark:block'
+            className='bg-muted hidden aspect-video w-full rounded-2xl object-cover dark:block'
           >
             <source src='/videos/fasting-timer-dark.mp4' type='video/mp4' />
           </motion.video>
@@ -199,7 +199,7 @@ export default function Page() {
       </section>
 
       {/* Plans */}
-      <section className='mx-auto grid max-w-6xl items-center gap-16 px-6 py-20 lg:grid-cols-[2fr_3fr]'>
+      <section className='mx-auto grid max-w-6xl items-center gap-16 px-6 py-8 md:py-20 lg:grid-cols-[2fr_3fr]'>
         <motion.div
           variants={textLeftVariants}
           initial='hidden'
@@ -258,7 +258,7 @@ export default function Page() {
       </section>
 
       {/* Statistics */}
-      <section className='mx-auto grid max-w-6xl items-center gap-16 px-6 py-20 lg:grid-cols-[3fr_2fr]'>
+      <section className='mx-auto grid max-w-6xl items-center gap-16 px-6 py-8 md:py-20 lg:grid-cols-[3fr_2fr]'>
         <motion.div
           variants={mediaLeftVariants}
           initial='hidden'
@@ -317,7 +317,7 @@ export default function Page() {
       </section>
 
       {/* Weight */}
-      <section className='mx-auto grid max-w-6xl items-center gap-16 px-6 py-20 lg:grid-cols-[2fr_3fr]'>
+      <section className='mx-auto grid max-w-6xl items-center gap-16 px-6 py-8 md:py-20 lg:grid-cols-[2fr_3fr]'>
         <motion.div
           variants={textLeftVariants}
           initial='hidden'
@@ -376,18 +376,31 @@ export default function Page() {
       </section>
 
       {/* Gamification */}
-      <section className='mx-auto grid max-w-6xl items-center gap-16 px-6 py-20 lg:grid-cols-[3fr_2fr]'>
+      <section className='mx-auto grid max-w-6xl items-center gap-16 px-6 py-8 md:py-20 lg:grid-cols-[3fr_2fr]'>
         <motion.div
           variants={mediaLeftVariants}
           initial='hidden'
           whileInView='visible'
           viewport={{ once: true, amount: 0.25 }}
-          whileHover={{
-            scale: 1.01,
-            y: -2,
-          }}
-          className='bg-muted border-border aspect-video rounded-2xl border'
-        />
+          whileHover={{ y: -2 }}
+          className='bg-muted/20 flex items-center justify-center rounded-3xl border p-8'
+        >
+          <Image
+            src='/screenshots/streak-dialog-light.webp'
+            alt='Fasting statistics'
+            width={706}
+            height={637}
+            className='h-auto max-h-130 w-auto rounded-2xl shadow-2xl dark:hidden'
+          />
+
+          <Image
+            src='/screenshots/streak-dialog-dark.webp'
+            alt='Fasting statistics'
+            width={706}
+            height={637}
+            className='hidden h-auto max-h-130 w-auto rounded-2xl shadow-2xl dark:block'
+          />
+        </motion.div>
 
         <motion.div
           variants={textRightVariants}
@@ -420,7 +433,7 @@ export default function Page() {
       </section>
 
       {/* Anchors */}
-      <section className='mx-auto grid max-w-6xl items-center gap-16 px-6 py-20 lg:grid-cols-[2fr_3fr]'>
+      <section className='mx-auto grid max-w-6xl items-center gap-16 px-6 py-8 md:py-20 lg:grid-cols-[2fr_3fr]'>
         <motion.div
           variants={textLeftVariants}
           initial='hidden'
@@ -456,13 +469,26 @@ export default function Page() {
           variants={mediaRightVariants}
           initial='hidden'
           whileInView='visible'
-          viewport={{ once: true, amount: 0.25 }}
-          whileHover={{
-            scale: 1.01,
-            y: -2,
-          }}
-          className='bg-muted border-border order-1 aspect-video rounded-2xl border lg:order-2'
-        />
+          viewport={{ amount: 0.25 }}
+          whileHover={{ y: -2 }}
+          className='bg-muted/20 order-1 flex items-center justify-center rounded-3xl border p-8 lg:order-2'
+        >
+          <Image
+            src='/screenshots/anchors-dialog-light.webp'
+            alt='Choose a fasting plan'
+            width={588}
+            height={699}
+            className='h-auto max-h-130 w-auto rounded-2xl shadow-2xl dark:hidden'
+          />
+
+          <Image
+            src='/screenshots/anchors-dialog-dark.webp'
+            alt='Choose a fasting plan'
+            width={589}
+            height={701}
+            className='hidden h-auto max-h-130 w-auto rounded-2xl shadow-2xl dark:block'
+          />
+        </motion.div>
       </section>
 
       {/* CTA */}
