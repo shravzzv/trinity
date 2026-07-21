@@ -1,33 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { motion, type Variants } from 'motion/react'
-import Image from 'next/image'
-
-const containerVariants: Variants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.08,
-    },
-  },
-}
-
-const itemVariants: Variants = {
-  hidden: {
-    opacity: 0,
-    y: 24,
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.45,
-    },
-  },
-}
+import { FeatureSection } from '@/components/feature-section'
+import { FeatureVideo } from '@/components/feature-video'
+import { FeatureImage } from '@/components/feature-image'
 
 const mediaLeftVariants: Variants = {
   hidden: {
@@ -120,376 +98,134 @@ export default function Page() {
         </motion.p>
       </section>
 
-      {/* timer */}
-      <section className='mx-auto grid max-w-6xl items-center gap-16 px-6 py-8 md:py-20 lg:grid-cols-[3fr_2fr]'>
-        <div className='bg-background flex items-center justify-center rounded-3xl border p-8'>
-          <motion.video
+      <FeatureSection
+        mediaLeft
+        title='Track every fast.'
+        description="Trinity's fasting timer is designed to stay out of your way while keeping you focused on your goals. Start and complete your fasts with a clean interface that makes consistency feel effortless."
+        bullets={[
+          'Beautiful and distraction-free interface',
+          'Works completely offline',
+          'Supports multiple fasting schedules',
+        ]}
+        textVariants={textRightVariants}
+        media={
+          <FeatureVideo
             variants={mediaLeftVariants}
-            initial='hidden'
-            whileInView='visible'
-            transition={{ duration: 0.2 }}
-            viewport={{ once: true }}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload='metadata'
-            className='bg-muted aspect-video w-full rounded-2xl object-cover dark:hidden'
-          >
-            <source src='/videos/fasting-timer-light.mp4' type='video/mp4' />
-          </motion.video>
+            lightSrc='/videos/fasting-timer-light.mp4'
+            darkSrc='/videos/fasting-timer-dark.mp4'
+          />
+        }
+      />
 
-          <motion.video
+      <FeatureSection
+        mediaLeft={false}
+        title='Find a schedule that works for you.'
+        description=" Whether you're beginning with 16:8, following 18:6, or practicing OMAD, Trinity helps you choose a fasting schedule that fits your lifestyle instead of forcing you into one."
+        bullets={[
+          'Popular fasting plans included',
+          'Simple plan selection',
+          'Switch plans whenever you need',
+        ]}
+        textVariants={textLeftVariants}
+        media={
+          <FeatureImage
+            variants={mediaRightVariants}
+            lightSrc='/screenshots/fasting-plans-light.webp'
+            darkSrc='/screenshots/fasting-plans-dark.webp'
+            alt='Choose a fasting plan'
+            width={588}
+            height={699}
+          />
+        }
+      />
+
+      <FeatureSection
+        mediaLeft
+        title='Understand your progress.'
+        description='Every completed fast contributes to a bigger picture. Beautiful charts and statistics help you recognize trends, celebrate consistency, and stay motivated throughout your journey.'
+        bullets={[
+          'Fasting history',
+          'Completion statistics',
+          'Long-term consistency tracking',
+        ]}
+        textVariants={textRightVariants}
+        media={
+          <FeatureImage
             variants={mediaLeftVariants}
-            initial='hidden'
-            whileInView='visible'
-            transition={{ duration: 0.2 }}
-            viewport={{ once: true }}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload='metadata'
-            className='bg-muted hidden aspect-video w-full rounded-2xl object-cover dark:block'
-          >
-            <source src='/videos/fasting-timer-dark.mp4' type='video/mp4' />
-          </motion.video>
-        </div>
+            lightSrc='/screenshots/fasting-statistics-light.webp'
+            darkSrc='/screenshots/fasting-statistics-dark.webp'
+            alt='Fasting statistics'
+            width={706}
+            height={637}
+          />
+        }
+      />
 
-        <motion.div
-          variants={textRightVariants}
-          initial='hidden'
-          whileInView='visible'
-          viewport={{ once: true, amount: 0.25 }}
-          className='space-y-6'
-        >
-          <h2 className='text-4xl font-bold tracking-tight'>
-            Track every fast.
-          </h2>
-
-          <p className='text-muted-foreground leading-7'>
-            Trinity&apos;s fasting timer is designed to stay out of your way
-            while keeping you focused on your goals. Start and complete your
-            fasts with a clean interface that makes consistency feel effortless.
-          </p>
-
-          <motion.ul
-            variants={containerVariants}
-            initial='hidden'
-            whileInView='visible'
-            viewport={{ once: true }}
-            className='space-y-3'
-          >
-            {[
-              'Beautiful and distraction-free interface',
-              'Works completely offline',
-              'Supports multiple fasting schedules',
-            ].map((item) => (
-              <motion.li
-                key={item}
-                variants={itemVariants}
-                className='flex items-center gap-3'
-              >
-                <Check className='text-primary size-5 shrink-0' />
-                <span>{item}</span>
-              </motion.li>
-            ))}
-          </motion.ul>
-        </motion.div>
-      </section>
-
-      {/* Plans */}
-      <section className='mx-auto grid max-w-6xl items-center gap-16 px-6 py-8 md:py-20 lg:grid-cols-[2fr_3fr]'>
-        <motion.div
-          variants={textLeftVariants}
-          initial='hidden'
-          whileInView='visible'
-          viewport={{ once: true, amount: 0.25 }}
-          className='order-2 space-y-6 lg:order-1'
-        >
-          <h2 className='text-4xl font-bold tracking-tight'>
-            Find a schedule that works for you.
-          </h2>
-
-          <p className='text-muted-foreground leading-7'>
-            Whether you&apos;re beginning with 16:8, following 18:6, or
-            practicing OMAD, Trinity helps you choose a fasting schedule that
-            fits your lifestyle instead of forcing you into one.
-          </p>
-
-          <ul className='space-y-3'>
-            {[
-              'Popular fasting plans included',
-              'Simple plan selection',
-              'Switch plans whenever you need',
-            ].map((item) => (
-              <li key={item} className='flex items-center gap-3'>
-                <Check className='text-primary size-5 shrink-0' />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </motion.div>
-
-        <motion.div
-          variants={mediaRightVariants}
-          initial='hidden'
-          whileInView='visible'
-          viewport={{ amount: 0.25 }}
-          whileHover={{ y: -2 }}
-          className='bg-muted/20 order-1 flex items-center justify-center rounded-3xl border p-8 lg:order-2'
-        >
-          <Image
-            src='/screenshots/fasting-plans-light.webp'
+      <FeatureSection
+        mediaLeft={false}
+        title='Track more than your weight.'
+        description='Weight changes are meaningful over weeks and months—not days. Trinity helps you visualize long-term trends with beautiful charts that encourage patience instead of daily obsession.'
+        bullets={[
+          'Weight history',
+          'Trend visualization',
+          'Long-term progress insights',
+        ]}
+        textVariants={textLeftVariants}
+        media={
+          <FeatureImage
+            variants={mediaRightVariants}
+            lightSrc='/screenshots/weight-statistics-light.webp'
+            darkSrc='/screenshots/weight-statistics-dark.webp'
             alt='Choose a fasting plan'
             width={588}
             height={699}
-            className='h-auto max-h-130 w-auto rounded-2xl shadow-2xl dark:hidden'
           />
+        }
+      />
 
-          <Image
-            src='/screenshots/fasting-plans-dark.webp'
-            alt='Choose a fasting plan'
-            width={589}
-            height={701}
-            className='hidden h-auto max-h-130 w-auto rounded-2xl shadow-2xl dark:block'
-          />
-        </motion.div>
-      </section>
-
-      {/* Statistics */}
-      <section className='mx-auto grid max-w-6xl items-center gap-16 px-6 py-8 md:py-20 lg:grid-cols-[3fr_2fr]'>
-        <motion.div
-          variants={mediaLeftVariants}
-          initial='hidden'
-          whileInView='visible'
-          viewport={{ once: true, amount: 0.25 }}
-          whileHover={{ y: -2 }}
-          className='bg-muted/20 flex items-center justify-center rounded-3xl border p-8'
-        >
-          <Image
-            src='/screenshots/fasting-statistics-light.webp'
+      <FeatureSection
+        mediaLeft
+        title='Stay motivated.'
+        description="  Building healthy habits should feel rewarding. Trinity's gamification system celebrates consistency through streaks, experience, and levels that grow alongside your fasting journey."
+        bullets={[
+          'Build and maintain streaks',
+          'Earn experience for completed fasts',
+          'Unlock new levels over time',
+        ]}
+        textVariants={textRightVariants}
+        media={
+          <FeatureImage
+            variants={mediaLeftVariants}
+            lightSrc='/screenshots/streak-dialog-light.webp'
+            darkSrc='/screenshots/streak-dialog-dark.webp'
             alt='Fasting statistics'
             width={706}
             height={637}
-            className='h-auto max-h-130 w-auto rounded-2xl shadow-2xl dark:hidden'
           />
+        }
+      />
 
-          <Image
-            src='/screenshots/fasting-statistics-dark.webp'
-            alt='Fasting statistics'
-            width={706}
-            height={637}
-            className='hidden h-auto max-h-130 w-auto rounded-2xl shadow-2xl dark:block'
-          />
-        </motion.div>
-
-        <motion.div
-          variants={textRightVariants}
-          initial='hidden'
-          whileInView='visible'
-          viewport={{ once: true, amount: 0.25 }}
-          className='space-y-6'
-        >
-          <h2 className='text-4xl font-bold tracking-tight'>
-            Understand your progress.
-          </h2>
-
-          <p className='text-muted-foreground leading-7'>
-            Every completed fast contributes to a bigger picture. Beautiful
-            charts and statistics help you recognize trends, celebrate
-            consistency, and stay motivated throughout your journey.
-          </p>
-
-          <ul className='space-y-3'>
-            {[
-              'Fasting history',
-              'Completion statistics',
-              'Long-term consistency tracking',
-            ].map((item) => (
-              <li key={item} className='flex items-center gap-3'>
-                <Check className='text-primary size-5 shrink-0' />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </motion.div>
-      </section>
-
-      {/* Weight */}
-      <section className='mx-auto grid max-w-6xl items-center gap-16 px-6 py-8 md:py-20 lg:grid-cols-[2fr_3fr]'>
-        <motion.div
-          variants={textLeftVariants}
-          initial='hidden'
-          whileInView='visible'
-          viewport={{ once: true, amount: 0.25 }}
-          className='order-2 space-y-6 lg:order-1'
-        >
-          <h2 className='text-4xl font-bold tracking-tight'>
-            Track more than your weight.
-          </h2>
-
-          <p className='text-muted-foreground leading-7'>
-            Weight changes are meaningful over weeks and months—not days.
-            Trinity helps you visualize long-term trends with beautiful charts
-            that encourage patience instead of daily obsession.
-          </p>
-
-          <ul className='space-y-3'>
-            {[
-              'Weight history',
-              'Trend visualization',
-              'Long-term progress insights',
-            ].map((item) => (
-              <li key={item} className='flex items-center gap-3'>
-                <Check className='text-primary size-5 shrink-0' />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </motion.div>
-
-        <motion.div
-          variants={mediaRightVariants}
-          initial='hidden'
-          whileInView='visible'
-          viewport={{ amount: 0.25 }}
-          whileHover={{ y: -2 }}
-          className='bg-muted/20 order-1 flex items-center justify-center rounded-3xl border p-8 lg:order-2'
-        >
-          <Image
-            src='/screenshots/weight-statistics-light.webp'
+      <FeatureSection
+        mediaLeft={false}
+        title='Protect your streak.'
+        description="Life happens. Anchors let you preserve your streak when fasting simply isn't possible. Earn anchors through consistent fasting and use them when you genuinely need a break—not as a shortcut."
+        bullets={[
+          'Earn anchors through consistency',
+          'Recover from unavoidable interruptions',
+          'Designed to encourage balance, not perfection',
+        ]}
+        textVariants={textLeftVariants}
+        media={
+          <FeatureImage
+            variants={mediaRightVariants}
+            lightSrc='/screenshots/anchors-dialog-light.webp'
+            darkSrc='/screenshots/anchors-dialog-dark.webp'
             alt='Choose a fasting plan'
             width={588}
             height={699}
-            className='h-auto max-h-130 w-auto rounded-2xl shadow-2xl dark:hidden'
           />
-
-          <Image
-            src='/screenshots/weight-statistics-dark.webp'
-            alt='Choose a fasting plan'
-            width={589}
-            height={701}
-            className='hidden h-auto max-h-130 w-auto rounded-2xl shadow-2xl dark:block'
-          />
-        </motion.div>
-      </section>
-
-      {/* Gamification */}
-      <section className='mx-auto grid max-w-6xl items-center gap-16 px-6 py-8 md:py-20 lg:grid-cols-[3fr_2fr]'>
-        <motion.div
-          variants={mediaLeftVariants}
-          initial='hidden'
-          whileInView='visible'
-          viewport={{ once: true, amount: 0.25 }}
-          whileHover={{ y: -2 }}
-          className='bg-muted/20 flex items-center justify-center rounded-3xl border p-8'
-        >
-          <Image
-            src='/screenshots/streak-dialog-light.webp'
-            alt='Fasting statistics'
-            width={706}
-            height={637}
-            className='h-auto max-h-130 w-auto rounded-2xl shadow-2xl dark:hidden'
-          />
-
-          <Image
-            src='/screenshots/streak-dialog-dark.webp'
-            alt='Fasting statistics'
-            width={706}
-            height={637}
-            className='hidden h-auto max-h-130 w-auto rounded-2xl shadow-2xl dark:block'
-          />
-        </motion.div>
-
-        <motion.div
-          variants={textRightVariants}
-          initial='hidden'
-          whileInView='visible'
-          viewport={{ once: true, amount: 0.25 }}
-          className='space-y-6'
-        >
-          <h2 className='text-4xl font-bold tracking-tight'>Stay motivated.</h2>
-
-          <p className='text-muted-foreground leading-7'>
-            Building healthy habits should feel rewarding. Trinity&apos;s
-            gamification system celebrates consistency through streaks,
-            experience, and levels that grow alongside your fasting journey.
-          </p>
-
-          <ul className='space-y-3'>
-            {[
-              'Build and maintain streaks',
-              'Earn experience for completed fasts',
-              'Unlock new levels over time',
-            ].map((item) => (
-              <li key={item} className='flex items-center gap-3'>
-                <Check className='text-primary size-5 shrink-0' />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </motion.div>
-      </section>
-
-      {/* Anchors */}
-      <section className='mx-auto grid max-w-6xl items-center gap-16 px-6 py-8 md:py-20 lg:grid-cols-[2fr_3fr]'>
-        <motion.div
-          variants={textLeftVariants}
-          initial='hidden'
-          whileInView='visible'
-          viewport={{ once: true, amount: 0.25 }}
-          className='order-2 space-y-6 lg:order-1'
-        >
-          <h2 className='text-4xl font-bold tracking-tight'>
-            Protect your streak.
-          </h2>
-
-          <p className='text-muted-foreground leading-7'>
-            Life happens. Anchors let you preserve your streak when fasting
-            simply isn&apos;t possible. Earn anchors through consistent fasting
-            and use them when you genuinely need a break—not as a shortcut.
-          </p>
-
-          <ul className='space-y-3'>
-            {[
-              'Earn anchors through consistency',
-              'Recover from unavoidable interruptions',
-              'Designed to encourage balance, not perfection',
-            ].map((item) => (
-              <li key={item} className='flex items-center gap-3'>
-                <Check className='text-primary size-5 shrink-0' />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </motion.div>
-
-        <motion.div
-          variants={mediaRightVariants}
-          initial='hidden'
-          whileInView='visible'
-          viewport={{ amount: 0.25 }}
-          whileHover={{ y: -2 }}
-          className='bg-muted/20 order-1 flex items-center justify-center rounded-3xl border p-8 lg:order-2'
-        >
-          <Image
-            src='/screenshots/anchors-dialog-light.webp'
-            alt='Choose a fasting plan'
-            width={588}
-            height={699}
-            className='h-auto max-h-130 w-auto rounded-2xl shadow-2xl dark:hidden'
-          />
-
-          <Image
-            src='/screenshots/anchors-dialog-dark.webp'
-            alt='Choose a fasting plan'
-            width={589}
-            height={701}
-            className='hidden h-auto max-h-130 w-auto rounded-2xl shadow-2xl dark:block'
-          />
-        </motion.div>
-      </section>
+        }
+      />
 
       {/* CTA */}
       <section className='mx-auto flex max-w-4xl flex-col items-center px-6 py-12 text-center md:py-28'>
