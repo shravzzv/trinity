@@ -105,7 +105,7 @@ export default function Page() {
         bullets={[
           'Beautiful and distraction-free interface',
           'Works completely offline',
-          'Supports multiple fasting schedules',
+          'Quickly start and complete fasts',
         ]}
         textVariants={textRightVariants}
         media={
