@@ -2,15 +2,15 @@
 
 import { motion, type Variants } from 'motion/react'
 
-type FeatureVideoProps = {
-  lightSrc: string
+interface FeatureVideoProps {
   darkSrc: string
+  lightSrc: string
   variants: Variants
 }
 
 export function FeatureVideo({
-  lightSrc,
   darkSrc,
+  lightSrc,
   variants,
 }: FeatureVideoProps) {
   return (

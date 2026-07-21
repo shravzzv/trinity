@@ -176,7 +176,7 @@ export default function Page() {
             variants={mediaRightVariants}
             lightSrc='/screenshots/weight-statistics-light.webp'
             darkSrc='/screenshots/weight-statistics-dark.webp'
-            alt='Choose a fasting plan'
+            alt='Weight statistics'
             width={588}
             height={699}
           />
@@ -198,7 +198,7 @@ export default function Page() {
             variants={mediaLeftVariants}
             lightSrc='/screenshots/streak-dialog-light.webp'
             darkSrc='/screenshots/streak-dialog-dark.webp'
-            alt='Fasting statistics'
+            alt='Fasting streak'
             width={706}
             height={637}
           />
@@ -220,7 +220,7 @@ export default function Page() {
             variants={mediaRightVariants}
             lightSrc='/screenshots/anchors-dialog-light.webp'
             darkSrc='/screenshots/anchors-dialog-dark.webp'
-            alt='Choose a fasting plan'
+            alt='Fasting anchor'
             width={588}
             height={699}
           />

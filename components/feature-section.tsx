@@ -27,7 +27,7 @@ const listItemVariants: Variants = {
   },
 }
 
-type FeatureSectionProps = {
+interface FeatureSectionProps {
   title: string
   media: ReactNode
   bullets: string[]
