@@ -1,6 +1,8 @@
 import { withSerwist } from '@serwist/turbopack'
 import type { NextConfig } from 'next'
+import createMDX from '@next/mdx'
 
+/** @type {import('next').NextConfig} */
 const nextConfig: NextConfig = {
   reactCompiler: true,
   allowedDevOrigins: [
@@ -11,6 +13,11 @@ const nextConfig: NextConfig = {
     '192.168.0.104',
     '192.168.0.105',
   ],
+  pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
 }
 
-export default withSerwist(nextConfig)
+const withMDX = createMDX({
+  extension: /\.(md|mdx)$/,
+})
+
+export default withSerwist(withMDX(nextConfig))
