@@ -9,12 +9,15 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useState } from 'react'
 
 interface DocsContentProps {
   children: React.ReactNode
 }
 
 export default function DocsContent({ children }: DocsContentProps) {
+  const [open, setOpen] = useState(false)
+
   return (
     <section className='mx-auto max-w-4xl space-y-1 px-2 md:px-8'>
       <motion.div
@@ -36,12 +39,13 @@ export default function DocsContent({ children }: DocsContentProps) {
           <SidebarTrigger size='icon-lg' />
         </div>
 
-        <DropdownMenu>
+        <DropdownMenu open={open} onOpenChange={setOpen}>
           <DropdownMenuTrigger asChild>
             <Button variant='outline'>On this page</Button>
           </DropdownMenuTrigger>
+
           <DropdownMenuContent className='max-h-[50svh] min-w-[70dvw] overflow-y-auto border-0 md:min-w-[50dvw]'>
-            <DocsTOC />
+            <DocsTOC onNavigate={() => setOpen(false)} />
           </DropdownMenuContent>
         </DropdownMenu>
       </motion.div>

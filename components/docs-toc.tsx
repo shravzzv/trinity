@@ -41,7 +41,11 @@ const links = [
   },
 ]
 
-export default function DocsTOC() {
+interface DocsTOCPros {
+  onNavigate?: () => void
+}
+
+export default function DocsTOC({ onNavigate }: DocsTOCPros) {
   const activeId = useActiveHeading()
 
   return (
@@ -72,6 +76,7 @@ export default function DocsTOC() {
                     id === activeId &&
                       'font-medium underline underline-offset-2',
                   )}
+                  onClick={onNavigate}
                 >
                   {link.name}
                 </Link>
