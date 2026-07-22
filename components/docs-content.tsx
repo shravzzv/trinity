@@ -17,7 +17,21 @@ interface DocsContentProps {
 export default function DocsContent({ children }: DocsContentProps) {
   return (
     <section className='mx-auto max-w-4xl space-y-1 px-2 md:px-8'>
-      <div className='bg-background sticky top-16 flex items-center gap-2 py-2 lg:hidden'>
+      <motion.div
+        initial={{
+          opacity: 0,
+          y: -8,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+        }}
+        exit={{
+          opacity: 0,
+          y: -8,
+        }}
+        className='bg-background sticky top-16 flex items-center gap-2 py-2 lg:hidden'
+      >
         <div className='md:hidden'>
           <SidebarTrigger size='icon-lg' />
         </div>
@@ -30,7 +44,7 @@ export default function DocsContent({ children }: DocsContentProps) {
             <DocsTOC />
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
+      </motion.div>
 
       <motion.article
         initial={{ opacity: 0, y: 12 }}

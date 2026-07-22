@@ -1,5 +1,8 @@
+'use client'
+
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
+import { motion } from 'motion/react'
 
 const links = [
   { href: '#introduction', name: 'Introduction' },
@@ -14,7 +17,14 @@ const links = [
 
 export default function DocsTOC() {
   return (
-    <aside className='lg:sticky lg:top-16 lg:w-64 lg:px-4 lg:py-1'>
+    <motion.aside
+      initial={{ opacity: 0, x: 12 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{
+        duration: 0.3,
+      }}
+      className='lg:sticky lg:top-16 lg:w-64 lg:px-4 lg:py-1'
+    >
       <Card className='rounded-2xl border-0 shadow-none ring-transparent lg:border lg:shadow-lg dark:border-0 dark:shadow-none dark:ring-transparent'>
         <CardHeader className='hidden lg:block'>
           <CardTitle>On this page</CardTitle>
@@ -26,7 +36,7 @@ export default function DocsTOC() {
               <Link
                 key={link.href}
                 href={link.href}
-                className='block rounded-md text-sm hover:font-medium hover:underline'
+                className='block rounded-md text-sm hover:underline hover:underline-offset-2'
               >
                 {link.name}
               </Link>
@@ -34,6 +44,6 @@ export default function DocsTOC() {
           </nav>
         </CardContent>
       </Card>
-    </aside>
+    </motion.aside>
   )
 }
