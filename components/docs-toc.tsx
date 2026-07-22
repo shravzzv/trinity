@@ -3,19 +3,47 @@
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { motion } from 'motion/react'
+import { useActiveHeading } from '@/hooks/use-active-heading'
+import { cn } from '@/lib/utils'
 
 const links = [
-  { href: '#introduction', name: 'Introduction' },
-  { href: '#introduction3', name: 'What is trinity?' },
   {
-    href: '#introduction2',
-    name: 'Could there be really long lines in this component?',
+    href: '#introduction',
+    name: 'Introduction',
   },
-  { href: '#other', name: 'Other' },
-  { href: '#other2', name: 'Other link' },
+  {
+    href: '#welcome',
+    name: 'Welcome',
+  },
+  {
+    href: '#what-is-trinity',
+    name: 'What is Trinity?',
+  },
+  {
+    href: '#why-trinity-exists',
+    name: 'Why Trinity exists',
+  },
+  {
+    href: '#who-is-it-for',
+    name: 'Who is it for?',
+  },
+  {
+    href: '#offline-first',
+    name: 'Offline-first',
+  },
+  {
+    href: '#privacy',
+    name: 'Privacy',
+  },
+  {
+    href: '#getting-started',
+    name: 'Getting started',
+  },
 ]
 
 export default function DocsTOC() {
+  const activeId = useActiveHeading()
+
   return (
     <motion.aside
       initial={{ opacity: 0, x: 12 }}
@@ -32,15 +60,23 @@ export default function DocsTOC() {
 
         <CardContent className='max-h-[calc(100svh-12rem)] overflow-y-auto'>
           <nav className='flex flex-col gap-2'>
-            {links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className='block rounded-md text-sm hover:underline hover:underline-offset-2'
-              >
-                {link.name}
-              </Link>
-            ))}
+            {links.map((link) => {
+              const id = link.href.slice(1)
+
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    'block rounded-md text-sm hover:underline hover:underline-offset-2',
+                    id === activeId &&
+                      'font-medium underline underline-offset-2',
+                  )}
+                >
+                  {link.name}
+                </Link>
+              )
+            })}
           </nav>
         </CardContent>
       </Card>
