@@ -49,7 +49,6 @@ export default function DocsSidebar() {
                   <SidebarMenuButton
                     asChild
                     isActive={isActive}
-                    className='text-base font-medium sm:font-normal'
                     onClick={() => setOpenMobile(false)}
                   >
                     <Link href={link.href}>
