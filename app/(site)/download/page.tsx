@@ -1,9 +1,19 @@
 'use client'
 
 import DownloadCard from '@/components/download-card'
+import { usePwaInstall } from '@/hooks/use-pwa-install'
 import { motion } from 'motion/react'
 
 export default function Page() {
+  const { canInstall, install, installed } = usePwaInstall()
+
+  const webDisabled = installed || !canInstall
+  const webButtonLabel = installed
+    ? 'Installed'
+    : canInstall
+      ? 'Install'
+      : 'Unavailable'
+
   return (
     <div className='mx-auto flex max-w-5xl flex-col space-y-8 md:py-12'>
       <div className='space-y-2 text-center'>
@@ -27,12 +37,48 @@ export default function Page() {
       </div>
 
       <div className='grid grid-cols-2 gap-4 md:grid-cols-3 md:px-8'>
-        <DownloadCard index={0} title='Web App' available />
-        <DownloadCard index={1} title='Android' />
-        <DownloadCard index={2} title='iOS' />
-        <DownloadCard index={3} title='Windows' />
-        <DownloadCard index={4} title='macOS' />
-        <DownloadCard index={5} title='Linux' />
+        <DownloadCard
+          index={0}
+          title='Web App'
+          buttonLabel={webButtonLabel}
+          disabled={webDisabled}
+          onClick={install}
+        />
+
+        <DownloadCard
+          index={1}
+          title='Android'
+          buttonLabel='Coming Soon'
+          disabled
+        />
+
+        <DownloadCard
+          index={2}
+          title='iOS'
+          buttonLabel='Coming Soon'
+          disabled
+        />
+
+        <DownloadCard
+          index={3}
+          title='Windows'
+          buttonLabel='Coming Soon'
+          disabled
+        />
+
+        <DownloadCard
+          index={4}
+          title='macOS'
+          buttonLabel='Coming Soon'
+          disabled
+        />
+
+        <DownloadCard
+          index={5}
+          title='Linux'
+          buttonLabel='Coming Soon'
+          disabled
+        />
       </div>
     </div>
   )

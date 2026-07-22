@@ -7,13 +7,17 @@ import { motion } from 'motion/react'
 interface DownloadCardProps {
   title: string
   index?: number
-  available?: boolean
+  disabled?: boolean
+  buttonLabel: string
+  onClick?: () => void
 }
 
 export default function DownloadCard({
   title,
-  available = false,
+  onClick,
+  disabled,
   index = 0,
+  buttonLabel,
 }: DownloadCardProps) {
   return (
     <motion.div
@@ -31,10 +35,11 @@ export default function DownloadCard({
           <Button
             className='w-full'
             variant='outline'
-            disabled={!available}
+            disabled={disabled}
             size='sm'
+            onClick={onClick}
           >
-            {available ? 'Install' : 'Coming Soon'}
+            {buttonLabel}
           </Button>
         </CardContent>
       </Card>
