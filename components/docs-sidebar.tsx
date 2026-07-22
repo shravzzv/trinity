@@ -11,7 +11,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from './ui/sidebar'
-import { docsLinks } from '@/constants/docs'
+import { docs } from '@/constants/docs'
 import { usePathname } from 'next/navigation'
 
 export default function DocsSidebar() {
@@ -41,7 +41,7 @@ export default function DocsSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>
-            {docsLinks.map((link) => {
+            {docs.map((link) => {
               const isActive = pathname.startsWith(link.href)
 
               return (

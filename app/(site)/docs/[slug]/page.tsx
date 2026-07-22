@@ -1,3 +1,4 @@
+import DocsPager from '@/components/docs-pager'
 import { docs } from '@/constants/docs'
 import { notFound } from 'next/navigation'
 
@@ -7,9 +8,14 @@ export default async function Page({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const Doc = docs[slug as keyof typeof docs]
 
-  if (!Doc) return notFound()
+  const doc = docs.find((doc) => doc.slug === slug)
+  if (!doc) return notFound()
 
-  return <Doc />
+  return (
+    <>
+      <doc.component />
+      <DocsPager slug={slug} />
+    </>
+  )
 }
