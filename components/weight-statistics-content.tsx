@@ -214,7 +214,7 @@ export default function WeightStatisticsContent({
           )}
         </div>
 
-        <ChartContainer config={chartConfig}>
+        <ChartContainer config={chartConfig} className='h-54 w-full'>
           <AreaChart
             accessibilityLayer
             data={chartData}

@@ -14,7 +14,7 @@ describe('Not-found page', () => {
     render(<Page />)
     const link = screen.getByRole('link', { name: /go home/i })
     expect(link).toBeInTheDocument()
-    expect(link).toHaveAttribute('href', '/')
+    expect(link).toHaveAttribute('href', '/home')
   })
 
   it('should explain that the page could not be found', () => {

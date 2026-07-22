@@ -29,7 +29,7 @@ exports[`Not-found page should match the snapshot 1`] = `
       data-size="default"
       data-slot="button"
       data-variant="default"
-      href="/"
+      href="/home"
     >
       Go home
     </a>
