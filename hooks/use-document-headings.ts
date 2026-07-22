@@ -10,7 +10,7 @@ export interface Heading {
 }
 
 const HEADING_SELECTOR =
-  'article h1, article h2, article h3, article h4, article h5, article h6'
+  'article h2, article h3, article h4, article h5, article h6'
 
 export function useDocumentHeadings() {
   const pathname = usePathname()

@@ -1,8 +1,7 @@
 import { withSerwist } from '@serwist/turbopack'
-import type { NextConfig } from 'next'
 import createMDX from '@next/mdx'
+import type { NextConfig } from 'next'
 
-/** @type {import('next').NextConfig} */
 const nextConfig: NextConfig = {
   reactCompiler: true,
   allowedDevOrigins: [
@@ -18,6 +17,10 @@ const nextConfig: NextConfig = {
 
 const withMDX = createMDX({
   extension: /\.(md|mdx)$/,
+  options: {
+    remarkPlugins: ['remark-gfm'],
+    rehypePlugins: ['rehype-slug'],
+  },
 })
 
 export default withSerwist(withMDX(nextConfig))
