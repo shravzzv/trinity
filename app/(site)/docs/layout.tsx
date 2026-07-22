@@ -12,7 +12,9 @@ export default function Layout({
     <SidebarProvider>
       <DocsSidebar />
       <DocsContent>{children}</DocsContent>
-      <DocsTOC />
+      <aside className='hidden lg:block'>
+        <DocsTOC />
+      </aside>
     </SidebarProvider>
   )
 }
