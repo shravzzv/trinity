@@ -3,50 +3,15 @@
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { motion } from 'motion/react'
-import { useActiveHeading } from '@/hooks/use-active-heading'
 import { cn } from '@/lib/utils'
-
-const links = [
-  {
-    href: '#introduction',
-    name: 'Introduction',
-  },
-  {
-    href: '#welcome',
-    name: 'Welcome',
-  },
-  {
-    href: '#what-is-trinity',
-    name: 'What is Trinity?',
-  },
-  {
-    href: '#why-trinity-exists',
-    name: 'Why Trinity exists',
-  },
-  {
-    href: '#who-is-it-for',
-    name: 'Who is it for?',
-  },
-  {
-    href: '#offline-first',
-    name: 'Offline-first',
-  },
-  {
-    href: '#privacy',
-    name: 'Privacy',
-  },
-  {
-    href: '#getting-started',
-    name: 'Getting started',
-  },
-]
+import { useDocumentHeadings } from '@/hooks/use-document-headings'
 
 interface DocsTOCPros {
   onNavigate?: () => void
 }
 
 export default function DocsTOC({ onNavigate }: DocsTOCPros) {
-  const activeId = useActiveHeading()
+  const { headings, activeId } = useDocumentHeadings()
 
   return (
     <motion.aside
@@ -64,24 +29,21 @@ export default function DocsTOC({ onNavigate }: DocsTOCPros) {
 
         <CardContent className='max-h-[calc(100svh-12rem)] overflow-y-auto'>
           <nav className='flex flex-col gap-2'>
-            {links.map((link) => {
-              const id = link.href.slice(1)
-
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    'block rounded-md text-sm hover:underline hover:underline-offset-2',
-                    id === activeId &&
-                      'font-medium underline underline-offset-2',
-                  )}
-                  onClick={onNavigate}
-                >
-                  {link.name}
-                </Link>
-              )
-            })}
+            {headings.map((heading) => (
+              <Link
+                key={heading.id}
+                href={`#${heading.id}`}
+                onClick={onNavigate}
+                className={cn(
+                  'block rounded-md text-sm hover:underline hover:underline-offset-2',
+                  heading.id === activeId &&
+                    'font-medium underline underline-offset-2',
+                  heading.level === 3 && 'pl-4',
+                )}
+              >
+                {heading.name}
+              </Link>
+            ))}
           </nav>
         </CardContent>
       </Card>
