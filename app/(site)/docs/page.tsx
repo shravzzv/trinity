@@ -1,5 +1,5 @@
-import GettingStarted from '@/docs/getting-started.mdx'
+import Introduction from '@/docs/introduction.mdx'
 
 export default function Page() {
-  return <GettingStarted />
+  return <Introduction />
 }
