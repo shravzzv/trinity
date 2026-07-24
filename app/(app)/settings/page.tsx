@@ -6,6 +6,8 @@ import { useFastingContext } from '@/providers/fasting-provider'
 import { useWeightContext } from '@/providers/weight-provider'
 import { useGamificationContext } from '@/providers/gamification-provider'
 import ThemeToggleCard from '@/components/theme-toggle-card'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 export default function Page() {
   const {
@@ -47,6 +49,10 @@ export default function Page() {
         targetWeight={targetWeightKg}
         isLoading={isWeightStateLoading}
       />
+
+      <Button>
+        <Link href='/docs'>Docs</Link>
+      </Button>
     </div>
   )
 }
