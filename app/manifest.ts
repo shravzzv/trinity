@@ -63,7 +63,7 @@ export default function manifest(): MetadataRoute.Manifest {
         src: '/screenshots/settings-mobile-dark.webp',
         form_factor: 'narrow',
         label: 'Mobile view showing the settings page in dark mode',
-        sizes: '1079x2233',
+        sizes: '1080x2216',
       },
     ],
   }
