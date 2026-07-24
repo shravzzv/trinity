@@ -57,13 +57,13 @@ export default function manifest(): MetadataRoute.Manifest {
         src: '/screenshots/hero-banner-mobile-dark.webp',
         form_factor: 'narrow',
         label: 'Mobile view showing the home page in dark mode',
-        sizes: '705x638',
+        sizes: '1080x2216',
       },
       {
         src: '/screenshots/hero-banner-mobile-light.webp',
         form_factor: 'narrow',
         label: 'Mobile view showing the home page in light mode',
-        sizes: '705x638',
+        sizes: '1078x2216',
       },
     ],
   }
