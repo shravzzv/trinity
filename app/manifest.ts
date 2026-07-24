@@ -22,5 +22,67 @@ export default function manifest(): MetadataRoute.Manifest {
         type: 'image/png',
       },
     ],
+    screenshots: [
+      {
+        src: '/screenshots/streak-dialog-dark.webp',
+        form_factor: 'wide',
+        label: 'Desktop view showing the home page',
+        sizes: '560x715',
+      },
+      {
+        src: '/screenshots/anchors-dialog-dark.webp',
+        form_factor: 'wide',
+        label: 'Desktop view showing the home page',
+        sizes: '560x633',
+      },
+      {
+        src: '/screenshots/fasting-plans-dark.webp',
+        form_factor: 'wide',
+        label: 'Desktop view showing the home page',
+        sizes: '560x675',
+      },
+      {
+        src: '/screenshots/fasting-statistics-dark.webp',
+        form_factor: 'wide',
+        label: 'Desktop view showing the home page',
+        sizes: '705x638',
+      },
+      {
+        src: '/screenshots/weight-statistics-dark.webp',
+        form_factor: 'wide',
+        label: 'Desktop view showing the home page',
+        sizes: '705x638',
+      },
+      {
+        src: '/screenshots/streak-dialog-dark.webp',
+        form_factor: 'narrow',
+        label: 'Desktop view showing the home page',
+        sizes: '560x715',
+      },
+      {
+        src: '/screenshots/anchors-dialog-dark.webp',
+        form_factor: 'narrow',
+        label: 'Desktop view showing the home page',
+        sizes: '560x633',
+      },
+      {
+        src: '/screenshots/fasting-plans-dark.webp',
+        form_factor: 'narrow',
+        label: 'Desktop view showing the home page',
+        sizes: '560x675',
+      },
+      {
+        src: '/screenshots/fasting-statistics-dark.webp',
+        form_factor: 'narrow',
+        label: 'Desktop view showing the home page',
+        sizes: '705x638',
+      },
+      {
+        src: '/screenshots/weight-statistics-dark.webp',
+        form_factor: 'narrow',
+        label: 'Desktop view showing the home page',
+        sizes: '705x638',
+      },
+    ],
   }
 }
