@@ -1,11 +1,11 @@
 'use client'
 
+import SigninForm from '@/components/signin-form'
 import { motion } from 'motion/react'
-import { SigninForm } from '@/components/signin-form'
 
 export default function Page() {
   return (
-    <div className='bg-background flex items-start justify-center py-8 md:py-24'>
+    <div className='bg-background flex items-start justify-center py-6 md:py-14'>
       <motion.div
         initial={{
           opacity: 0,
