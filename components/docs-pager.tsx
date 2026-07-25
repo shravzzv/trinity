@@ -15,7 +15,7 @@ export default function DocsPager({ slug }: DocsPagerProps) {
     <nav className='mt-16 flex justify-between gap-4 border-t pt-8'>
       {previous && (
         <Link
-          href={previous.href}
+          href={`/docs/${previous.slug}`}
           className='flex items-center gap-2 underline-offset-2'
         >
           <ArrowLeft className='size-5' />
@@ -25,7 +25,7 @@ export default function DocsPager({ slug }: DocsPagerProps) {
 
       {next && (
         <Link
-          href={next.href}
+          href={`/docs/${next.slug}`}
           className='flex items-center gap-2 underline-offset-2'
         >
           <span>{next.title}</span>

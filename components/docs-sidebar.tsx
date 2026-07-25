@@ -42,7 +42,7 @@ export default function DocsSidebar() {
         <SidebarGroup>
           <SidebarMenu>
             {docs.map((link) => {
-              const isActive = pathname.startsWith(link.href)
+              const isActive = pathname.startsWith(`/docs/${link.slug}`)
 
               return (
                 <SidebarMenuItem key={link.title}>
@@ -51,7 +51,7 @@ export default function DocsSidebar() {
                     isActive={isActive}
                     onClick={() => setOpenMobile(false)}
                   >
-                    <Link href={link.href}>
+                    <Link href={`/docs/${link.slug}`}>
                       <span>{link.title}</span>
                     </Link>
                   </SidebarMenuButton>

@@ -11,55 +11,46 @@ import Changelog from '@/docs/changelog.mdx'
 export const docs = [
   {
     title: 'Getting Started',
-    href: '/docs/getting-started',
     slug: 'getting-started',
     component: GettingStarted,
   },
   {
     title: 'Timer',
-    href: '/docs/timer',
     slug: 'timer',
     component: Timer,
   },
   {
     title: 'Plans',
-    href: '/docs/plans',
     slug: 'plans',
     component: Plans,
   },
   {
     title: 'Statistics',
-    href: '/docs/statistics',
     slug: 'statistics',
     component: Statistics,
   },
   {
     title: 'Weight',
-    href: '/docs/weight',
     slug: 'weight',
     component: Weight,
   },
   {
     title: 'Gamification',
-    href: '/docs/gamification',
     slug: 'gamification',
     component: Gamification,
   },
   {
     title: 'Anchors',
-    href: '/docs/anchors',
     slug: 'anchors',
     component: Anchors,
   },
   {
     title: 'FAQ',
-    href: '/docs/faq',
     slug: 'faq',
     component: FAQ,
   },
   {
     title: 'Changelog',
-    href: '/docs/changelog',
     slug: 'changelog',
     component: Changelog,
   },
