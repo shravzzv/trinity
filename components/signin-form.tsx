@@ -16,29 +16,47 @@ import Link from 'next/link'
 import { Controller, useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 
-const formSchema = z.object({
+const emailStepSchema = z.object({
   email: z.email({ error: 'A valid email is required' }),
+  password: z.string(),
 })
 
-type Formschema = z.infer<typeof formSchema>
+const passwordStepSchema = z.object({
+  email: z.email(),
+  password: z
+    .string()
+    .min(8, { error: 'Password must be at least 8 characters long' }),
+})
+
+type SignInFormValues = z.infer<typeof passwordStepSchema>
 
 export function SigninForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
+  const [showPasswordStep, setShowPasswordStep] = useState(false)
+
+  const resolver = zodResolver(
+    showPasswordStep ? passwordStepSchema : emailStepSchema,
+  )
+
   const {
     control,
     handleSubmit,
     formState: { isSubmitting },
-  } = useForm<Formschema>({
-    resolver: zodResolver(formSchema),
+  } = useForm<SignInFormValues>({
+    resolver,
     defaultValues: {
       email: '',
+      password: '',
     },
   })
 
-  const onSubmit = (data: Formschema) => {
+  const onSubmit = (data: SignInFormValues) => {
+    setShowPasswordStep(true)
     console.log(data)
   }
 
@@ -61,28 +79,76 @@ export function SigninForm({
             </FieldDescription>
           </div>
 
-          <Controller
-            name='email'
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+          <AnimatePresence mode='wait' initial={false}>
+            {!showPasswordStep ? (
+              <motion.div
+                key='email'
+                initial={{ opacity: 0, x: -16 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 16 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Controller
+                  name='email'
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>Email</FieldLabel>
 
-                <Input
-                  {...field}
-                  id={field.name}
-                  aria-invalid={fieldState.invalid}
-                  placeholder='m@example.com'
-                  type='email'
-                  required
+                      <Input
+                        {...field}
+                        id={field.name}
+                        type='email'
+                        placeholder='m@example.com'
+                        aria-invalid={fieldState.invalid}
+                      />
+
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
                 />
+              </motion.div>
+            ) : (
+              <motion.div
+                key='password'
+                initial={{ opacity: 0, x: 16 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -16 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Controller
+                  name='password'
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <div className='flex items-center justify-between'>
+                        <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                        <Link
+                          href='/forgot-password'
+                          className='text-muted-foreground text-sm underline underline-offset-4'
+                        >
+                          Forgot password?
+                        </Link>
+                      </div>
 
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
+                      <Input
+                        {...field}
+                        id={field.name}
+                        type='password'
+                        aria-invalid={fieldState.invalid}
+                      />
+
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </motion.div>
             )}
-          />
+          </AnimatePresence>
 
           <Field>
             <Button type='submit' disabled={isSubmitting}>
