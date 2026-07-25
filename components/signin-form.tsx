@@ -9,17 +9,42 @@ import {
   FieldGroup,
   FieldLabel,
   FieldSeparator,
+  FieldError,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
+import { Controller, useForm } from 'react-hook-form'
+import * as z from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+
+const formSchema = z.object({
+  email: z.email({ error: 'A valid email is required' }),
+})
+
+type Formschema = z.infer<typeof formSchema>
 
 export function SigninForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
+  const {
+    control,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<Formschema>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: '',
+    },
+  })
+
+  const onSubmit = (data: Formschema) => {
+    console.log(data)
+  }
+
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
-      <form>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <FieldGroup>
           <div className='flex flex-col items-center gap-2 text-center'>
             <div className='flex flex-col items-center gap-2 font-medium'>
@@ -36,18 +61,33 @@ export function SigninForm({
             </FieldDescription>
           </div>
 
-          <Field>
-            <FieldLabel htmlFor='email'>Email</FieldLabel>
-            <Input
-              id='email'
-              type='email'
-              placeholder='m@example.com'
-              required
-            />
-          </Field>
+          <Controller
+            name='email'
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+
+                <Input
+                  {...field}
+                  id={field.name}
+                  aria-invalid={fieldState.invalid}
+                  placeholder='m@example.com'
+                  type='email'
+                  required
+                />
+
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
 
           <Field>
-            <Button type='submit'>Sign in</Button>
+            <Button type='submit' disabled={isSubmitting}>
+              Continue
+            </Button>
           </Field>
 
           <FieldSeparator>Or</FieldSeparator>
