@@ -18,6 +18,7 @@ import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { AnimatePresence, motion, type Variants } from 'motion/react'
+import { Spinner } from './ui/spinner'
 
 const emailStepSchema = z.object({
   email: z.email({ error: 'A valid email is required' }),
@@ -236,7 +237,16 @@ export function SigninForm({
 
           <Field>
             <Button type='submit' disabled={isSubmitting}>
-              {showPasswordStep ? 'Sign in' : 'Continue'}
+              {isSubmitting ? (
+                <>
+                  <Spinner />
+                  Loading...
+                </>
+              ) : showPasswordStep ? (
+                'Sign in'
+              ) : (
+                'Continue'
+              )}
             </Button>
           </Field>
 
