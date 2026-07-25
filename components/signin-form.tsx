@@ -21,6 +21,7 @@ import { AnimatePresence, motion, type Variants } from 'motion/react'
 import { Spinner } from './ui/spinner'
 import { signin } from '@/app/actions'
 import { Alert, AlertDescription, AlertTitle } from './ui/alert'
+import EmailInput from './email-input'
 
 const emailStepSchema = z.object({
   email: z.email({ error: 'A valid email is required' }),
@@ -217,27 +218,7 @@ export function SigninForm({
                     ease: 'easeInOut',
                   }}
                 >
-                  <Controller
-                    name='email'
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-
-                        <Input
-                          {...field}
-                          id={field.name}
-                          type='email'
-                          placeholder='m@example.com'
-                          aria-invalid={fieldState.invalid}
-                        />
-
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
+                  <EmailInput control={control} />
                 </motion.div>
               ) : (
                 <motion.div
