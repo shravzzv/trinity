@@ -1,6 +1,7 @@
 'use client'
 
 import BlogCard from '@/components/blog-card'
+import { blogPosts } from '@/constants/blog'
 import { motion, Variants } from 'motion/react'
 
 const container: Variants = {
@@ -42,14 +43,9 @@ export default function Page() {
         animate='show'
         className='grid gap-6 md:grid-cols-2'
       >
-        <BlogCard
-          title='Introducing Trinity'
-          description='Why I built Trinity and the principles behind an offline-first intermittent fasting tracker.'
-          image='/blog/introducing-trinity.webp'
-          href='/blog/introducing-trinity'
-          authors={['Sai Shravan', 'ChatGPT']}
-          publishedAt='July 25, 2026'
-        />
+        {blogPosts.map((post) => (
+          <BlogCard key={post.slug} href={`/blog/${post.slug}`} {...post} />
+        ))}
       </motion.div>
     </section>
   )
