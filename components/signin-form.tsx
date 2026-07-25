@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeft, GalleryVerticalEnd } from 'lucide-react'
+import { AlertCircleIcon, ArrowLeft, GalleryVerticalEnd } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,6 +19,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { AnimatePresence, motion, type Variants } from 'motion/react'
 import { Spinner } from './ui/spinner'
+import { signin } from '@/app/actions'
+import { Alert, AlertDescription, AlertTitle } from './ui/alert'
 
 const emailStepSchema = z.object({
   email: z.email({ error: 'A valid email is required' }),
@@ -80,6 +82,7 @@ export function SigninForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
+  const [error, setError] = useState<string | null>(null)
   const [showPasswordStep, setShowPasswordStep] = useState(false)
   const [direction, setDirection] = useState<'forward' | 'backward'>('forward')
 
@@ -100,16 +103,24 @@ export function SigninForm({
     },
   })
 
-  const onSubmit = (data: SignInFormSchema) => {
+  const onSubmit = async (data: SignInFormSchema) => {
     if (!showPasswordStep) {
       setDirection('forward')
       setShowPasswordStep(true)
-      console.log(data)
       return
     }
 
-    // todo: action call here
-    console.log(data)
+    setError(null)
+
+    const formData = new FormData()
+    formData.append('email', data.email)
+    formData.append('password', data.password)
+
+    const result = await signin(formData)
+
+    if (result?.error) {
+      setError(result.error)
+    }
   }
 
   return (
@@ -147,6 +158,7 @@ export function SigninForm({
                     duration: 0.18,
                     ease: 'easeOut',
                   }}
+                  className='w-full'
                 >
                   <FieldDescription className='flex w-full items-center justify-center gap-2'>
                     <Button
@@ -156,6 +168,7 @@ export function SigninForm({
                       onClick={() => {
                         setDirection('backward')
                         setShowPasswordStep(false)
+                        setError(null)
                       }}
                     >
                       <ArrowLeft className='size-4' />
@@ -272,6 +285,23 @@ export function SigninForm({
               )}
             </AnimatePresence>
           </motion.div>
+
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.15 }}
+              >
+                <Alert variant='destructive'>
+                  <AlertCircleIcon className='h-4 w-4' />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Submit */}
           <motion.div variants={staggerItem}>
