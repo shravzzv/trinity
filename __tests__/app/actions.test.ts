@@ -11,16 +11,22 @@ jest.mock('next/navigation', () => ({
 }))
 
 describe('signin', () => {
+  let consoleErrorSpy: jest.SpyInstance
   const signInWithPassword = jest.fn()
 
   beforeEach(() => {
     jest.clearAllMocks()
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
 
     ;(createClient as jest.Mock).mockResolvedValue({
       auth: {
         signInWithPassword,
       },
     })
+  })
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore()
   })
 
   function createFormData() {
