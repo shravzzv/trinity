@@ -17,7 +17,7 @@ import { Controller, useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, motion, type Variants } from 'motion/react'
 
 const emailStepSchema = z.object({
   email: z.email({ error: 'A valid email is required' }),
@@ -33,11 +33,29 @@ const passwordStepSchema = z.object({
 
 type SignInFormValues = z.infer<typeof passwordStepSchema>
 
+const variants: Variants = {
+  initial: (direction: 'forward' | 'backward') => ({
+    opacity: 0,
+    x: direction === 'forward' ? 24 : -24,
+  }),
+
+  animate: {
+    opacity: 1,
+    x: 0,
+  },
+
+  exit: (direction: 'forward' | 'backward') => ({
+    opacity: 0,
+    x: direction === 'forward' ? -24 : 24,
+  }),
+}
+
 export function SigninForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
   const [showPasswordStep, setShowPasswordStep] = useState(false)
+  const [direction, setDirection] = useState<'forward' | 'backward'>('forward')
 
   const resolver = zodResolver(
     showPasswordStep ? passwordStepSchema : emailStepSchema,
@@ -59,6 +77,7 @@ export function SigninForm({
   const onSubmit = (data: SignInFormValues) => {
     if (!showPasswordStep) {
       setShowPasswordStep(true)
+      setDirection('forward')
       console.log(data)
       return
     }
@@ -82,38 +101,70 @@ export function SigninForm({
 
             <h1 className='text-xl font-bold'>Welcome to Trinity</h1>
 
-            {showPasswordStep ? (
-              <FieldDescription className='flex w-full items-center justify-center gap-2'>
-                <Button
-                  type='button'
-                  size='icon-sm'
-                  variant='ghost'
-                  onClick={() => setShowPasswordStep(false)}
+            <AnimatePresence mode='wait' initial={false}>
+              {showPasswordStep ? (
+                <motion.div
+                  key='password-header'
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 6 }}
+                  transition={{
+                    duration: 0.18,
+                    ease: 'easeOut',
+                  }}
                 >
-                  <ArrowLeft className='size-4' />
-                  <span className='sr-only'>Back</span>
-                </Button>
+                  <FieldDescription className='flex w-full items-center justify-center gap-2'>
+                    <Button
+                      type='button'
+                      size='icon-sm'
+                      variant='ghost'
+                      onClick={() => {
+                        setShowPasswordStep(false)
+                        setDirection('backward')
+                      }}
+                    >
+                      <ArrowLeft className='size-4' />
+                      <span className='sr-only'>Back</span>
+                    </Button>
 
-                <span className='min-w-0 truncate'>
-                  Enter password for
-                  <span className='font-medium'> {watch('email')}</span>
-                </span>
-              </FieldDescription>
-            ) : (
-              <FieldDescription>
-                Don&apos;t have an account? <Link href='/signup'>Sign up</Link>
-              </FieldDescription>
-            )}
+                    <span className='min-w-0 truncate'>
+                      Enter password for
+                      <span className='font-medium'> {watch('email')}</span>
+                    </span>
+                  </FieldDescription>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key='email-header'
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 6 }}
+                  transition={{
+                    duration: 0.18,
+                    ease: 'easeOut',
+                  }}
+                >
+                  <FieldDescription>
+                    Don't have an account? <Link href='/signup'>Sign up</Link>
+                  </FieldDescription>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
-          <AnimatePresence mode='wait' initial={false}>
+          <AnimatePresence mode='wait' initial={false} custom={direction}>
             {!showPasswordStep ? (
               <motion.div
                 key='email'
-                initial={{ opacity: 0, x: -16 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 16 }}
-                transition={{ duration: 0.2 }}
+                custom={direction}
+                variants={variants}
+                initial='initial'
+                animate='animate'
+                exit='exit'
+                transition={{
+                  duration: 0.22,
+                  ease: 'easeInOut',
+                }}
               >
                 <Controller
                   name='email'
@@ -140,10 +191,15 @@ export function SigninForm({
             ) : (
               <motion.div
                 key='password'
-                initial={{ opacity: 0, x: 16 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -16 }}
-                transition={{ duration: 0.2 }}
+                custom={direction}
+                variants={variants}
+                initial='initial'
+                animate='animate'
+                exit='exit'
+                transition={{
+                  duration: 0.22,
+                  ease: 'easeInOut',
+                }}
               >
                 <Controller
                   name='password'
