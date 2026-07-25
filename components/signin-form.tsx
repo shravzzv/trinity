@@ -31,7 +31,7 @@ const passwordStepSchema = z.object({
     .min(8, { error: 'Password must be at least 8 characters long' }),
 })
 
-type SignInFormValues = z.infer<typeof passwordStepSchema>
+type SignInFormSchema = z.infer<typeof passwordStepSchema>
 
 const variants: Variants = {
   initial: (direction: 'forward' | 'backward') => ({
@@ -66,7 +66,7 @@ export function SigninForm({
     control,
     handleSubmit,
     formState: { isSubmitting },
-  } = useForm<SignInFormValues>({
+  } = useForm<SignInFormSchema>({
     resolver,
     defaultValues: {
       email: '',
@@ -74,7 +74,7 @@ export function SigninForm({
     },
   })
 
-  const onSubmit = (data: SignInFormValues) => {
+  const onSubmit = (data: SignInFormSchema) => {
     if (!showPasswordStep) {
       setShowPasswordStep(true)
       setDirection('forward')
@@ -145,7 +145,8 @@ export function SigninForm({
                   }}
                 >
                   <FieldDescription>
-                    Don't have an account? <Link href='/signup'>Sign up</Link>
+                    Don&apos;t have an account?{' '}
+                    <Link href='/signup'>Sign up</Link>
                   </FieldDescription>
                 </motion.div>
               )}
