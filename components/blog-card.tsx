@@ -23,18 +23,18 @@ interface BlogCardProps {
   href: string
   title: string
   image: string
+  authors: string[]
   description: string
   publishedAt: string
-  authors: string[]
 }
 
 export default function BlogCard({
   href,
   title,
   image,
+  authors,
   description,
   publishedAt,
-  authors,
 }: BlogCardProps) {
   return (
     <motion.div variants={item}>
@@ -65,8 +65,9 @@ export default function BlogCard({
               </div>
 
               <p className='text-muted-foreground text-xs'>
-                {authors.join(', ')}
+                {authors.join(', ')}.
               </p>
+
               <p className='text-muted-foreground text-xs'>{publishedAt}</p>
             </div>
           </CardContent>

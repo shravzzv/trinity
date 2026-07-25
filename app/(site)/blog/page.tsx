@@ -48,7 +48,7 @@ export default function Page() {
           image='/blog/introducing-trinity.webp'
           href='/blog/introducing-trinity'
           authors={['Sai Shravan', 'ChatGPT']}
-          publishedAt='August 2, 2026'
+          publishedAt='July 25, 2026'
         />
       </motion.div>
     </section>
