@@ -1,6 +1,6 @@
 'use client'
 
-import { GalleryVerticalEnd } from 'lucide-react'
+import { ArrowLeft, GalleryVerticalEnd } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -44,6 +44,7 @@ export function SigninForm({
   )
 
   const {
+    watch,
     control,
     handleSubmit,
     formState: { isSubmitting },
@@ -56,7 +57,14 @@ export function SigninForm({
   })
 
   const onSubmit = (data: SignInFormValues) => {
-    setShowPasswordStep(true)
+    if (!showPasswordStep) {
+      setShowPasswordStep(true)
+      console.log(data)
+      return
+    }
+
+    // todo: action call here
+
     console.log(data)
   }
 
@@ -74,9 +82,28 @@ export function SigninForm({
 
             <h1 className='text-xl font-bold'>Welcome to Trinity</h1>
 
-            <FieldDescription>
-              Don&apos;t have an account? <Link href='/signup'>Sign up</Link>
-            </FieldDescription>
+            {showPasswordStep ? (
+              <FieldDescription className='flex w-full items-center justify-center gap-2'>
+                <Button
+                  type='button'
+                  size='icon-sm'
+                  variant='ghost'
+                  onClick={() => setShowPasswordStep(false)}
+                >
+                  <ArrowLeft className='size-4' />
+                  <span className='sr-only'>Back</span>
+                </Button>
+
+                <span className='min-w-0 truncate'>
+                  Enter password for
+                  <span className='font-medium'> {watch('email')}</span>
+                </span>
+              </FieldDescription>
+            ) : (
+              <FieldDescription>
+                Don&apos;t have an account? <Link href='/signup'>Sign up</Link>
+              </FieldDescription>
+            )}
           </div>
 
           <AnimatePresence mode='wait' initial={false}>
@@ -152,7 +179,7 @@ export function SigninForm({
 
           <Field>
             <Button type='submit' disabled={isSubmitting}>
-              Continue
+              {showPasswordStep ? 'Sign in' : 'Continue'}
             </Button>
           </Field>
 
