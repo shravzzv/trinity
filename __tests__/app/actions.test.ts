@@ -1,4 +1,4 @@
-import { signin, signInWithProvider, signup } from '@/app/actions'
+import { signin, signInWithProvider, signOut, signup } from '@/app/actions'
 import { getSiteURL } from '@/lib/links'
 import { createClient } from '@/supabase/server'
 import { redirect } from 'next/navigation'
@@ -237,6 +237,62 @@ describe('signInWithProvider', () => {
     })
 
     await signInWithProvider('google')
+
+    expect(console.error).toHaveBeenCalledWith(error)
+    expect(redirect).toHaveBeenCalledWith('/auth-error')
+  })
+})
+
+describe('signOut', () => {
+  let consoleErrorSpy: jest.SpyInstance
+  const signOutMock = jest.fn()
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+
+    ;(createClient as jest.Mock).mockResolvedValue({
+      auth: {
+        signOut: signOutMock,
+      },
+    })
+  })
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore()
+  })
+
+  it('signs out with the provided scope', async () => {
+    signOutMock.mockResolvedValue({
+      error: null,
+    })
+
+    await signOut('local')
+
+    expect(signOutMock).toHaveBeenCalledWith({
+      scope: 'local',
+    })
+  })
+
+  it('redirects to /signin after a successful sign out', async () => {
+    signOutMock.mockResolvedValue({
+      error: null,
+    })
+
+    await signOut('local')
+
+    expect(redirect).toHaveBeenCalledWith('/signin')
+  })
+
+  it('logs the error and redirects to the auth error page when sign out fails', async () => {
+    const error = new Error('Sign out failed')
+
+    signOutMock.mockResolvedValue({
+      error,
+    })
+
+    await signOut('local')
 
     expect(console.error).toHaveBeenCalledWith(error)
     expect(redirect).toHaveBeenCalledWith('/auth-error')

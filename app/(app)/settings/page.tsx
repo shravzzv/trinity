@@ -8,6 +8,8 @@ import { useGamificationContext } from '@/providers/gamification-provider'
 import ThemeToggleCard from '@/components/theme-toggle-card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { signOut } from '@/app/actions'
+import { LogOut } from 'lucide-react'
 
 export default function Page() {
   const {
@@ -52,6 +54,11 @@ export default function Page() {
 
       <Button>
         <Link href='/docs'>Docs</Link>
+      </Button>
+
+      <Button onClick={() => signOut('local')}>
+        <LogOut />
+        Sign out
       </Button>
     </div>
   )
