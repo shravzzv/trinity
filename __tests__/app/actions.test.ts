@@ -1,4 +1,4 @@
-import { signin, signup } from '@/app/actions'
+import { signin, signInWithProvider, signup } from '@/app/actions'
 import { getSiteURL } from '@/lib/links'
 import { createClient } from '@/supabase/server'
 import { redirect } from 'next/navigation'
@@ -11,13 +11,20 @@ jest.mock('next/navigation', () => ({
   redirect: jest.fn(),
 }))
 
+jest.mock('@/lib/links', () => ({
+  getSiteURL: jest.fn(),
+}))
+
 describe('signin', () => {
   let consoleErrorSpy: jest.SpyInstance
   const signInWithPasswordMock = jest.fn()
 
   beforeEach(() => {
     jest.clearAllMocks()
+
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+
+    ;(getSiteURL as jest.Mock).mockReturnValue('https://trinity-fit.vercel.app')
 
     ;(createClient as jest.Mock).mockResolvedValue({
       auth: {
@@ -91,7 +98,10 @@ describe('signup', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+
+    ;(getSiteURL as jest.Mock).mockReturnValue('https://trinity-fit.vercel.app')
 
     ;(createClient as jest.Mock).mockResolvedValue({
       auth: {
@@ -118,13 +128,11 @@ describe('signup', () => {
 
     await signup(createFormData())
 
-    const emailRedirectTo = new URL('/home', getSiteURL()).toString()
-
     expect(signUpMock).toHaveBeenCalledWith({
       email: 'john@example.com',
       password: 'password123',
       options: {
-        emailRedirectTo,
+        emailRedirectTo: 'https://trinity-fit.vercel.app/home',
       },
     })
   })
@@ -162,5 +170,75 @@ describe('signup', () => {
     await expect(signup(createFormData())).resolves.toBeUndefined()
 
     expect(redirect).not.toHaveBeenCalled()
+  })
+})
+
+describe('signInWithProvider', () => {
+  let consoleErrorSpy: jest.SpyInstance
+  const signInWithOAuthMock = jest.fn()
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+
+    ;(getSiteURL as jest.Mock).mockReturnValue('https://trinity-fit.vercel.app')
+
+    ;(createClient as jest.Mock).mockResolvedValue({
+      auth: {
+        signInWithOAuth: signInWithOAuthMock,
+      },
+    })
+  })
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore()
+  })
+
+  it('initiates OAuth sign-in with the correct provider and redirect URL', async () => {
+    signInWithOAuthMock.mockResolvedValue({
+      data: {
+        url: 'https://accounts.google.com/oauth',
+      },
+      error: null,
+    })
+
+    await signInWithProvider('google')
+
+    expect(signInWithOAuthMock).toHaveBeenCalledWith({
+      provider: 'google',
+      options: {
+        redirectTo: 'https://trinity-fit.vercel.app/auth/callback?next=%2Fhome',
+      },
+    })
+  })
+
+  it('redirects to the provider authorization URL on success', async () => {
+    signInWithOAuthMock.mockResolvedValue({
+      data: {
+        url: 'https://accounts.google.com/oauth',
+      },
+      error: null,
+    })
+
+    await signInWithProvider('google')
+
+    expect(redirect).toHaveBeenCalledWith('https://accounts.google.com/oauth')
+  })
+
+  it('logs the error and redirects to the auth error page when OAuth initiation fails', async () => {
+    const error = new Error('OAuth failed')
+
+    signInWithOAuthMock.mockResolvedValue({
+      data: {
+        url: '',
+      },
+      error,
+    })
+
+    await signInWithProvider('google')
+
+    expect(console.error).toHaveBeenCalledWith(error)
+    expect(redirect).toHaveBeenCalledWith('/auth-error')
   })
 })

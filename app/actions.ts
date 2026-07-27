@@ -16,6 +16,7 @@
 import { getSiteURL } from '@/lib/links'
 import { createClient } from '../supabase/server'
 import { redirect } from 'next/navigation'
+import type { OAuthProvider } from '@/types/oauth'
 
 /**
  * Signs in a user using email + password credentials.
@@ -92,4 +93,38 @@ export async function signup(formData: FormData) {
       console.error(error)
       redirect('/auth-error')
   }
+}
+
+/**
+ * Initiates OAuth sign-in with a supported provider.
+ *
+ * The user is redirected to the provider's authentication page. After
+ * successfully authenticating, the provider redirects back to
+ * `/auth/callback`, where the authorization code is exchanged for a
+ * Supabase session before the user is finally redirected to `/home`.
+ *
+ * If the OAuth flow cannot be started, the user is redirected to the
+ * generic authentication error page.
+ *
+ * @param provider - The OAuth provider to authenticate with.
+ */
+export async function signInWithProvider(provider: OAuthProvider) {
+  const supabase = await createClient()
+
+  const redirectTo = new URL('auth/callback', getSiteURL())
+  redirectTo.searchParams.set('next', '/home')
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: {
+      redirectTo: redirectTo.toString(),
+    },
+  })
+
+  if (error) {
+    console.error(error)
+    redirect('/auth-error')
+  }
+
+  redirect(data.url)
 }
