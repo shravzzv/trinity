@@ -54,10 +54,6 @@ export default function Page() {
         isLoading={isWeightStateLoading}
       />
 
-      <Button>
-        <Link href='/docs'>Docs</Link>
-      </Button>
-
       {isAuthenticated && (
         <Button onClick={() => signOut('local')}>
           <LogOut />
