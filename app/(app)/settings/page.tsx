@@ -9,8 +9,9 @@ import ThemeToggleCard from '@/components/theme-toggle-card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { signOut } from '@/app/actions'
-import { LogOut } from 'lucide-react'
+import { BookOpenText, LifeBuoy, LogOut } from 'lucide-react'
 import { useAuthContext } from '@/providers/auth-provider'
+import { Card, CardContent } from '@/components/ui/card'
 
 export default function Page() {
   const {
@@ -54,12 +55,30 @@ export default function Page() {
         isLoading={isWeightStateLoading}
       />
 
-      {isAuthenticated && (
-        <Button onClick={() => signOut('local')}>
-          <LogOut />
-          Sign out
-        </Button>
-      )}
+      <Card>
+        <CardContent className='flex items-center justify-evenly'>
+          <Button asChild>
+            <Link href='/docs'>
+              <BookOpenText />
+              Docs
+            </Link>
+          </Button>
+
+          <Button asChild>
+            <Link href='/support'>
+              <LifeBuoy />
+              Support
+            </Link>
+          </Button>
+
+          {isAuthenticated && (
+            <Button onClick={() => signOut('local')}>
+              <LogOut />
+              Sign out
+            </Button>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }
