@@ -3,6 +3,7 @@
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarHeader,
   SidebarMenu,
@@ -23,10 +24,14 @@ import {
 } from '@/components/ui/tooltip'
 import { motion } from 'motion/react'
 import { appLinks } from '@/constants/navigation'
+import { BookOpenText, LifeBuoy, LogOut } from 'lucide-react'
+import { signOut } from '@/app/actions'
+import { useAuthContext } from '@/providers/auth-provider'
 
 export function AppSidebar() {
   const pathname = usePathname()
   const { open } = useSidebar()
+  const { isAuthenticated } = useAuthContext()
 
   return (
     <Sidebar variant='floating' collapsible='icon'>
@@ -91,6 +96,42 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter className='px-0'>
+        <SidebarGroup>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip='Docs'>
+                <Link href='/docs'>
+                  <BookOpenText />
+                  <span>Docs</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip='Support'>
+                <Link href='/support'>
+                  <LifeBuoy />
+                  <span>Support</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            {isAuthenticated && (
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => signOut('local')}
+                  tooltip='Sign out'
+                >
+                  <LogOut />
+                  Sign out
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )}
+          </SidebarMenu>
+        </SidebarGroup>
+      </SidebarFooter>
     </Sidebar>
   )
 }
