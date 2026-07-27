@@ -91,9 +91,7 @@ export default function SigninForm() {
 
     const result = await signin(formData)
 
-    if (result?.error) {
-      setError(result.error)
-    }
+    if (result?.error) setError(result.error)
   }
 
   return (
@@ -193,13 +191,9 @@ export default function SigninForm() {
             </Field>
           </motion.div>
 
-          {/* Separator */}
-
           <motion.div variants={staggerItem}>
             <FieldSeparator>Or</FieldSeparator>
           </motion.div>
-
-          {/* OAuth */}
 
           <motion.div variants={staggerItem}>
             <Field className='grid gap-4 sm:grid-cols-2'>
