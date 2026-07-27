@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { signOut } from '@/app/actions'
 import { LogOut } from 'lucide-react'
+import { useAuthContext } from '@/providers/auth-provider'
 
 export default function Page() {
   const {
@@ -29,6 +30,7 @@ export default function Page() {
   } = useWeightContext()
 
   const { awardXp } = useGamificationContext()
+  const { isAuthenticated } = useAuthContext()
 
   return (
     <div className='mx-auto w-full max-w-xl space-y-6'>
@@ -56,10 +58,12 @@ export default function Page() {
         <Link href='/docs'>Docs</Link>
       </Button>
 
-      <Button onClick={() => signOut('local')}>
-        <LogOut />
-        Sign out
-      </Button>
+      {isAuthenticated && (
+        <Button onClick={() => signOut('local')}>
+          <LogOut />
+          Sign out
+        </Button>
+      )}
     </div>
   )
 }

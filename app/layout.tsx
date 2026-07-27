@@ -8,6 +8,7 @@ import { SerwistProvider } from '@serwist/turbopack/react'
 import { Toaster } from '@/components/ui/sonner'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { AuthProvider } from '@/providers/auth-provider'
 
 const APP_NAME = 'Trinity'
 const APP_DEFAULT_TITLE = 'Trinity'
@@ -74,17 +75,19 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body>
-        <SerwistProvider swUrl='/serwist/sw.js'>
-          <ThemeProvider
-            attribute='class'
-            defaultTheme='system'
-            enableSystem
-            disableTransitionOnChange
-          >
-            <TooltipProvider>{children}</TooltipProvider>
-            <Toaster richColors />
-          </ThemeProvider>
-        </SerwistProvider>
+        <AuthProvider>
+          <SerwistProvider swUrl='/serwist/sw.js'>
+            <ThemeProvider
+              attribute='class'
+              defaultTheme='system'
+              enableSystem
+              disableTransitionOnChange
+            >
+              <TooltipProvider>{children}</TooltipProvider>
+              <Toaster richColors />
+            </ThemeProvider>
+          </SerwistProvider>
+        </AuthProvider>
         <Analytics />
         <SpeedInsights />
       </body>
