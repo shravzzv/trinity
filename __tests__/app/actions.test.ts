@@ -1,4 +1,9 @@
-import { signin, signInWithProvider, signup } from '@/app/actions'
+import {
+  sendPasswordResetEmail,
+  signin,
+  signInWithProvider,
+  signup,
+} from '@/app/actions'
 import { getSiteURL } from '@/lib/links'
 import { createClient } from '@/supabase/server'
 import { redirect } from 'next/navigation'
@@ -240,5 +245,74 @@ describe('signInWithProvider', () => {
 
     expect(console.error).toHaveBeenCalledWith(error)
     expect(redirect).toHaveBeenCalledWith('/auth-error')
+  })
+})
+
+describe('sendPasswordResetEmail', () => {
+  const resetPasswordForEmailMock = jest.fn()
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+
+    ;(getSiteURL as jest.Mock).mockReturnValue('https://example.com')
+    ;(createClient as jest.Mock).mockResolvedValue({
+      auth: {
+        resetPasswordForEmail: resetPasswordForEmailMock,
+      },
+    })
+  })
+
+  it('calls resetPasswordForEmail with the provided email', async () => {
+    resetPasswordForEmailMock.mockResolvedValue({
+      error: null,
+    })
+
+    const formData = new FormData()
+    formData.set('email', 'john@example.com')
+
+    await sendPasswordResetEmail(formData)
+
+    expect(resetPasswordForEmailMock).toHaveBeenCalledWith('john@example.com', {
+      redirectTo: 'https://example.com/update-password',
+    })
+  })
+
+  it('uses the site URL when constructing the redirect URL', async () => {
+    resetPasswordForEmailMock.mockResolvedValue({
+      error: null,
+    })
+
+    const formData = new FormData()
+    formData.set('email', 'john@example.com')
+
+    await sendPasswordResetEmail(formData)
+
+    expect(getSiteURL).toHaveBeenCalled()
+  })
+
+  it('returns the error message when Supabase returns an error', async () => {
+    resetPasswordForEmailMock.mockResolvedValue({
+      error: {
+        message: 'Failed to send password reset email',
+      },
+    })
+
+    const formData = new FormData()
+    formData.set('email', 'john@example.com')
+
+    await expect(sendPasswordResetEmail(formData)).resolves.toEqual({
+      error: 'Failed to send password reset email',
+    })
+  })
+
+  it('returns undefined when the password reset email is sent successfully', async () => {
+    resetPasswordForEmailMock.mockResolvedValue({
+      error: null,
+    })
+
+    const formData = new FormData()
+    formData.set('email', 'john@example.com')
+
+    await expect(sendPasswordResetEmail(formData)).resolves.toBeUndefined()
   })
 })

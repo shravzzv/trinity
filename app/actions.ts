@@ -128,3 +128,29 @@ export async function signInWithProvider(provider: OAuthProvider) {
 
   redirect(data.url)
 }
+
+/**
+ * Sends a password reset email to the user.
+ *
+ * The email contains a secure link that redirects the user
+ * back to the app’s `/update-password` page.
+ *
+ * The actual password change happens only after the user
+ * follows the link and submits a new password.
+ *
+ * Errors are returned to the caller to allow inline UI handling.
+ */
+export async function sendPasswordResetEmail(formData: FormData) {
+  const supabase = await createClient()
+  const email = formData.get('email') as string
+
+  const redirectTo = new URL('update-password', getSiteURL())
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: redirectTo.toString(),
+  })
+
+  if (error) {
+    return { error: error.message }
+  }
+}
