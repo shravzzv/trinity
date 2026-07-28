@@ -191,7 +191,7 @@ export default function FastingStatisticsContent({
       </CardHeader>
 
       <CardContent>
-        <ChartContainer config={chartConfig} className='min-h-[25vh] w-full'>
+        <ChartContainer config={chartConfig} className='h-64 w-full'>
           <BarChart accessibilityLayer data={chartData} margin={{ top: 20 }}>
             <CartesianGrid vertical={false} />
             <XAxis

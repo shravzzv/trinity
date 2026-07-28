@@ -24,7 +24,7 @@ export default function FastingStatisticsSkeleton() {
       </CardHeader>
 
       <CardContent>
-        <div className='flex h-[35vh] items-end justify-around gap-2'>
+        <div className='flex h-[30vh] items-end justify-around gap-2'>
           <Skeleton className='h-16 flex-1 rounded-lg' />
           <Skeleton className='h-28 flex-1 rounded-lg' />
           <Skeleton className='h-20 flex-1 rounded-lg' />

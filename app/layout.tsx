@@ -7,6 +7,8 @@ import { Analytics } from '@vercel/analytics/next'
 import { SerwistProvider } from '@serwist/turbopack/react'
 import { Toaster } from '@/components/ui/sonner'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import { AuthProvider } from '@/providers/auth-provider'
 
 const APP_NAME = 'Trinity'
 const APP_DEFAULT_TITLE = 'Trinity'
@@ -65,21 +67,27 @@ export default function RootLayout({
   return (
     <html
       lang='en'
-      className={cn('h-full', 'antialiased', 'font-sans', inter.variable)}
+      className={cn(
+        'h-full scroll-smooth font-sans antialiased',
+        inter.variable,
+      )}
+      data-scroll-behavior='smooth'
       suppressHydrationWarning
     >
       <body>
-        <SerwistProvider swUrl='/serwist/sw.js'>
-          <ThemeProvider
-            attribute='class'
-            defaultTheme='system'
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-            <Toaster richColors />
-          </ThemeProvider>
-        </SerwistProvider>
+        <AuthProvider>
+          <SerwistProvider swUrl='/serwist/sw.js'>
+            <ThemeProvider
+              attribute='class'
+              defaultTheme='system'
+              enableSystem
+              disableTransitionOnChange
+            >
+              <TooltipProvider>{children}</TooltipProvider>
+              <Toaster richColors />
+            </ThemeProvider>
+          </SerwistProvider>
+        </AuthProvider>
         <Analytics />
         <SpeedInsights />
       </body>
