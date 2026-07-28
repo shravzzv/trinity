@@ -1,9 +1,9 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { signin } from '@/app/actions'
 import SigninForm from '@/components/signin-form'
+import { signin } from '@/lib/auth'
 
-jest.mock('@/app/actions', () => ({
+jest.mock('@/lib/auth', () => ({
   signin: jest.fn(),
 }))
 

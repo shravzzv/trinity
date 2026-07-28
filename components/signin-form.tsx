@@ -14,12 +14,12 @@ import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { AnimatePresence, motion, type Variants } from 'motion/react'
-import { signin } from '@/app/actions'
 import { Alert, AlertDescription, AlertTitle } from './ui/alert'
 import EmailInput from './email-input'
 import PasswordInput from './password-input'
 import { Spinner } from './ui/spinner'
 import OAuthButton from './oauth-button'
+import { signin } from '@/lib/auth'
 
 const signInFormSchema = z.object({
   email: z.email({ error: 'A valid email is required' }),

@@ -1,6 +1,5 @@
 import {
   sendPasswordResetEmail,
-  signin,
   signInWithProvider,
   signup,
   updatePassword,
@@ -20,83 +19,6 @@ jest.mock('next/navigation', () => ({
 jest.mock('@/lib/links', () => ({
   getSiteURL: jest.fn(),
 }))
-
-describe('signin', () => {
-  let consoleErrorSpy: jest.SpyInstance
-  const signInWithPasswordMock = jest.fn()
-
-  beforeEach(() => {
-    jest.clearAllMocks()
-
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-
-    ;(getSiteURL as jest.Mock).mockReturnValue('https://trinity-fit.vercel.app')
-
-    ;(createClient as jest.Mock).mockResolvedValue({
-      auth: {
-        signInWithPassword: signInWithPasswordMock,
-      },
-    })
-  })
-
-  afterEach(() => {
-    consoleErrorSpy.mockRestore()
-  })
-
-  function createFormData() {
-    const formData = new FormData()
-    formData.append('email', 'john@example.com')
-    formData.append('password', 'password123')
-    return formData
-  }
-
-  it('signs in with the provided credentials', async () => {
-    signInWithPasswordMock.mockResolvedValue({
-      error: null,
-    })
-
-    await signin(createFormData())
-
-    expect(signInWithPasswordMock).toHaveBeenCalledWith({
-      email: 'john@example.com',
-      password: 'password123',
-    })
-  })
-
-  it('redirects to /home after a successful sign in', async () => {
-    signInWithPasswordMock.mockResolvedValue({
-      error: null,
-    })
-
-    await signin(createFormData())
-
-    expect(redirect).toHaveBeenCalledWith('/home')
-  })
-
-  it('returns an invalid credentials error', async () => {
-    signInWithPasswordMock.mockResolvedValue({
-      error: {
-        code: 'invalid_credentials',
-      },
-    })
-
-    await expect(signin(createFormData())).resolves.toEqual({
-      error: 'Invalid email or password.',
-    })
-  })
-
-  it('returns a generic error for unexpected failures', async () => {
-    signInWithPasswordMock.mockResolvedValue({
-      error: {
-        code: 'unexpected_failure',
-      },
-    })
-
-    await expect(signin(createFormData())).resolves.toEqual({
-      error: 'Unable to sign in. Please try again.',
-    })
-  })
-})
 
 describe('signup', () => {
   let consoleErrorSpy: jest.SpyInstance
