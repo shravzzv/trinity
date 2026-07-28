@@ -3,6 +3,7 @@ import {
   signin,
   signInWithProvider,
   signup,
+  updatePassword,
 } from '@/app/actions'
 import { getSiteURL } from '@/lib/links'
 import { createClient } from '@/supabase/server'
@@ -314,5 +315,79 @@ describe('sendPasswordResetEmail', () => {
     formData.set('email', 'john@example.com')
 
     await expect(sendPasswordResetEmail(formData)).resolves.toBeUndefined()
+  })
+})
+
+describe('updatePassword', () => {
+  const updateUserMock = jest.fn()
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+
+    ;(createClient as jest.Mock).mockResolvedValue({
+      auth: {
+        updateUser: updateUserMock,
+      },
+    })
+  })
+
+  it('calls updateUser with the provided password', async () => {
+    updateUserMock.mockResolvedValue({
+      error: null,
+    })
+
+    const formData = new FormData()
+    formData.set('password', 'new-password-123')
+
+    await updatePassword(formData)
+
+    expect(updateUserMock).toHaveBeenCalledWith({
+      password: 'new-password-123',
+    })
+  })
+
+  it('redirects to /home after successfully updating the password', async () => {
+    updateUserMock.mockResolvedValue({
+      error: null,
+    })
+
+    const formData = new FormData()
+    formData.set('password', 'new-password-123')
+
+    await updatePassword(formData)
+
+    expect(redirect).toHaveBeenCalledWith('/home')
+  })
+
+  it('returns the error message when Supabase returns an error', async () => {
+    updateUserMock.mockResolvedValue({
+      error: {
+        message: 'Auth session missing',
+      },
+    })
+
+    const formData = new FormData()
+    formData.set('password', 'new-password-123')
+
+    await expect(updatePassword(formData)).resolves.toEqual({
+      error: 'Auth session missing',
+    })
+
+    expect(redirect).not.toHaveBeenCalled()
+  })
+
+  it('does not redirect when updating the password fails', async () => {
+    updateUserMock.mockResolvedValue({
+      error: {
+        message: 'Something went wrong',
+      },
+    })
+
+    const formData = new FormData()
+    formData.set('password', 'new-password-123')
+
+    await updatePassword(formData)
+
+    expect(redirect).not.toHaveBeenCalled()
   })
 })

@@ -154,3 +154,28 @@ export async function sendPasswordResetEmail(formData: FormData) {
     return { error: error.message }
   }
 }
+
+/**
+ * Updates the authenticated user’s password.
+ *
+ * This action is typically reached via a password reset
+ * or recovery flow, where Supabase has already verified
+ * the user via a secure token.
+ *
+ * On success, the user is redirected to the home page.
+ */
+export async function updatePassword(formData: FormData) {
+  const supabase = await createClient()
+  const password = formData.get('password') as string
+
+  const { error } = await supabase.auth.updateUser({
+    password,
+  })
+
+  if (error) {
+    console.error(error)
+    return { error: error.message }
+  }
+
+  redirect('/home')
+}
