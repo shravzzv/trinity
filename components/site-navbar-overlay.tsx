@@ -6,6 +6,7 @@ import { motion } from 'motion/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Button } from './ui/button'
+import { useAuthContext } from '@/providers/auth-provider'
 
 interface SiteNavbarOverlayProps {
   onClose: () => void
@@ -60,6 +61,7 @@ const itemVariants = {
 
 export default function SiteNavbarOverlay({ onClose }: SiteNavbarOverlayProps) {
   const pathname = usePathname()
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuthContext()
 
   return (
     <motion.div
@@ -89,19 +91,21 @@ export default function SiteNavbarOverlay({ onClose }: SiteNavbarOverlayProps) {
         })}
       </div>
 
-      <motion.div variants={itemVariants} className='border-t pt-6'>
-        <Button
-          asChild
-          size='lg'
-          onClick={onClose}
-          variant={pathname.startsWith('/signin') ? 'secondary' : 'ghost'}
-          className={cn(
-            'text-foreground w-full justify-start text-xl font-semibold',
-          )}
-        >
-          <Link href='/signin'>Sign in</Link>
-        </Button>
-      </motion.div>
+      {!isAuthLoading && !isAuthenticated && (
+        <motion.div variants={itemVariants} className='border-t pt-6'>
+          <Button
+            asChild
+            size='lg'
+            onClick={onClose}
+            variant={pathname.startsWith('/signin') ? 'secondary' : 'ghost'}
+            className={cn(
+              'text-foreground w-full justify-start text-xl font-semibold',
+            )}
+          >
+            <Link href='/signin'>Sign in</Link>
+          </Button>
+        </motion.div>
+      )}
     </motion.div>
   )
 }

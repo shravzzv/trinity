@@ -9,10 +9,13 @@ import { Menu, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import SiteNavbarOverlay from './site-navbar-overlay'
+import { useAuthContext } from '@/providers/auth-provider'
+import { Spinner } from './ui/spinner'
 
 export default function SiteNavbar() {
   const pathname = usePathname()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuthContext()
 
   // Prevent background scrolling when menu is open.
   useEffect(() => {
@@ -83,18 +86,26 @@ export default function SiteNavbar() {
           </div>
 
           <div className='ml-auto flex items-center gap-2'>
-            <Button
-              asChild
-              size='lg'
-              variant={pathname.startsWith('/signin') ? 'secondary' : 'ghost'}
-              className={'text-foreground hidden font-normal lg:flex'}
-            >
-              <Link href='/signin'>Sign in</Link>
-            </Button>
+            {!isAuthLoading && !isAuthenticated && (
+              <Button
+                asChild
+                size='lg'
+                variant={pathname.startsWith('/signin') ? 'secondary' : 'ghost'}
+                className='text-foreground hidden font-normal lg:flex'
+              >
+                <Link href='/signin'>Sign in</Link>
+              </Button>
+            )}
 
-            <Button asChild size='lg'>
-              <Link href='/home'>Get started</Link>
-            </Button>
+            {isAuthLoading ? (
+              <Spinner />
+            ) : (
+              <Button asChild size='lg'>
+                <Link href='/home'>
+                  {isAuthenticated ? 'Home' : 'Get started'}
+                </Link>
+              </Button>
+            )}
 
             <Button
               size='icon-lg'

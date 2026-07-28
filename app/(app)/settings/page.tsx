@@ -8,10 +8,10 @@ import { useGamificationContext } from '@/providers/gamification-provider'
 import ThemeToggleCard from '@/components/theme-toggle-card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { signOut } from '@/app/actions'
 import { BookOpenText, LifeBuoy, LogOut } from 'lucide-react'
 import { useAuthContext } from '@/providers/auth-provider'
 import { Card, CardContent } from '@/components/ui/card'
+import { signOut } from '@/lib/auth'
 
 export default function Page() {
   const {

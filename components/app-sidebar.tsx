@@ -25,13 +25,14 @@ import {
 import { motion } from 'motion/react'
 import { appLinks } from '@/constants/navigation'
 import { BookOpenText, LifeBuoy, LogOut } from 'lucide-react'
-import { signOut } from '@/app/actions'
 import { useAuthContext } from '@/providers/auth-provider'
+import { signOut } from '@/lib/auth'
+import { Spinner } from './ui/spinner'
 
 export function AppSidebar() {
   const pathname = usePathname()
   const { open } = useSidebar()
-  const { isAuthenticated } = useAuthContext()
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuthContext()
 
   return (
     <Sidebar variant='floating' collapsible='icon'>
@@ -118,17 +119,19 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
 
-            {isAuthenticated && (
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={() => signOut('local')}
-                  tooltip='Sign out'
-                >
-                  <LogOut />
-                  Sign out
+            <SidebarMenuItem>
+              {isAuthLoading ? (
+                <SidebarMenuButton disabled>
+                  <Spinner className='opacity-40' />
+                  <span>Loading...</span>
                 </SidebarMenuButton>
-              </SidebarMenuItem>
-            )}
+              ) : isAuthenticated ? (
+                <SidebarMenuButton onClick={() => signOut()} tooltip='Sign out'>
+                  <LogOut />
+                  <span>Sign out</span>
+                </SidebarMenuButton>
+              ) : null}
+            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
       </SidebarFooter>
