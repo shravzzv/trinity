@@ -2,16 +2,16 @@ import { getSiteURL } from '@/lib/links'
 
 describe('getSiteURL', () => {
   const originalSiteURL = process.env.NEXT_PUBLIC_SITE_URL
-  const originalVercelURL = process.env.NEXT_PUBLIC_VERCEL_URL
+  const originalVercelURL = process.env.VERCEL_URL
 
   beforeEach(() => {
     delete process.env.NEXT_PUBLIC_SITE_URL
-    delete process.env.NEXT_PUBLIC_VERCEL_URL
+    delete process.env.VERCEL_URL
   })
 
   afterAll(() => {
     process.env.NEXT_PUBLIC_SITE_URL = originalSiteURL
-    process.env.NEXT_PUBLIC_VERCEL_URL = originalVercelURL
+    process.env.VERCEL_URL = originalVercelURL
   })
 
   it('uses NEXT_PUBLIC_SITE_URL when defined', () => {
@@ -20,8 +20,8 @@ describe('getSiteURL', () => {
     expect(getSiteURL()).toBe('https://trinity.app/')
   })
 
-  it('falls back to NEXT_PUBLIC_VERCEL_URL', () => {
-    process.env.NEXT_PUBLIC_VERCEL_URL = 'trinity.vercel.app'
+  it('falls back to VERCEL_URL', () => {
+    process.env.VERCEL_URL = 'trinity.vercel.app'
 
     expect(getSiteURL()).toBe('https://trinity.vercel.app/')
   })
