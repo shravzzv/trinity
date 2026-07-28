@@ -118,7 +118,7 @@ export default function ForgotPasswordForm() {
                   <Lock className='size-6' />
                 </div>
 
-                <span className='sr-only'>Reset your passwod</span>
+                <span className='sr-only'>Reset your password</span>
               </div>
 
               <h1 className='text-xl font-bold'>Reset your password</h1>
