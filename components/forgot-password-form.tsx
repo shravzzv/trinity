@@ -147,7 +147,10 @@ export default function ForgotPasswordForm() {
               }}
               className='space-y-4'
             >
-              <EmailInput control={control} disabled={isSubmitting} />
+              <EmailInput
+                control={control}
+                disabled={isSubmitting || showConfirmEmail}
+              />
             </motion.div>
 
             <AnimatePresence>
@@ -168,7 +171,7 @@ export default function ForgotPasswordForm() {
             </AnimatePresence>
 
             <Field>
-              <Button type='submit' disabled={isSubmitting}>
+              <Button type='submit' disabled={isSubmitting || showConfirmEmail}>
                 {isSubmitting ? (
                   <>
                     <Spinner />
