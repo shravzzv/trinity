@@ -251,9 +251,12 @@ describe('signInWithProvider', () => {
 
 describe('sendPasswordResetEmail', () => {
   const resetPasswordForEmailMock = jest.fn()
+  let consoleErrorSpy: jest.SpyInstance
 
   beforeEach(() => {
     jest.clearAllMocks()
+
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
 
     ;(getSiteURL as jest.Mock).mockReturnValue('https://example.com')
     ;(createClient as jest.Mock).mockResolvedValue({
@@ -261,6 +264,10 @@ describe('sendPasswordResetEmail', () => {
         resetPasswordForEmail: resetPasswordForEmailMock,
       },
     })
+  })
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore()
   })
 
   it('calls resetPasswordForEmail with the provided email', async () => {
@@ -320,15 +327,22 @@ describe('sendPasswordResetEmail', () => {
 
 describe('updatePassword', () => {
   const updateUserMock = jest.fn()
+  let consoleErrorSpy: jest.SpyInstance
 
   beforeEach(() => {
     jest.clearAllMocks()
+
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
 
     ;(createClient as jest.Mock).mockResolvedValue({
       auth: {
         updateUser: updateUserMock,
       },
     })
+  })
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore()
   })
 
   it('calls updateUser with the provided password', async () => {
