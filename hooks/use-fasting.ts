@@ -17,8 +17,8 @@ import type {
 import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import {
-  getFasts as getFastsFromIdxDB,
   addFast as addFastToIdxDB,
+  getFasts as getFastsFromIdxDB,
   updateFast as updateFastInIdxDB,
   deleteFast as deleteFastFromIdxDB,
 } from '@/lib/indexed-db'
@@ -210,7 +210,7 @@ export const useFasting = (): UseFastingResult => {
     },
   ) => {
     if (!planId) {
-      throw new Error('Cannot record a fast without a fasting plan.')
+      throw Error('Cannot record a fast without a fasting plan.')
     }
 
     const newSessionStartedAtISO = newSessionStartedAt.toISOString()
@@ -399,7 +399,7 @@ export const useFasting = (): UseFastingResult => {
           (session.status === 'fasting' || session.status === 'eating'))
 
       if (!isValidSession) {
-        throw new Error('Fasting session in local storage corrupted')
+        throw Error('Fasting session in local storage corrupted')
       }
 
       setSession(
@@ -428,6 +428,7 @@ export const useFasting = (): UseFastingResult => {
 
       const migratedFasts = fasts.map((fast) => ({
         ...fast,
+        // using completed as the default streak status
         streakStatus: fast.streakStatus ?? 'completed',
         planId: fast.planId ?? '23:1',
       }))
