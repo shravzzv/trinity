@@ -7,8 +7,8 @@ import { isSameDay } from 'date-fns'
 import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import {
-  getWeightEntries as getWeightEntriesFromIdxDB,
   addWeightEntry as addWeightEntryToIdxDB,
+  getWeightEntries as getWeightEntriesFromIdxDB,
   updateWeightEntry as updateWeightEntryInIdxDB,
   deleteWeightEntry as deleteWeightEntryFromIdxDB,
 } from '@/lib/indexed-db'
