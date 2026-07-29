@@ -101,6 +101,7 @@ export const useWeight = (): UseWeightResult => {
       id: existingEntry?.id ?? uuidv4(),
       recordedAt: recordedAt.toISOString(),
       weightKg: Number(weightKg.toFixed(1)),
+      needsSync: true,
     }
 
     setWeightEntries(
@@ -138,20 +139,25 @@ export const useWeight = (): UseWeightResult => {
   }
 
   const updateWeightEntry = async (updatedWeightEntry: WeightEntry) => {
+    const entry = {
+      ...updatedWeightEntry,
+      needsSync: true,
+    }
+
     let previousEntries: WeightEntry[] = []
 
     setWeightEntries((prev) => {
       previousEntries = prev
 
       return sortWeightEntries(
-        prev.map((entry) =>
-          entry.id === updatedWeightEntry.id ? updatedWeightEntry : entry,
+        prev.map((weightEntry) =>
+          weightEntry.id === entry.id ? entry : weightEntry,
         ),
       )
     })
 
     try {
-      await updateWeightEntryInIdxDB(updatedWeightEntry)
+      await updateWeightEntryInIdxDB(entry)
     } catch (error) {
       setWeightEntries(previousEntries)
       throw Error('Failed to update the weight', { cause: error })
@@ -188,7 +194,13 @@ export const useWeight = (): UseWeightResult => {
   const hydrateWeightEntries = async () => {
     try {
       const entries = await getWeightEntriesFromIdxDB()
-      setWeightEntries(sortWeightEntries(entries))
+
+      const migratedEntries = entries.map((entry) => ({
+        ...entry,
+        needsSync: entry.needsSync ?? true,
+      }))
+
+      setWeightEntries(sortWeightEntries(migratedEntries))
     } catch (error) {
       console.error('Hydrating weight entries failed', error)
     }
