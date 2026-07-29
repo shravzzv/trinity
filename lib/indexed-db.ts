@@ -1,3 +1,13 @@
+/**
+ * IndexedDB persistence utilities.
+ *
+ * Provides low-level CRUD operations for Trinity's local IndexedDB database.
+ *
+ * This module intentionally contains no synchronization logic.
+ * Synchronization is coordinated by `lib/sync.ts`, which uses this
+ * module together with `lib/supabase-db.ts`.
+ */
+
 import { type IDBPDatabase, openDB, type DBSchema } from 'idb'
 import type { Fast } from '@/types/fasting'
 import { INDEXED_DB_NAME, INDEXED_DB_VERSION } from '@/constants/storage-keys'
