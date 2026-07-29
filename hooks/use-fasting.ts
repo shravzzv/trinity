@@ -223,6 +223,7 @@ export const useFasting = (): UseFastingResult => {
       await addFast({
         planId,
         id: uuidv4(),
+        needsSync: true,
         startedAt: session.startedAt,
         endedAt: newSessionStartedAtISO,
         streakStatus: getStreakStatus({
@@ -428,9 +429,10 @@ export const useFasting = (): UseFastingResult => {
 
       const migratedFasts = fasts.map((fast) => ({
         ...fast,
+        planId: fast.planId ?? '23:1',
+        needsSync: fast.needsSync ?? true,
         // using completed as the default streak status
         streakStatus: fast.streakStatus ?? 'completed',
-        planId: fast.planId ?? '23:1',
       }))
 
       setFasts(sortFasts(migratedFasts))

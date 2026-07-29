@@ -29,4 +29,5 @@ export interface Fast {
   endedAt: string
   streakStatus: StreakStatus
   planId: FastingPlanId
+  needsSync: boolean
 }
