@@ -153,6 +153,7 @@ export default function FastingStatisticsContent({
           endedAt,
           isAnchored: false,
         }),
+        needsSync: false,
       })
       toast.success('Fast added')
     } catch (error) {
