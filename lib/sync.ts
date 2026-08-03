@@ -80,6 +80,8 @@ const sync = async (): Promise<void> => {
  * Synchronization is skipped when there is no authenticated user.
  */
 const canSync = async (): Promise<boolean> => {
+  if (!navigator.onLine) return false
+
   const supabase = createClient()
 
   const {
