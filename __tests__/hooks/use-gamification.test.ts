@@ -7,6 +7,10 @@ import {
 } from '@/constants/storage-keys'
 import { INITIAL_ANCHORS } from '@/constants/gamification'
 
+jest.mock('@/lib/sync', () => ({
+  requestSync: jest.fn().mockResolvedValue(undefined),
+}))
+
 describe('useGamification', () => {
   let consoleErrorSpy: jest.SpyInstance
 

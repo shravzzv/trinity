@@ -12,6 +12,10 @@ jest.mock('@/lib/indexed-db', () => ({
   deleteWeightEntry: jest.fn(),
 }))
 
+jest.mock('@/lib/sync', () => ({
+  requestSync: jest.fn().mockResolvedValue(undefined),
+}))
+
 const getWeightEntriesMock = jest.mocked(indexedDb.getWeightEntries)
 const addWeightEntryMock = jest.mocked(indexedDb.addWeightEntry)
 const updateWeightEntryMock = jest.mocked(indexedDb.updateWeightEntry)
