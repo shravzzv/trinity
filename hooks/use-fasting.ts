@@ -18,6 +18,7 @@ import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import * as indexedDb from '@/lib/indexed-db'
 import { getStreakStatus } from '@/lib/gamification'
+import { requestSync } from '@/lib/sync'
 
 /**
  * The public API exposed by {@link useFasting}.
@@ -264,6 +265,7 @@ export const useFasting = (): UseFastingResult => {
 
     try {
       await indexedDb.addFast(fast)
+      void requestSync()
     } catch (error) {
       setFasts(previousFasts)
       throw Error('Failed to save the fast', { cause: error })
@@ -285,6 +287,7 @@ export const useFasting = (): UseFastingResult => {
 
     try {
       await indexedDb.deleteFast(id)
+      void requestSync()
     } catch (error) {
       setFasts(previousFasts)
       throw Error('Failed to delete the fast', { cause: error })
@@ -313,6 +316,7 @@ export const useFasting = (): UseFastingResult => {
 
     try {
       await indexedDb.updateFast(updatedFast)
+      void requestSync()
     } catch (error) {
       setFasts(previousFasts)
       throw Error('Failed to update the fast', { cause: error })
@@ -445,6 +449,7 @@ export const useFasting = (): UseFastingResult => {
         await hydrateFasts()
       } finally {
         setIsLoading(false)
+        void requestSync()
       }
     }
 
@@ -459,6 +464,7 @@ export const useFasting = (): UseFastingResult => {
     }
 
     syncPlanId()
+    void requestSync()
   }, [isLoading, planId])
 
   useEffect(() => {
@@ -469,6 +475,7 @@ export const useFasting = (): UseFastingResult => {
     }
 
     syncSession()
+    void requestSync()
   }, [isLoading, session])
 
   useEffect(() => {
@@ -482,6 +489,7 @@ export const useFasting = (): UseFastingResult => {
     }
 
     syncPreferredFastStartTime()
+    void requestSync()
   }, [isLoading, preferredFastStartTime])
 
   return {

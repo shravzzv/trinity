@@ -7,6 +7,7 @@ import { isSameDay } from 'date-fns'
 import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import * as indexedDb from '@/lib/indexed-db'
+import { requestSync } from '@/lib/sync'
 
 /**
  * The public API exposed by {@link useWeight}.
@@ -111,6 +112,7 @@ export const useWeight = (): UseWeightResult => {
     try {
       if (existingEntry) await indexedDb.updateWeightEntry(entry)
       else await indexedDb.addWeightEntry(entry)
+      void requestSync()
     } catch (error) {
       setWeightEntries(previousEntries)
       throw Error('Failed to save the weight', { cause: error })
@@ -127,6 +129,7 @@ export const useWeight = (): UseWeightResult => {
 
     try {
       await indexedDb.deleteWeightEntry(id)
+      void requestSync()
     } catch (error) {
       setWeightEntries(previousEntries)
       throw Error('Failed to delete the weight', { cause: error })
@@ -153,6 +156,7 @@ export const useWeight = (): UseWeightResult => {
 
     try {
       await indexedDb.updateWeightEntry(entry)
+      void requestSync()
     } catch (error) {
       setWeightEntries(previousEntries)
       throw Error('Failed to update the weight', { cause: error })
@@ -208,6 +212,7 @@ export const useWeight = (): UseWeightResult => {
         await hydrateWeightEntries()
       } finally {
         setIsLoading(false)
+        void requestSync()
       }
     }
 
@@ -225,6 +230,7 @@ export const useWeight = (): UseWeightResult => {
     }
 
     syncTargetWeightKg()
+    void requestSync()
   }, [isLoading, targetWeightKg])
 
   return {
