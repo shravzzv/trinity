@@ -9,7 +9,12 @@
  */
 
 import { createClient } from '@/supabase/client'
-import type { Database, Tables, TablesInsert } from '@/types/database'
+import type {
+  Database,
+  Tables,
+  TablesInsert,
+  TablesUpdate,
+} from '@/types/database'
 import type { Fast, FastingPlanId } from '@/types/fasting'
 import type { StreakStatus } from '@/types/gamification'
 import type { WeightEntry } from '@/types/weight'
@@ -39,7 +44,7 @@ export const getProfile = async (): Promise<Tables<'profiles'>> => {
  *
  * @param profile The updated profile.
  */
-export const updateProfile = async (profile: any) => {
+export const updateProfile = async (profile: TablesUpdate<'profiles'>) => {
   const supabase = createClient()
 
   const { error } = await supabase
@@ -257,6 +262,28 @@ export const deleteWeightEntry = async (id: string) => {
 }
 
 /**
+ * Returns the authenticated user's profile identifier.
+ *
+ * In Trinity, the `profiles.id` primary key is the same as the authenticated
+ * user's `auth.users.id`. This helper retrieves that identifier for use when
+ * reading from or writing to profile-owned tables.
+ *
+ * @throws {Error} If there is no authenticated user.
+ * @returns The authenticated user's profile identifier.
+ */
+export const getProfileId = async (
+  supabase: SupabaseClient<Database>,
+): Promise<string> => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) throw new Error('No authenticated user.')
+
+  return user.id
+}
+
+/**
  * Converts a local {@link Fast} into a Supabase fast row.
  *
  * @param fast The local fast.
@@ -329,26 +356,4 @@ const toWeightEntry = (row: Tables<'weight_entries'>): WeightEntry => {
     weightKg: row.weight_kg,
     recordedAt: row.recorded_at,
   }
-}
-
-/**
- * Returns the authenticated user's profile identifier.
- *
- * In Trinity, the `profiles.id` primary key is the same as the authenticated
- * user's `auth.users.id`. This helper retrieves that identifier for use when
- * reading from or writing to profile-owned tables.
- *
- * @throws {Error} If there is no authenticated user.
- * @returns The authenticated user's profile identifier.
- */
-const getProfileId = async (
-  supabase: SupabaseClient<Database>,
-): Promise<string> => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) throw new Error('No authenticated user.')
-
-  return user.id
 }

@@ -22,3 +22,6 @@ export const XP_STORAGE_KEY = 'trinity-xp'
 export const STREAK_STORAGE_KEY = 'trinity-streak'
 
 export const ANCHORS_STORAGE_KEY = 'trinity-anchors'
+
+export const PROFILE_LAST_SYNCED_AT_STORAGE_KEY =
+  'trinity-profile-sync-timestamp'

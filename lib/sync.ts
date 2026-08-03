@@ -17,9 +17,20 @@
  * local database first and then call `requestSync()`.
  */
 
+import {
+  ANCHORS_STORAGE_KEY,
+  FASTING_PLAN_ID_STORAGE_KEY,
+  FASTING_SESSION_STORAGE_KEY,
+  PREFERRED_FAST_START_TIME_STORAGE_KEY,
+  PROFILE_LAST_SYNCED_AT_STORAGE_KEY,
+  STREAK_STORAGE_KEY,
+  TARGET_WEIGHT_KG_STORAGE_KEY,
+  XP_STORAGE_KEY,
+} from '@/constants/storage-keys'
 import * as indexedDb from '@/lib/indexed-db'
 import * as supabaseDb from '@/lib/supabase-db'
 import { createClient } from '@/supabase/client'
+import type { Tables, TablesUpdate } from '@/types/database'
 import type { Fast } from '@/types/fasting'
 import type { WeightEntry } from '@/types/weight'
 
@@ -97,9 +108,18 @@ const downloadRemoteChanges = async (): Promise<void> => {
 }
 
 /**
- * Uploads the local profile if it requires synchronization.
+ * Uploads the local profile to the cloud.
  */
-const uploadProfile = async (): Promise<void> => {}
+const uploadProfile = async () => {
+  const profile = await buildProfile()
+
+  const syncedAt = new Date().toISOString()
+  profile.last_synced_at = syncedAt
+
+  await supabaseDb.updateProfile(profile)
+
+  localStorage.setItem(PROFILE_LAST_SYNCED_AT_STORAGE_KEY, syncedAt)
+}
 
 /**
  * Uploads all pending fasts.
@@ -144,12 +164,24 @@ const uploadWeightEntries = async (): Promise<void> => {
 /**
  * Downloads the latest profile from Supabase.
  */
-const downloadProfile = async (): Promise<void> => {
-  // TODO:
-  // - Fetch the user's profile from Supabase.
-  // - Return if no profile exists.
-  // - Compare with the local profile.
-  // - Update LocalStorage if the remote version is newer.
+const downloadProfile = async () => {
+  const remoteProfile = await supabaseDb.getProfile()
+
+  const localLastSyncedAt = localStorage.getItem(
+    PROFILE_LAST_SYNCED_AT_STORAGE_KEY,
+  )
+
+  if (
+    remoteProfile.last_synced_at &&
+    (!localLastSyncedAt || remoteProfile.last_synced_at > localLastSyncedAt)
+  ) {
+    applyProfile(remoteProfile)
+
+    localStorage.setItem(
+      PROFILE_LAST_SYNCED_AT_STORAGE_KEY,
+      remoteProfile.last_synced_at,
+    )
+  }
 }
 
 /**
@@ -184,4 +216,88 @@ const downloadWeightEntries = async (): Promise<void> => {
   await Promise.all(
     entriesNeedingDownload.map((entry) => indexedDb.addWeightEntry(entry)),
   )
+}
+
+/**
+ * Builds a Supabase profile update from the application's locally
+ * persisted profile data.
+ *
+ * Trinity stores profile information across multiple local persistence
+ * locations rather than as a single object. This helper gathers those
+ * individual values and assembles them into the shape expected by the
+ * `profiles` table.
+ *
+ * This function does not communicate with Supabase.
+ *
+ * @returns The locally assembled profile ready for upload.
+ */
+const buildProfile = async (): Promise<TablesUpdate<'profiles'>> => {
+  const supabase = createClient()
+  const profileId = await supabaseDb.getProfileId(supabase)
+
+  // fasting
+  const fastingPlanId = localStorage.getItem(FASTING_PLAN_ID_STORAGE_KEY)
+  const fastingSession = localStorage.getItem(FASTING_SESSION_STORAGE_KEY)
+  const preferredFastStartTime = localStorage.getItem(
+    PREFERRED_FAST_START_TIME_STORAGE_KEY,
+  )
+
+  // weight
+  const targetWeightKg = localStorage.getItem(TARGET_WEIGHT_KG_STORAGE_KEY)
+
+  // gamification
+  const xp = localStorage.getItem(XP_STORAGE_KEY)
+  const streak = localStorage.getItem(STREAK_STORAGE_KEY)
+  const anchors = localStorage.getItem(ANCHORS_STORAGE_KEY)
+
+  return {
+    id: profileId,
+    fasting_plan_id: fastingPlanId,
+    fasting_session: fastingSession ? JSON.parse(fastingSession) : null,
+    preferred_fast_start_time: preferredFastStartTime
+      ? JSON.parse(preferredFastStartTime)
+      : null,
+    target_weight_kg: targetWeightKg ? Number(targetWeightKg) : null,
+    xp: xp ? Number(xp) : 0,
+    streak: streak ? Number(streak) : 0,
+    anchors: anchors ? Number(anchors) : 1,
+  }
+}
+
+/**
+ * Applies a downloaded profile to the application's local persistence.
+ *
+ * Trinity stores profile information across multiple local persistence
+ * locations. This helper distributes the values from the Supabase
+ * profile into their respective local storage locations.
+ *
+ * This function does not communicate with Supabase.
+ *
+ * @param profile The downloaded profile.
+ */
+const applyProfile = (profile: Tables<'profiles'>): void => {
+  // fasting
+  localStorage.setItem(
+    FASTING_PLAN_ID_STORAGE_KEY,
+    JSON.stringify(profile.fasting_plan_id),
+  )
+  localStorage.setItem(
+    FASTING_SESSION_STORAGE_KEY,
+    JSON.stringify(profile.fasting_session),
+  )
+  localStorage.setItem(
+    PREFERRED_FAST_START_TIME_STORAGE_KEY,
+    JSON.stringify(profile.preferred_fast_start_time),
+  )
+
+  // weight
+  localStorage.setItem(
+    TARGET_WEIGHT_KG_STORAGE_KEY,
+    JSON.stringify(profile.target_weight_kg),
+  )
+
+  // gamification
+  localStorage.setItem(XP_STORAGE_KEY, JSON.stringify(profile.xp))
+  localStorage.setItem(STREAK_STORAGE_KEY, JSON.stringify(profile.streak))
+  localStorage.setItem(ANCHORS_STORAGE_KEY, JSON.stringify(profile.anchors))
 }
