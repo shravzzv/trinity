@@ -48,6 +48,7 @@ const fasts: Fast[] = [
     endedAt: '2026-01-01T18:00:00.000Z',
     streakStatus: 'completed',
     planId: '',
+    needsSync: false,
   },
   {
     id: '2',
@@ -55,6 +56,7 @@ const fasts: Fast[] = [
     endedAt: '2026-01-02T22:00:00.000Z',
     streakStatus: 'completed',
     planId: '',
+    needsSync: false,
   },
 ]
 
@@ -177,6 +179,7 @@ describe('FastingStatisticsContent', () => {
       endedAt: '2026-01-01T18:00:00.000Z',
       planId: '16:8',
       streakStatus: 'missed',
+      needsSync: false,
     })
   })
 
