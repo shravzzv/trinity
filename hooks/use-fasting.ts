@@ -16,12 +16,7 @@ import type {
 } from '@/types/fasting'
 import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
-import {
-  addFast as addFastToIdxDB,
-  getFasts as getFastsFromIdxDB,
-  updateFast as updateFastInIdxDB,
-  deleteFast as deleteFastFromIdxDB,
-} from '@/lib/indexed-db'
+import * as indexedDb from '@/lib/indexed-db'
 import { getStreakStatus } from '@/lib/gamification'
 
 /**
@@ -268,7 +263,7 @@ export const useFasting = (): UseFastingResult => {
     })
 
     try {
-      await addFastToIdxDB(fast)
+      await indexedDb.addFast(fast)
     } catch (error) {
       setFasts(previousFasts)
       throw Error('Failed to save the fast', { cause: error })
@@ -289,7 +284,7 @@ export const useFasting = (): UseFastingResult => {
     })
 
     try {
-      await deleteFastFromIdxDB(id)
+      await indexedDb.deleteFast(id)
     } catch (error) {
       setFasts(previousFasts)
       throw Error('Failed to delete the fast', { cause: error })
@@ -317,7 +312,7 @@ export const useFasting = (): UseFastingResult => {
     })
 
     try {
-      await updateFastInIdxDB(updatedFast)
+      await indexedDb.updateFast(updatedFast)
     } catch (error) {
       setFasts(previousFasts)
       throw Error('Failed to update the fast', { cause: error })
@@ -425,7 +420,7 @@ export const useFasting = (): UseFastingResult => {
 
   const hydrateFasts = async () => {
     try {
-      const fasts = await getFastsFromIdxDB()
+      const fasts = await indexedDb.getFasts()
 
       const migratedFasts = fasts.map((fast) => ({
         ...fast,

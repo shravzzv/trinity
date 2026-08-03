@@ -6,12 +6,7 @@ import type { WeightEntry } from '@/types/weight'
 import { isSameDay } from 'date-fns'
 import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
-import {
-  addWeightEntry as addWeightEntryToIdxDB,
-  getWeightEntries as getWeightEntriesFromIdxDB,
-  updateWeightEntry as updateWeightEntryInIdxDB,
-  deleteWeightEntry as deleteWeightEntryFromIdxDB,
-} from '@/lib/indexed-db'
+import * as indexedDb from '@/lib/indexed-db'
 
 /**
  * The public API exposed by {@link useWeight}.
@@ -114,8 +109,8 @@ export const useWeight = (): UseWeightResult => {
     )
 
     try {
-      if (existingEntry) await updateWeightEntryInIdxDB(entry)
-      else await addWeightEntryToIdxDB(entry)
+      if (existingEntry) await indexedDb.updateWeightEntry(entry)
+      else await indexedDb.addWeightEntry(entry)
     } catch (error) {
       setWeightEntries(previousEntries)
       throw Error('Failed to save the weight', { cause: error })
@@ -131,7 +126,7 @@ export const useWeight = (): UseWeightResult => {
     })
 
     try {
-      await deleteWeightEntryFromIdxDB(id)
+      await indexedDb.deleteWeightEntry(id)
     } catch (error) {
       setWeightEntries(previousEntries)
       throw Error('Failed to delete the weight', { cause: error })
@@ -157,7 +152,7 @@ export const useWeight = (): UseWeightResult => {
     })
 
     try {
-      await updateWeightEntryInIdxDB(entry)
+      await indexedDb.updateWeightEntry(entry)
     } catch (error) {
       setWeightEntries(previousEntries)
       throw Error('Failed to update the weight', { cause: error })
@@ -193,7 +188,7 @@ export const useWeight = (): UseWeightResult => {
 
   const hydrateWeightEntries = async () => {
     try {
-      const entries = await getWeightEntriesFromIdxDB()
+      const entries = await indexedDb.getWeightEntries()
 
       const migratedEntries = entries.map((entry) => ({
         ...entry,
