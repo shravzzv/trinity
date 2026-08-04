@@ -231,6 +231,26 @@ export const getFastsDeletions = async (): Promise<PendingDelete[]> => {
 }
 
 /**
+ * Persists a deleted fast tombstone.
+ *
+ * @param pendingDelete The deleted fast to persist.
+ */
+export const addFastDeletion = async (pendingDelete: PendingDelete) => {
+  const supabase = createClient()
+  const profileId = await getProfileId(supabase)
+
+  const { error } = await supabase
+    .from('fasts_deletions')
+    .insert(toDeletionRow(pendingDelete, profileId))
+
+  if (error) {
+    throw Error('Inserting fast deletion failed', {
+      cause: error,
+    })
+  }
+}
+
+/**
  * Returns all deleted weight entry tombstones.
  *
  * @returns All deleted weight entry tombstones.
@@ -250,6 +270,26 @@ export const getWeightEntriesDeletions = async (): Promise<PendingDelete[]> => {
   }
 
   return data.map((item) => toPendingDelete(item, 'weightEntry'))
+}
+
+/**
+ * Persists a deleted weight entry tombstone.
+ *
+ * @param pendingDelete The deleted weight entry to persist.
+ */
+export const addWeightEntryDeletion = async (pendingDelete: PendingDelete) => {
+  const supabase = createClient()
+  const profileId = await getProfileId(supabase)
+
+  const { error } = await supabase
+    .from('weight_entries_deletions')
+    .insert(toDeletionRow(pendingDelete, profileId))
+
+  if (error) {
+    throw Error('Inserting weight entry deletion failed', {
+      cause: error,
+    })
+  }
 }
 
 /**
@@ -343,4 +383,23 @@ const toPendingDelete = (
   entity,
   entityId: row.entity_id,
   deletedAt: row.deleted_at,
+})
+
+/**
+ * Converts a local {@link PendingDelete} into a Supabase deletion row.
+ *
+ * @param pendingDelete The local pending deletion.
+ * @param profileId The owning profile's identifier.
+ * @returns The corresponding database row.
+ */
+const toDeletionRow = (
+  pendingDelete: PendingDelete,
+  profileId: string,
+):
+  | TablesInsert<'fasts_deletions'>
+  | TablesInsert<'weight_entries_deletions'> => ({
+  id: pendingDelete.id,
+  profile_id: profileId,
+  entity_id: pendingDelete.entityId,
+  deleted_at: pendingDelete.deletedAt,
 })
