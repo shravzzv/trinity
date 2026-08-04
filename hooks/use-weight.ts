@@ -129,6 +129,14 @@ export const useWeight = (): UseWeightResult => {
 
     try {
       await indexedDb.deleteWeightEntry(id)
+
+      await indexedDb.addPendingDelete({
+        id: uuidv4(),
+        entityId: id,
+        deletedAt: new Date().toISOString(),
+        entity: 'weightEntry',
+      })
+
       void requestSync()
     } catch (error) {
       setWeightEntries(previousEntries)

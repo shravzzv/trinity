@@ -287,6 +287,14 @@ export const useFasting = (): UseFastingResult => {
 
     try {
       await indexedDb.deleteFast(id)
+
+      await indexedDb.addPendingDelete({
+        id: uuidv4(),
+        entityId: id,
+        deletedAt: new Date().toISOString(),
+        entity: 'fast',
+      })
+
       void requestSync()
     } catch (error) {
       setFasts(previousFasts)
