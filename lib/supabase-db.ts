@@ -17,6 +17,7 @@ import type {
 } from '@/types/database'
 import type { Fast, FastingPlanId } from '@/types/fasting'
 import type { StreakStatus } from '@/types/gamification'
+import type { PendingDelete, PendingDeleteEntity } from '@/types/sync'
 import type { WeightEntry } from '@/types/weight'
 import { SupabaseClient } from '@supabase/supabase-js'
 
@@ -208,6 +209,50 @@ export const getProfileId = async (
 }
 
 /**
+ * Returns all deleted fast tombstones.
+ *
+ * @returns All deleted fast tombstones.
+ */
+export const getFastsDeletions = async (): Promise<PendingDelete[]> => {
+  const supabase = createClient()
+
+  const { data, error } = await supabase
+    .from('fasts_deletions')
+    .select()
+    .order('deleted_at', { ascending: true })
+
+  if (error) {
+    throw Error('Fetching fast deletions failed', {
+      cause: error,
+    })
+  }
+
+  return data.map((item) => toPendingDelete(item, 'fast'))
+}
+
+/**
+ * Returns all deleted weight entry tombstones.
+ *
+ * @returns All deleted weight entry tombstones.
+ */
+export const getWeightEntriesDeletions = async (): Promise<PendingDelete[]> => {
+  const supabase = createClient()
+
+  const { data, error } = await supabase
+    .from('weight_entries_deletions')
+    .select()
+    .order('deleted_at', { ascending: true })
+
+  if (error) {
+    throw Error('Fetching weight entry deletions failed', {
+      cause: error,
+    })
+  }
+
+  return data.map((item) => toPendingDelete(item, 'weightEntry'))
+}
+
+/**
  * Converts a local {@link Fast} into a Supabase fast row.
  *
  * @param fast The local fast.
@@ -281,3 +326,21 @@ const toWeightEntry = (row: Tables<'weight_entries'>): WeightEntry => {
     recordedAt: row.recorded_at,
   }
 }
+
+/**
+ * Converts a Supabase deletion tombstone into a local
+ * {@link PendingDelete}.
+ *
+ * @param row The database row.
+ * @param entity The type of deleted entity represented by the row.
+ * @returns The corresponding local pending deletion.
+ */
+const toPendingDelete = (
+  row: Tables<'fasts_deletions'> | Tables<'weight_entries_deletions'>,
+  entity: PendingDeleteEntity,
+): PendingDelete => ({
+  id: row.id,
+  entity,
+  entityId: row.entity_id,
+  deletedAt: row.deleted_at,
+})
