@@ -198,6 +198,7 @@ const downloadFasts = async (): Promise<void> => {
   const fastsNeedingDownload = remoteFasts.filter(
     (fast) => !localFastIds.has(fast.id),
   )
+  if (fastsNeedingDownload.length === 0) return
 
   await Promise.all(fastsNeedingDownload.map((fast) => indexedDb.addFast(fast)))
 }
@@ -214,6 +215,7 @@ const downloadWeightEntries = async (): Promise<void> => {
   const entriesNeedingDownload = remoteWeightEntries.filter(
     (entry) => !localEntryIds.has(entry.id),
   )
+  if (entriesNeedingDownload.length === 0) return
 
   await Promise.all(
     entriesNeedingDownload.map((entry) => indexedDb.addWeightEntry(entry)),
