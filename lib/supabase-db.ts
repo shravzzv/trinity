@@ -82,60 +82,22 @@ export const getFasts = async (): Promise<Fast[]> => {
 }
 
 /**
- * Persists a fast.
+ * Inserts or updates multiple fasts.
  *
- * @param fast The fast to insert.
- */
-export const addFast = async (fast: Fast) => {
-  const supabase = createClient()
-  const profileId = await getProfileId(supabase)
-
-  const { error } = await supabase
-    .from('fasts')
-    .insert(toFastRow(fast, profileId))
-
-  if (error) {
-    throw Error('Inserting fast failed', {
-      cause: error,
-    })
-  }
-}
-
-/**
- * Persists multiple fasts.
+ * If a fast with the same primary key already exists, it is updated.
+ * Otherwise a new row is inserted.
  *
- * @param fasts The fasts to insert.
+ * @param fasts The fasts to synchronize.
  */
-export const addFasts = async (fasts: Fast[]) => {
+export const upsertFasts = async (fasts: Fast[]) => {
   const supabase = createClient()
   const profileId = await getProfileId(supabase)
 
   const fastRows = fasts.map((fast) => toFastRow(fast, profileId))
-  const { error } = await supabase.from('fasts').insert(fastRows)
+  const { error } = await supabase.from('fasts').upsert(fastRows)
 
   if (error) {
-    throw Error('Inserting fasts failed', {
-      cause: error,
-    })
-  }
-}
-
-/**
- * Updates an existing fast.
- *
- * @param fast The updated fast.
- */
-export const updateFast = async (fast: Fast) => {
-  const supabase = createClient()
-  const profileId = await getProfileId(supabase)
-
-  const { error } = await supabase
-    .from('fasts')
-    .update(toFastRow(fast, profileId))
-    .eq('id', fast.id)
-
-  if (error) {
-    throw Error('Updating fast failed', {
+    throw Error('Upserting fasts failed', {
       cause: error,
     })
   }
@@ -180,31 +142,14 @@ export const getWeightEntries = async (): Promise<WeightEntry[]> => {
 }
 
 /**
- * Persists a  weight entry.
+ * Inserts or updates multiple weight entries.
  *
- * @param weightEntry The weight entry to insert.
- */
-export const addWeightEntry = async (weightEntry: WeightEntry) => {
-  const supabase = createClient()
-  const profileId = await getProfileId(supabase)
-
-  const { error } = await supabase
-    .from('weight_entries')
-    .insert(toWeightEntryRow(weightEntry, profileId))
-
-  if (error) {
-    throw Error('Inserting weight entry failed', {
-      cause: error,
-    })
-  }
-}
-
-/**
- * Persists multiple weight entries.
+ * If a weight entry with the same primary key already exists, it is
+ * updated. Otherwise a new row is inserted.
  *
- * @param weightEntries The weight entries to insert.
+ * @param weightEntries The weight entries to synchronize.
  */
-export const addWeightEntries = async (weightEntries: WeightEntry[]) => {
+export const upsertWeightEntries = async (weightEntries: WeightEntry[]) => {
   const supabase = createClient()
   const profileId = await getProfileId(supabase)
 
@@ -217,28 +162,7 @@ export const addWeightEntries = async (weightEntries: WeightEntry[]) => {
     .upsert(weightEntryRows)
 
   if (error) {
-    throw Error('Inserting weight entries failed', {
-      cause: error,
-    })
-  }
-}
-
-/**
- * Updates an existing weight entry.
- *
- * @param weightEntry The updated weight entry.
- */
-export const updateWeightEntry = async (weightEntry: WeightEntry) => {
-  const supabase = createClient()
-  const profileId = await getProfileId(supabase)
-
-  const { error } = await supabase
-    .from('weight_entries')
-    .update(toWeightEntryRow(weightEntry, profileId))
-    .eq('id', weightEntry.id)
-
-  if (error) {
-    throw Error('Updating weight entry failed', {
+    throw Error('Upserting weight entries failed', {
       cause: error,
     })
   }

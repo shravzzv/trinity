@@ -61,6 +61,7 @@ export default function EditFastsSheet({
                 endedAt,
                 isAnchored: false,
               }),
+        needsSync: true,
       }
 
       await updateFast(updatedFast)

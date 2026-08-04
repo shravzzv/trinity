@@ -138,7 +138,12 @@ const uploadProfile = async () => {
 }
 
 /**
- * Uploads all pending fasts.
+ * Uploads all locally modified fasts to Supabase.
+ *
+ * Records are uploaded using an upsert operation so both newly created
+ * and previously existing fasts are synchronized with a single request.
+ *
+ * Successfully uploaded fasts are marked as synchronized locally.
  */
 const uploadFasts = async (): Promise<void> => {
   const fasts: Fast[] = await indexedDb.getFasts()
@@ -146,7 +151,7 @@ const uploadFasts = async (): Promise<void> => {
   const fastsNeedingSync = fasts.filter((fast) => fast.needsSync === true)
   if (fastsNeedingSync.length === 0) return
 
-  await supabaseDb.addFasts(fastsNeedingSync)
+  await supabaseDb.upsertFasts(fastsNeedingSync)
 
   // Every uploaded fast needs its needSync set to false.
   fastsNeedingSync.forEach((fast) => (fast.needsSync = false))
@@ -156,7 +161,13 @@ const uploadFasts = async (): Promise<void> => {
 }
 
 /**
- * Uploads all pending weight entries.
+ * Uploads all locally modified weight entries to Supabase.
+ *
+ * Records are uploaded using an upsert operation so both newly created
+ * and previously existing weight entries are synchronized with a single
+ * request.
+ *
+ * Successfully uploaded entries are marked as synchronized locally.
  */
 const uploadWeightEntries = async (): Promise<void> => {
   const weightEntries: WeightEntry[] = await indexedDb.getWeightEntries()
@@ -166,7 +177,7 @@ const uploadWeightEntries = async (): Promise<void> => {
   )
   if (weightEntriesNeedingSync.length === 0) return
 
-  await supabaseDb.addWeightEntries(weightEntriesNeedingSync)
+  await supabaseDb.upsertWeightEntries(weightEntriesNeedingSync)
 
   // Every uploaded weight entry needs its needSync set to false.
   weightEntriesNeedingSync.forEach((entry) => (entry.needsSync = false))
