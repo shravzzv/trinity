@@ -251,6 +251,23 @@ export const addFastDeletion = async (pendingDelete: PendingDelete) => {
 }
 
 /**
+ * Removes a deleted fast tombstone.
+ *
+ * @param id The identifier of the deleted fast tombstone.
+ */
+export const removeFastDeletion = async (id: string) => {
+  const supabase = createClient()
+
+  const { error } = await supabase.from('fasts_deletions').delete().eq('id', id)
+
+  if (error) {
+    throw Error('Removing fast deletion failed', {
+      cause: error,
+    })
+  }
+}
+
+/**
  * Returns all deleted weight entry tombstones.
  *
  * @returns All deleted weight entry tombstones.
@@ -287,6 +304,26 @@ export const addWeightEntryDeletion = async (pendingDelete: PendingDelete) => {
 
   if (error) {
     throw Error('Inserting weight entry deletion failed', {
+      cause: error,
+    })
+  }
+}
+
+/**
+ * Removes a deleted weight entry tombstone.
+ *
+ * @param id The identifier of the deleted weight entry tombstone.
+ */
+export const removeWeightEntryDeletion = async (id: string) => {
+  const supabase = createClient()
+
+  const { error } = await supabase
+    .from('weight_entries_deletions')
+    .delete()
+    .eq('id', id)
+
+  if (error) {
+    throw Error('Removing weight entry deletion failed', {
       cause: error,
     })
   }
