@@ -15,6 +15,7 @@ jest.mock('@/lib/indexed-db', () => ({
   addFast: jest.fn().mockResolvedValue(undefined),
   updateFast: jest.fn().mockResolvedValue(undefined),
   deleteFast: jest.fn().mockResolvedValue(undefined),
+  addPendingDelete: jest.fn().mockResolvedValue(undefined),
 }))
 
 jest.mock('@/lib/sync', () => ({
