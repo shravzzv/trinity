@@ -15,7 +15,7 @@ export const WEIGHT_STATISTICS_CADENCE_STORAGE_KEY =
 
 export const INDEXED_DB_NAME = 'trinity'
 
-export const INDEXED_DB_VERSION = 1
+export const INDEXED_DB_VERSION = 2
 
 export const XP_STORAGE_KEY = 'trinity-xp'
 

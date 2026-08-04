@@ -12,6 +12,7 @@ import { type IDBPDatabase, openDB, type DBSchema } from 'idb'
 import type { Fast } from '@/types/fasting'
 import { INDEXED_DB_NAME, INDEXED_DB_VERSION } from '@/constants/storage-keys'
 import type { WeightEntry } from '@/types/weight'
+import type { PendingDelete, PendingDeleteEntity } from '@/types/sync'
 
 /**
  * Application database schema.
@@ -36,10 +37,20 @@ interface TrinityDB extends DBSchema {
       recordedAt: string
     }
   }
+
+  pendingDeletes: {
+    key: string
+    value: PendingDelete
+    indexes: {
+      entity: PendingDeleteEntity
+      deletedAt: string
+    }
+  }
 }
 
 const FASTS_STORE_NAME = 'fasts'
 const WEIGHT_ENTRIES_STORE_NAME = 'weightEntries'
+const PENDING_DELETES_STORE_NAME = 'pendingDeletes'
 
 /**
  * Lazily initialized database connection.
@@ -64,21 +75,37 @@ const getDb = () => {
 
   if (!dbPromise) {
     dbPromise = openDB<TrinityDB>(INDEXED_DB_NAME, INDEXED_DB_VERSION, {
-      upgrade(db) {
-        const fastsStore = db.createObjectStore(FASTS_STORE_NAME, {
-          keyPath: 'id',
-        })
+      upgrade(db, oldVersion) {
+        switch (oldVersion) {
+          case 0: {
+            const fastsStore = db.createObjectStore(FASTS_STORE_NAME, {
+              keyPath: 'id',
+            })
 
-        fastsStore.createIndex('startedAt', 'startedAt')
+            fastsStore.createIndex('startedAt', 'startedAt')
 
-        const weightEntriesStore = db.createObjectStore(
-          WEIGHT_ENTRIES_STORE_NAME,
-          {
-            keyPath: 'id',
-          },
-        )
+            const weightEntriesStore = db.createObjectStore(
+              WEIGHT_ENTRIES_STORE_NAME,
+              {
+                keyPath: 'id',
+              },
+            )
 
-        weightEntriesStore.createIndex('recordedAt', 'recordedAt')
+            weightEntriesStore.createIndex('recordedAt', 'recordedAt')
+          }
+
+          case 1: {
+            const pendingDeletesStore = db.createObjectStore(
+              PENDING_DELETES_STORE_NAME,
+              {
+                keyPath: 'id',
+              },
+            )
+
+            pendingDeletesStore.createIndex('entity', 'entity')
+            pendingDeletesStore.createIndex('deletedAt', 'deletedAt')
+          }
+        }
       },
     })
   }
@@ -166,4 +193,34 @@ export const updateWeightEntry = async (entry: WeightEntry) => {
 export const deleteWeightEntry = async (id: string) => {
   const db = await getDb()
   await db.delete(WEIGHT_ENTRIES_STORE_NAME, id)
+}
+
+/**
+ * Returns all pending deletes.
+ *
+ * @returns A promise that resolves to all pending deletes.
+ */
+export const getPendingDeletes = async () => {
+  const db = await getDb()
+  return db.getAll(PENDING_DELETES_STORE_NAME)
+}
+
+/**
+ * Persists a new pending delete.
+ *
+ * @param pendingDelete The pending delete to add.
+ */
+export const addPendingDelete = async (pendingDelete: PendingDelete) => {
+  const db = await getDb()
+  await db.add(PENDING_DELETES_STORE_NAME, pendingDelete)
+}
+
+/**
+ * Removes a pending delete.
+ *
+ * @param id The identifier of the pending delete.
+ */
+export const removePendingDelete = async (id: string) => {
+  const db = await getDb()
+  await db.delete(PENDING_DELETES_STORE_NAME, id)
 }
