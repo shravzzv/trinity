@@ -214,7 +214,7 @@ export const addWeightEntries = async (weightEntries: WeightEntry[]) => {
 
   const { error } = await supabase
     .from('weight_entries')
-    .insert(weightEntryRows)
+    .upsert(weightEntryRows)
 
   if (error) {
     throw Error('Inserting weight entries failed', {
