@@ -15,6 +15,14 @@
  * This module intentionally contains no React code and should never
  * manipulate application state directly. React hooks should update the
  * local database first and then call `requestSync()`.
+ *
+ * Profile synchronization strategy:
+ *
+ * - Local profile changes always take precedence.
+ * - Profile synchronization is performed as a whole-document update.
+ *
+ * Conflict resolution between simultaneous edits from multiple devices
+ * is intentionally not implemented yet.
  */
 
 import {
@@ -23,6 +31,7 @@ import {
   FASTING_SESSION_STORAGE_KEY,
   PREFERRED_FAST_START_TIME_STORAGE_KEY,
   PROFILE_LAST_SYNCED_AT_STORAGE_KEY,
+  PROFILE_NEEDS_SYNC_STORAGE_KEY,
   STREAK_STORAGE_KEY,
   TARGET_WEIGHT_KG_STORAGE_KEY,
   XP_STORAGE_KEY,
@@ -113,6 +122,10 @@ const downloadRemoteChanges = async (): Promise<void> => {
  * Uploads the local profile to the cloud.
  */
 const uploadProfile = async () => {
+  const profileNeedsSync =
+    localStorage.getItem(PROFILE_NEEDS_SYNC_STORAGE_KEY) === 'true'
+  if (!profileNeedsSync) return
+
   const profile = await buildProfile()
 
   const syncedAt = new Date().toISOString()
@@ -121,6 +134,7 @@ const uploadProfile = async () => {
   await supabaseDb.updateProfile(profile)
 
   localStorage.setItem(PROFILE_LAST_SYNCED_AT_STORAGE_KEY, syncedAt)
+  clearProfileNeedsSync()
 }
 
 /**
@@ -183,6 +197,8 @@ const downloadProfile = async () => {
       PROFILE_LAST_SYNCED_AT_STORAGE_KEY,
       remoteProfile.last_synced_at,
     )
+
+    clearProfileNeedsSync()
   }
 }
 
@@ -304,4 +320,26 @@ const applyProfile = (profile: Tables<'profiles'>): void => {
   localStorage.setItem(XP_STORAGE_KEY, JSON.stringify(profile.xp))
   localStorage.setItem(STREAK_STORAGE_KEY, JSON.stringify(profile.streak))
   localStorage.setItem(ANCHORS_STORAGE_KEY, JSON.stringify(profile.anchors))
+}
+
+/**
+ * Marks the locally persisted profile as requiring synchronization.
+ *
+ * Unlike fasts and weight entries, Trinity's profile is stored across
+ * multiple LocalStorage keys rather than as a single object. This flag
+ * indicates that one or more profile values have changed locally and
+ * should be uploaded during the next synchronization cycle.
+ */
+export const markProfileNeedsSync = () => {
+  localStorage.setItem(PROFILE_NEEDS_SYNC_STORAGE_KEY, 'true')
+}
+
+/**
+ * Marks the locally persisted profile as synchronized.
+ *
+ * This should be called after a successful profile upload or whenever
+ * the local profile has been updated to match the remote profile.
+ */
+export const clearProfileNeedsSync = () => {
+  localStorage.setItem(PROFILE_NEEDS_SYNC_STORAGE_KEY, 'false')
 }

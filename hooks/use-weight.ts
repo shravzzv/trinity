@@ -7,7 +7,7 @@ import { isSameDay } from 'date-fns'
 import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import * as indexedDb from '@/lib/indexed-db'
-import { requestSync } from '@/lib/sync'
+import { markProfileNeedsSync, requestSync } from '@/lib/sync'
 
 /**
  * The public API exposed by {@link useWeight}.
@@ -230,6 +230,7 @@ export const useWeight = (): UseWeightResult => {
     }
 
     syncTargetWeightKg()
+    markProfileNeedsSync()
     void requestSync()
   }, [isLoading, targetWeightKg])
 

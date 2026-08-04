@@ -18,7 +18,7 @@ import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import * as indexedDb from '@/lib/indexed-db'
 import { getStreakStatus } from '@/lib/gamification'
-import { requestSync } from '@/lib/sync'
+import { markProfileNeedsSync, requestSync } from '@/lib/sync'
 
 /**
  * The public API exposed by {@link useFasting}.
@@ -464,6 +464,7 @@ export const useFasting = (): UseFastingResult => {
     }
 
     syncPlanId()
+    markProfileNeedsSync()
     void requestSync()
   }, [isLoading, planId])
 
@@ -475,6 +476,7 @@ export const useFasting = (): UseFastingResult => {
     }
 
     syncSession()
+    markProfileNeedsSync()
     void requestSync()
   }, [isLoading, session])
 
@@ -489,6 +491,7 @@ export const useFasting = (): UseFastingResult => {
     }
 
     syncPreferredFastStartTime()
+    markProfileNeedsSync()
     void requestSync()
   }, [isLoading, preferredFastStartTime])
 

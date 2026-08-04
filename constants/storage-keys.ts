@@ -25,3 +25,5 @@ export const ANCHORS_STORAGE_KEY = 'trinity-anchors'
 
 export const PROFILE_LAST_SYNCED_AT_STORAGE_KEY =
   'trinity-profile-sync-timestamp'
+
+export const PROFILE_NEEDS_SYNC_STORAGE_KEY = 'trinity-profile-needs-sync'
