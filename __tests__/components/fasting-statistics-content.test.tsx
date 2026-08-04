@@ -179,7 +179,7 @@ describe('FastingStatisticsContent', () => {
       endedAt: '2026-01-01T18:00:00.000Z',
       planId: '16:8',
       streakStatus: 'missed',
-      needsSync: false,
+      needsSync: true,
     })
   })
 
