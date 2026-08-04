@@ -19,6 +19,7 @@ jest.mock('@/lib/indexed-db', () => ({
 
 jest.mock('@/lib/sync', () => ({
   requestSync: jest.fn().mockResolvedValue(undefined),
+  markProfileNeedsSync: jest.fn().mockResolvedValue(undefined),
 }))
 
 const mockedGetFasts = jest.mocked(getFasts)

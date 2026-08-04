@@ -229,6 +229,9 @@ describe('FastDialog', () => {
           id: '1',
           startedAt: '2026-01-01T18:00:00',
           endedAt: '2026-01-01T20:00:00',
+          needsSync: false,
+          streakStatus: 'completed',
+          planId: '23:1',
         },
       ],
       {

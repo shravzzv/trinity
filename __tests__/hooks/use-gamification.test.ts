@@ -9,6 +9,7 @@ import { INITIAL_ANCHORS } from '@/constants/gamification'
 
 jest.mock('@/lib/sync', () => ({
   requestSync: jest.fn().mockResolvedValue(undefined),
+  markProfileNeedsSync: jest.fn().mockResolvedValue(undefined),
 }))
 
 describe('useGamification', () => {
