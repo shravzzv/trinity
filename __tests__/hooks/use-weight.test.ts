@@ -1,11 +1,6 @@
 import { TARGET_WEIGHT_KG_STORAGE_KEY } from '@/constants/storage-keys'
 import { useWeight } from '@/hooks/use-weight'
-import {
-  addWeightEntry,
-  deleteWeightEntry,
-  getWeightEntries,
-  updateWeightEntry,
-} from '@/lib/indexed-db'
+import * as indexedDb from '@/lib/indexed-db'
 import { act, renderHook, waitFor } from '@testing-library/react'
 
 jest.mock('uuid')
@@ -15,12 +10,18 @@ jest.mock('@/lib/indexed-db', () => ({
   addWeightEntry: jest.fn(),
   updateWeightEntry: jest.fn(),
   deleteWeightEntry: jest.fn(),
+  addPendingDelete: jest.fn().mockResolvedValue(undefined),
 }))
 
-const getWeightEntriesMock = jest.mocked(getWeightEntries)
-const addWeightEntryMock = jest.mocked(addWeightEntry)
-const updateWeightEntryMock = jest.mocked(updateWeightEntry)
-const deleteWeightEntryMock = jest.mocked(deleteWeightEntry)
+jest.mock('@/lib/sync', () => ({
+  requestSync: jest.fn().mockResolvedValue(undefined),
+  markProfileNeedsSync: jest.fn().mockResolvedValue(undefined),
+}))
+
+const getWeightEntriesMock = jest.mocked(indexedDb.getWeightEntries)
+const addWeightEntryMock = jest.mocked(indexedDb.addWeightEntry)
+const updateWeightEntryMock = jest.mocked(indexedDb.updateWeightEntry)
+const deleteWeightEntryMock = jest.mocked(indexedDb.deleteWeightEntry)
 
 describe('useWeight', () => {
   let consoleErrorSpy: jest.SpyInstance
@@ -67,6 +68,7 @@ describe('useWeight', () => {
         id: '1',
         recordedAt: '2026-01-01T10:00:00.000Z',
         weightKg: 61.2,
+        needsSync: false,
       },
     ])
 
@@ -81,6 +83,7 @@ describe('useWeight', () => {
         id: '1',
         recordedAt: '2026-01-01T10:00:00.000Z',
         weightKg: 61.2,
+        needsSync: false,
       },
     ])
   })
@@ -173,6 +176,7 @@ describe('useWeight', () => {
         id: 'test-uuid',
         recordedAt: '2026-01-01T10:00:00.000Z',
         weightKg: 61.5,
+        needsSync: true,
       },
     ])
 
@@ -180,6 +184,7 @@ describe('useWeight', () => {
       id: 'test-uuid',
       recordedAt: '2026-01-01T10:00:00.000Z',
       weightKg: 61.5,
+      needsSync: true,
     })
   })
 
@@ -243,6 +248,7 @@ describe('useWeight', () => {
       id: 'test-uuid',
       recordedAt: '2026-01-01T18:00:00.000Z',
       weightKg: 60.5,
+      needsSync: true,
     })
 
     expect(updateWeightEntryMock).toHaveBeenCalled()
@@ -277,6 +283,7 @@ describe('useWeight', () => {
         id: 'test-uuid',
         recordedAt: '2026-01-01T10:00:00.000Z',
         weightKg: 61,
+        needsSync: false,
       },
     ])
 
@@ -291,6 +298,7 @@ describe('useWeight', () => {
         id: 'test-uuid',
         recordedAt: '2026-01-01T10:00:00.000Z',
         weightKg: 59.8,
+        needsSync: false,
       })
     })
 
@@ -305,11 +313,13 @@ describe('useWeight', () => {
         id: '1',
         weightKg: 60,
         recordedAt: '2026-01-02T10:00:00.000Z',
+        needsSync: false,
       },
       {
         id: '2',
         weightKg: 61,
         recordedAt: '2026-01-03T10:00:00.000Z',
+        needsSync: false,
       },
     ])
 
@@ -324,6 +334,7 @@ describe('useWeight', () => {
         id: '2',
         weightKg: 61,
         recordedAt: '2026-01-01T10:00:00.000Z',
+        needsSync: false,
       })
     })
 
@@ -352,6 +363,7 @@ describe('useWeight', () => {
         id: '1',
         weightKg: 61,
         recordedAt: '2026-01-01T10:00:00.000Z',
+        needsSync: false,
       },
     ])
 
@@ -376,6 +388,7 @@ describe('useWeight', () => {
         id: '1',
         weightKg: 61,
         recordedAt: '2026-01-01T10:00:00.000Z',
+        needsSync: false,
       },
     ])
 
@@ -392,6 +405,7 @@ describe('useWeight', () => {
         id: '1',
         weightKg: 59,
         recordedAt: '2026-01-01T10:00:00.000Z',
+        needsSync: false,
       }),
     ).rejects.toThrow('Failed to update the weight')
 

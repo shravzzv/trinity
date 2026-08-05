@@ -9,11 +9,18 @@ import { getFasts, addFast, updateFast, deleteFast } from '@/lib/indexed-db'
 import type { Fast } from '@/types/fasting'
 
 jest.mock('uuid')
+
 jest.mock('@/lib/indexed-db', () => ({
   getFasts: jest.fn().mockResolvedValue([]),
   addFast: jest.fn().mockResolvedValue(undefined),
   updateFast: jest.fn().mockResolvedValue(undefined),
   deleteFast: jest.fn().mockResolvedValue(undefined),
+  addPendingDelete: jest.fn().mockResolvedValue(undefined),
+}))
+
+jest.mock('@/lib/sync', () => ({
+  requestSync: jest.fn().mockResolvedValue(undefined),
+  markProfileNeedsSync: jest.fn().mockResolvedValue(undefined),
 }))
 
 const mockedGetFasts = jest.mocked(getFasts)
@@ -29,6 +36,7 @@ const createFast = (): Fast => ({
   endedAt: '2026-01-01T18:00:00.000Z',
   planId: '23:1',
   streakStatus: 'completed',
+  needsSync: false,
 })
 
 describe('useFasting', () => {

@@ -7,6 +7,7 @@ import {
   XP_STORAGE_KEY,
 } from '@/constants/storage-keys'
 import { getLevelForXp, shouldCelebrateStreak } from '@/lib/gamification'
+import { markProfileNeedsSync, requestSync } from '@/lib/sync'
 import type { Achievement } from '@/types/gamification'
 import { useEffect, useState } from 'react'
 
@@ -233,6 +234,7 @@ export const useGamification = (): UseGamificationResult => {
         hydrateAnchors()
       } finally {
         setIsLoading(false)
+        void requestSync()
       }
     }
 
@@ -247,6 +249,8 @@ export const useGamification = (): UseGamificationResult => {
     }
 
     syncXp()
+    markProfileNeedsSync()
+    void requestSync()
   }, [isLoading, xp])
 
   useEffect(() => {
@@ -257,6 +261,8 @@ export const useGamification = (): UseGamificationResult => {
     }
 
     syncStreak()
+    markProfileNeedsSync()
+    void requestSync()
   }, [isLoading, streak])
 
   useEffect(() => {
@@ -267,6 +273,8 @@ export const useGamification = (): UseGamificationResult => {
     }
 
     syncAnchors()
+    markProfileNeedsSync()
+    void requestSync()
   }, [anchors, isLoading])
 
   return {

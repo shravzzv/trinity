@@ -6,12 +6,8 @@ import type { WeightEntry } from '@/types/weight'
 import { isSameDay } from 'date-fns'
 import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
-import {
-  getWeightEntries as getWeightEntriesFromIdxDB,
-  addWeightEntry as addWeightEntryToIdxDB,
-  updateWeightEntry as updateWeightEntryInIdxDB,
-  deleteWeightEntry as deleteWeightEntryFromIdxDB,
-} from '@/lib/indexed-db'
+import * as indexedDb from '@/lib/indexed-db'
+import { markProfileNeedsSync, requestSync } from '@/lib/sync'
 
 /**
  * The public API exposed by {@link useWeight}.
@@ -101,6 +97,7 @@ export const useWeight = (): UseWeightResult => {
       id: existingEntry?.id ?? uuidv4(),
       recordedAt: recordedAt.toISOString(),
       weightKg: Number(weightKg.toFixed(1)),
+      needsSync: true,
     }
 
     setWeightEntries(
@@ -113,8 +110,9 @@ export const useWeight = (): UseWeightResult => {
     )
 
     try {
-      if (existingEntry) await updateWeightEntryInIdxDB(entry)
-      else await addWeightEntryToIdxDB(entry)
+      if (existingEntry) await indexedDb.updateWeightEntry(entry)
+      else await indexedDb.addWeightEntry(entry)
+      void requestSync()
     } catch (error) {
       setWeightEntries(previousEntries)
       throw Error('Failed to save the weight', { cause: error })
@@ -130,7 +128,16 @@ export const useWeight = (): UseWeightResult => {
     })
 
     try {
-      await deleteWeightEntryFromIdxDB(id)
+      await indexedDb.deleteWeightEntry(id)
+
+      await indexedDb.addPendingDelete({
+        id: uuidv4(),
+        entityId: id,
+        deletedAt: new Date().toISOString(),
+        entity: 'weightEntry',
+      })
+
+      void requestSync()
     } catch (error) {
       setWeightEntries(previousEntries)
       throw Error('Failed to delete the weight', { cause: error })
@@ -138,20 +145,26 @@ export const useWeight = (): UseWeightResult => {
   }
 
   const updateWeightEntry = async (updatedWeightEntry: WeightEntry) => {
+    const entry = {
+      ...updatedWeightEntry,
+      needsSync: true,
+    }
+
     let previousEntries: WeightEntry[] = []
 
     setWeightEntries((prev) => {
       previousEntries = prev
 
       return sortWeightEntries(
-        prev.map((entry) =>
-          entry.id === updatedWeightEntry.id ? updatedWeightEntry : entry,
+        prev.map((weightEntry) =>
+          weightEntry.id === entry.id ? entry : weightEntry,
         ),
       )
     })
 
     try {
-      await updateWeightEntryInIdxDB(updatedWeightEntry)
+      await indexedDb.updateWeightEntry(entry)
+      void requestSync()
     } catch (error) {
       setWeightEntries(previousEntries)
       throw Error('Failed to update the weight', { cause: error })
@@ -187,8 +200,14 @@ export const useWeight = (): UseWeightResult => {
 
   const hydrateWeightEntries = async () => {
     try {
-      const entries = await getWeightEntriesFromIdxDB()
-      setWeightEntries(sortWeightEntries(entries))
+      const entries = await indexedDb.getWeightEntries()
+
+      const migratedEntries = entries.map((entry) => ({
+        ...entry,
+        needsSync: entry.needsSync ?? true,
+      }))
+
+      setWeightEntries(sortWeightEntries(migratedEntries))
     } catch (error) {
       console.error('Hydrating weight entries failed', error)
     }
@@ -201,6 +220,7 @@ export const useWeight = (): UseWeightResult => {
         await hydrateWeightEntries()
       } finally {
         setIsLoading(false)
+        void requestSync()
       }
     }
 
@@ -218,6 +238,8 @@ export const useWeight = (): UseWeightResult => {
     }
 
     syncTargetWeightKg()
+    markProfileNeedsSync()
+    void requestSync()
   }, [isLoading, targetWeightKg])
 
   return {

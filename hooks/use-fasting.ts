@@ -16,13 +16,9 @@ import type {
 } from '@/types/fasting'
 import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
-import {
-  getFasts as getFastsFromIdxDB,
-  addFast as addFastToIdxDB,
-  updateFast as updateFastInIdxDB,
-  deleteFast as deleteFastFromIdxDB,
-} from '@/lib/indexed-db'
+import * as indexedDb from '@/lib/indexed-db'
 import { getStreakStatus } from '@/lib/gamification'
+import { markProfileNeedsSync, requestSync } from '@/lib/sync'
 
 /**
  * The public API exposed by {@link useFasting}.
@@ -210,7 +206,7 @@ export const useFasting = (): UseFastingResult => {
     },
   ) => {
     if (!planId) {
-      throw new Error('Cannot record a fast without a fasting plan.')
+      throw Error('Cannot record a fast without a fasting plan.')
     }
 
     const newSessionStartedAtISO = newSessionStartedAt.toISOString()
@@ -223,6 +219,7 @@ export const useFasting = (): UseFastingResult => {
       await addFast({
         planId,
         id: uuidv4(),
+        needsSync: true,
         startedAt: session.startedAt,
         endedAt: newSessionStartedAtISO,
         streakStatus: getStreakStatus({
@@ -267,7 +264,8 @@ export const useFasting = (): UseFastingResult => {
     })
 
     try {
-      await addFastToIdxDB(fast)
+      await indexedDb.addFast(fast)
+      void requestSync()
     } catch (error) {
       setFasts(previousFasts)
       throw Error('Failed to save the fast', { cause: error })
@@ -288,7 +286,16 @@ export const useFasting = (): UseFastingResult => {
     })
 
     try {
-      await deleteFastFromIdxDB(id)
+      await indexedDb.deleteFast(id)
+
+      await indexedDb.addPendingDelete({
+        id: uuidv4(),
+        entityId: id,
+        deletedAt: new Date().toISOString(),
+        entity: 'fast',
+      })
+
+      void requestSync()
     } catch (error) {
       setFasts(previousFasts)
       throw Error('Failed to delete the fast', { cause: error })
@@ -316,7 +323,8 @@ export const useFasting = (): UseFastingResult => {
     })
 
     try {
-      await updateFastInIdxDB(updatedFast)
+      await indexedDb.updateFast(updatedFast)
+      void requestSync()
     } catch (error) {
       setFasts(previousFasts)
       throw Error('Failed to update the fast', { cause: error })
@@ -399,7 +407,7 @@ export const useFasting = (): UseFastingResult => {
           (session.status === 'fasting' || session.status === 'eating'))
 
       if (!isValidSession) {
-        throw new Error('Fasting session in local storage corrupted')
+        throw Error('Fasting session in local storage corrupted')
       }
 
       setSession(
@@ -424,12 +432,14 @@ export const useFasting = (): UseFastingResult => {
 
   const hydrateFasts = async () => {
     try {
-      const fasts = await getFastsFromIdxDB()
+      const fasts = await indexedDb.getFasts()
 
       const migratedFasts = fasts.map((fast) => ({
         ...fast,
-        streakStatus: fast.streakStatus ?? 'completed',
         planId: fast.planId ?? '23:1',
+        needsSync: fast.needsSync ?? true,
+        // using completed as the default streak status
+        streakStatus: fast.streakStatus ?? 'completed',
       }))
 
       setFasts(sortFasts(migratedFasts))
@@ -447,6 +457,7 @@ export const useFasting = (): UseFastingResult => {
         await hydrateFasts()
       } finally {
         setIsLoading(false)
+        void requestSync()
       }
     }
 
@@ -461,6 +472,8 @@ export const useFasting = (): UseFastingResult => {
     }
 
     syncPlanId()
+    markProfileNeedsSync()
+    void requestSync()
   }, [isLoading, planId])
 
   useEffect(() => {
@@ -471,6 +484,8 @@ export const useFasting = (): UseFastingResult => {
     }
 
     syncSession()
+    markProfileNeedsSync()
+    void requestSync()
   }, [isLoading, session])
 
   useEffect(() => {
@@ -484,6 +499,8 @@ export const useFasting = (): UseFastingResult => {
     }
 
     syncPreferredFastStartTime()
+    markProfileNeedsSync()
+    void requestSync()
   }, [isLoading, preferredFastStartTime])
 
   return {

@@ -1,0 +1,6 @@
+{
+  "[sql]": {
+    "editor.defaultFormatter": "inferrinizzard.prettier-sql-vscode"
+  },
+  "Prettier-SQL.SQLFlavourOverride": "postgresql"
+}

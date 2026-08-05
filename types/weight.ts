@@ -4,4 +4,5 @@ export interface WeightEntry {
   id: string
   weightKg: number
   recordedAt: string
+  needsSync: boolean
 }

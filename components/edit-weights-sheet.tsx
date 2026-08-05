@@ -38,14 +38,15 @@ export default function EditWeightsSheet({
     recordedAt: Date,
     entry: WeightEntry,
   ) => {
-    const newWeight: WeightEntry = {
+    const updatedWeight: WeightEntry = {
       ...entry,
       weightKg,
       recordedAt: recordedAt.toISOString(),
+      needsSync: true,
     }
 
     try {
-      await updateWeight(newWeight)
+      await updateWeight(updatedWeight)
       toast.success('Weight updated')
     } catch (error) {
       if (error instanceof Error) toast.error(error.message)

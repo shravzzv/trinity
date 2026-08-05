@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "inferrinizzard.prettier-sql-vscode",
+    "bradlc.vscode-tailwindcss",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "unifiedjs.vscode-mdx",
+    "redhat.vscode-yaml",
+    "mhutchie.git-graph"
+  ]
+}
