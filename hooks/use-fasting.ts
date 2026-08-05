@@ -336,7 +336,7 @@ export const useFasting = (): UseFastingResult => {
       const saved = localStorage.getItem(FASTING_PLAN_ID_STORAGE_KEY)
       if (!saved) return
 
-      const planId = JSON.parse(saved) as FastingPlanId | null
+      const planId = saved as FastingPlanId | null
 
       const isValidPlanId =
         planId === null || fastingPlans.some((plan) => plan.id === planId)
@@ -468,7 +468,8 @@ export const useFasting = (): UseFastingResult => {
     if (isLoading) return
 
     const syncPlanId = () => {
-      localStorage.setItem(FASTING_PLAN_ID_STORAGE_KEY, JSON.stringify(planId))
+      if (!planId) return
+      localStorage.setItem(FASTING_PLAN_ID_STORAGE_KEY, planId)
     }
 
     syncPlanId()

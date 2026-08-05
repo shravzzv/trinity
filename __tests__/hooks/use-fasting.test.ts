@@ -68,7 +68,7 @@ describe('useFasting', () => {
   })
 
   it('hydrates the persisted plan id', async () => {
-    localStorage.setItem(FASTING_PLAN_ID_STORAGE_KEY, JSON.stringify('20:4'))
+    localStorage.setItem(FASTING_PLAN_ID_STORAGE_KEY, '20:4')
 
     const { result } = renderUseFasting()
 
@@ -160,7 +160,7 @@ describe('useFasting', () => {
   it('removes corrupted plan id storage', async () => {
     const removeItemSpy = jest.spyOn(Storage.prototype, 'removeItem')
 
-    localStorage.setItem(FASTING_PLAN_ID_STORAGE_KEY, JSON.stringify('banana'))
+    localStorage.setItem(FASTING_PLAN_ID_STORAGE_KEY, 'banana')
 
     renderUseFasting()
 
@@ -236,10 +236,7 @@ describe('useFasting', () => {
       result.current.updatePlanId('20:4')
     })
 
-    expect(setItemSpy).toHaveBeenCalledWith(
-      FASTING_PLAN_ID_STORAGE_KEY,
-      JSON.stringify('20:4'),
-    )
+    expect(setItemSpy).toHaveBeenCalledWith(FASTING_PLAN_ID_STORAGE_KEY, '20:4')
   })
 
   it('updates preferred fast start time', async () => {
