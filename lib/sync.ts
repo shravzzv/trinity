@@ -375,10 +375,11 @@ const buildProfile = async (): Promise<TablesUpdate<'profiles'>> => {
  */
 const applyProfile = (profile: Tables<'profiles'>): void => {
   // fasting
-  localStorage.setItem(
-    FASTING_PLAN_ID_STORAGE_KEY,
-    JSON.stringify(profile.fasting_plan_id),
-  )
+  if (profile.fasting_plan_id === null) {
+    localStorage.removeItem(FASTING_PLAN_ID_STORAGE_KEY)
+  } else {
+    localStorage.setItem(FASTING_PLAN_ID_STORAGE_KEY, profile.fasting_plan_id)
+  }
   localStorage.setItem(
     FASTING_SESSION_STORAGE_KEY,
     JSON.stringify(profile.fasting_session),

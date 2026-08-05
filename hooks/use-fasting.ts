@@ -468,8 +468,8 @@ export const useFasting = (): UseFastingResult => {
     if (isLoading) return
 
     const syncPlanId = () => {
-      if (!planId) return
-      localStorage.setItem(FASTING_PLAN_ID_STORAGE_KEY, planId)
+      if (planId === null) localStorage.removeItem(FASTING_PLAN_ID_STORAGE_KEY)
+      else localStorage.setItem(FASTING_PLAN_ID_STORAGE_KEY, planId)
     }
 
     syncPlanId()
