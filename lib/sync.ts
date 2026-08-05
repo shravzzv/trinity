@@ -112,6 +112,8 @@ const downloadRemoteChanges = async (): Promise<void> => {
     downloadProfile(),
     downloadFasts(),
     downloadWeightEntries(),
+    downloadFastsDeletions(),
+    downloadWeightEntriesDeletions(),
   ])
 }
 
@@ -279,6 +281,38 @@ const downloadWeightEntries = async (): Promise<void> => {
 
   await Promise.all(
     entriesNeedingDownload.map((entry) => indexedDb.addWeightEntry(entry)),
+  )
+}
+
+/**
+ * Downloads deleted fast tombstones.
+ *
+ * Every downloaded tombstone represents a fast that no longer exists.
+ * The corresponding local fast is removed if present.
+ */
+const downloadFastsDeletions = async (): Promise<void> => {
+  const remoteDeletions = await supabaseDb.getFastsDeletions()
+  if (remoteDeletions.length === 0) return
+
+  await Promise.all(
+    remoteDeletions.map((deletion) => indexedDb.deleteFast(deletion.entityId)),
+  )
+}
+
+/**
+ * Downloads deleted weight entry tombstones.
+ *
+ * Every downloaded tombstone represents a weight entry that no longer
+ * exists. The corresponding local weight entry is removed if present.
+ */
+const downloadWeightEntriesDeletions = async (): Promise<void> => {
+  const remoteDeletions = await supabaseDb.getWeightEntriesDeletions()
+  if (remoteDeletions.length === 0) return
+
+  await Promise.all(
+    remoteDeletions.map((deletion) =>
+      indexedDb.deleteWeightEntry(deletion.entityId),
+    ),
   )
 }
 
