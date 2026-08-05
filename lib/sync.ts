@@ -15,14 +15,6 @@
  * This module intentionally contains no React code and should never
  * manipulate application state directly. React hooks should update the
  * local database first and then call `requestSync()`.
- *
- * Profile synchronization strategy:
- *
- * - Local profile changes always take precedence.
- * - Profile synchronization is performed as a whole-document update.
- *
- * Conflict resolution between simultaneous edits from multiple devices
- * is intentionally not implemented yet.
  */
 
 import {
@@ -104,7 +96,12 @@ const canSync = async (): Promise<boolean> => {
  * Uploads every locally modified record to Supabase.
  */
 const uploadPendingChanges = async (): Promise<void> => {
-  await Promise.all([uploadProfile(), uploadFasts(), uploadWeightEntries()])
+  await Promise.all([
+    uploadProfile(),
+    uploadFasts(),
+    uploadWeightEntries(),
+    uploadPendingDeletes(),
+  ])
 }
 
 /**
@@ -186,6 +183,42 @@ const uploadWeightEntries = async (): Promise<void> => {
   await Promise.all(
     weightEntriesNeedingSync.map((entry) => indexedDb.updateWeightEntry(entry)),
   )
+}
+
+/**
+ * Uploads all pending deletions.
+ *
+ * Each pending deletion is synchronized in three steps:
+ *
+ * 1. Delete the corresponding entity from Supabase.
+ * 2. Create a deletion tombstone in Supabase.
+ * 3. Remove the pending deletion from IndexedDB.
+ *
+ * If any step fails for a particular deletion, that deletion remains in the
+ * local pending delete queue so it can be retried during the next
+ * synchronization.
+ */
+const uploadPendingDeletes = async (): Promise<void> => {
+  const pendingDeletes = await indexedDb.getPendingDeletes()
+  if (pendingDeletes.length === 0) return
+
+  for (const pendingDelete of pendingDeletes) {
+    switch (pendingDelete.entity) {
+      case 'fast': {
+        await supabaseDb.deleteFast(pendingDelete.entityId)
+        await supabaseDb.addFastDeletion(pendingDelete)
+        break
+      }
+
+      case 'weightEntry': {
+        await supabaseDb.deleteWeightEntry(pendingDelete.entityId)
+        await supabaseDb.addWeightEntryDeletion(pendingDelete)
+        break
+      }
+    }
+
+    await indexedDb.removePendingDelete(pendingDelete.id)
+  }
 }
 
 /**
