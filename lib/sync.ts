@@ -1,9 +1,9 @@
 /**
  * Synchronization engine.
  *
- * Coordinates synchronization between Trinity's local storage and Supabase.
+ * Coordinates synchronization between Trinity's browser storage and Supabase.
  * This is the only module that communicates with both persistence layers:
- *   IndexedDB  ⇄  sync.ts  ⇄  Supabase
+ *   LocalStorage/IndexedDB  ⇄  sync.ts  ⇄  Supabase
  *
  * Responsibilities:
  * - Prevent concurrent synchronization attempts.
