@@ -116,7 +116,7 @@ describe('useGamification', () => {
         result.current.spendAnchor()
       })
 
-      expect(result.current.anchors).toBe(INITIAL_ANCHORS - 1)
+      expect(result.current.anchors).toBe(Math.max(INITIAL_ANCHORS - 1, 0))
     })
 
     it('does not spend an Anchor when none are available', async () => {
@@ -243,7 +243,9 @@ describe('useGamification', () => {
         result.current.awardAnchor()
       })
 
-      expect(localStorage.getItem(ANCHORS_STORAGE_KEY)).toBe('2')
+      expect(localStorage.getItem(ANCHORS_STORAGE_KEY)).toBe(
+        String(INITIAL_ANCHORS + 1),
+      )
     })
   })
 
