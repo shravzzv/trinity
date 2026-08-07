@@ -33,7 +33,8 @@ const DEFAULT_PROFILE: Profile = {
 /**
  * Returns the locally persisted profile.
  *
- * If no profile has been persisted yet, a default profile is returned.
+ * If no profile has been persisted yet, or the stored profile is
+ * corrupted, a default profile is returned.
  *
  * @returns The current local profile.
  */
@@ -41,7 +42,15 @@ export const getProfile = (): Profile => {
   const saved = localStorage.getItem(PROFILE_STORAGE_KEY)
 
   if (!saved) return DEFAULT_PROFILE
-  return JSON.parse(saved) as Profile
+
+  try {
+    return JSON.parse(saved) as Profile
+  } catch (error) {
+    console.error('Hydrating profile from local storage failed', error)
+    localStorage.removeItem(PROFILE_STORAGE_KEY)
+
+    return DEFAULT_PROFILE
+  }
 }
 
 /**
