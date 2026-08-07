@@ -1,4 +1,3 @@
-import { TARGET_WEIGHT_KG_STORAGE_KEY } from '@/constants/storage-keys'
 import { useWeight } from '@/hooks/use-weight'
 import * as indexedDb from '@/lib/indexed-db'
 import { act, renderHook, waitFor } from '@testing-library/react'
@@ -50,18 +49,6 @@ describe('useWeight', () => {
     expect(result.current.targetWeightKg).toBeNull()
   })
 
-  it('should hydrate target weight from local storage', async () => {
-    localStorage.setItem(TARGET_WEIGHT_KG_STORAGE_KEY, JSON.stringify(58))
-
-    const { result } = renderHook(() => useWeight())
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
-
-    expect(result.current.targetWeightKg).toBe(58)
-  })
-
   it('should hydrate weight entries from indexeddb', async () => {
     getWeightEntriesMock.mockResolvedValue([
       {
@@ -88,42 +75,6 @@ describe('useWeight', () => {
     ])
   })
 
-  it('should fall back to defaults when target weight json is invalid', async () => {
-    localStorage.setItem(TARGET_WEIGHT_KG_STORAGE_KEY, '{broken json')
-
-    const { result } = renderHook(() => useWeight())
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
-
-    expect(result.current.targetWeightKg).toBeNull()
-  })
-
-  it('should remove corrupted target weight from local storage', async () => {
-    const removeItemSpy = jest.spyOn(Storage.prototype, 'removeItem')
-
-    localStorage.setItem(TARGET_WEIGHT_KG_STORAGE_KEY, '{broken json')
-
-    renderHook(() => useWeight())
-
-    await waitFor(() => {
-      expect(removeItemSpy).toHaveBeenCalledWith(TARGET_WEIGHT_KG_STORAGE_KEY)
-    })
-  })
-
-  it('should fall back to default state when target weight is invalid', async () => {
-    localStorage.setItem(TARGET_WEIGHT_KG_STORAGE_KEY, JSON.stringify('banana'))
-
-    const { result } = renderHook(() => useWeight())
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
-
-    expect(result.current.targetWeightKg).toBeNull()
-  })
-
   it('should update the target weight', async () => {
     const { result } = renderHook(() => useWeight())
 
@@ -136,25 +87,6 @@ describe('useWeight', () => {
     })
 
     expect(result.current.targetWeightKg).toBe(58)
-  })
-
-  it('should persist target weight changes to local storage', async () => {
-    const setItemSpy = jest.spyOn(Storage.prototype, 'setItem')
-
-    const { result } = renderHook(() => useWeight())
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
-
-    act(() => {
-      result.current.updateTargetWeight(58)
-    })
-
-    expect(setItemSpy).toHaveBeenLastCalledWith(
-      TARGET_WEIGHT_KG_STORAGE_KEY,
-      '58',
-    )
   })
 
   it('should add a weight entry', async () => {

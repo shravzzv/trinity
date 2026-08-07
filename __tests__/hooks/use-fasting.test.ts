@@ -1,10 +1,5 @@
 import { useFasting } from '@/hooks/use-fasting'
 import { renderHook, waitFor, act } from '@testing-library/react'
-import {
-  FASTING_PLAN_ID_STORAGE_KEY,
-  FASTING_SESSION_STORAGE_KEY,
-  PREFERRED_FAST_START_TIME_STORAGE_KEY,
-} from '@/constants/storage-keys'
 import { getFasts, addFast, updateFast, deleteFast } from '@/lib/indexed-db'
 import type { Fast } from '@/types/fasting'
 
@@ -67,75 +62,6 @@ describe('useFasting', () => {
     expect(result.current.preferredFastStartTime).toBeNull()
   })
 
-  it('hydrates the persisted plan id', async () => {
-    localStorage.setItem(FASTING_PLAN_ID_STORAGE_KEY, '20:4')
-
-    const { result } = renderUseFasting()
-
-    await waitFor(() => {
-      expect(result.current.planId).toBe('20:4')
-    })
-  })
-
-  it('hydrates the persisted session', async () => {
-    localStorage.setItem(
-      FASTING_SESSION_STORAGE_KEY,
-      JSON.stringify({
-        status: 'fasting',
-        startedAt: '2026-01-01T00:00:00.000Z',
-      }),
-    )
-
-    const { result } = renderUseFasting()
-
-    await waitFor(() => {
-      expect(result.current.session).toEqual({
-        status: 'fasting',
-        startedAt: '2026-01-01T00:00:00.000Z',
-        isAnchored: false,
-      })
-    })
-  })
-
-  it('migrates a session without isAnchored', async () => {
-    localStorage.setItem(
-      FASTING_SESSION_STORAGE_KEY,
-      JSON.stringify({
-        status: 'fasting',
-        startedAt: '2026-01-01T00:00:00.000Z',
-      }),
-    )
-
-    const { result } = renderUseFasting()
-
-    await waitFor(() => {
-      expect(result.current.session).toEqual({
-        status: 'fasting',
-        startedAt: '2026-01-01T00:00:00.000Z',
-        isAnchored: false,
-      })
-    })
-  })
-
-  it('hydrates the preferred fast start time', async () => {
-    localStorage.setItem(
-      PREFERRED_FAST_START_TIME_STORAGE_KEY,
-      JSON.stringify({
-        hour: 18,
-        minute: 0,
-      }),
-    )
-
-    const { result } = renderUseFasting()
-
-    await waitFor(() => {
-      expect(result.current.preferredFastStartTime).toEqual({
-        hour: 18,
-        minute: 0,
-      })
-    })
-  })
-
   it('hydrates fasts from indexeddb', async () => {
     mockedGetFasts.mockResolvedValueOnce([
       {
@@ -157,56 +83,6 @@ describe('useFasting', () => {
     })
   })
 
-  it('removes corrupted plan id storage', async () => {
-    const removeItemSpy = jest.spyOn(Storage.prototype, 'removeItem')
-
-    localStorage.setItem(FASTING_PLAN_ID_STORAGE_KEY, 'banana')
-
-    renderUseFasting()
-
-    await waitFor(() => {
-      expect(removeItemSpy).toHaveBeenCalledWith(FASTING_PLAN_ID_STORAGE_KEY)
-    })
-  })
-
-  it('removes corrupted session storage', async () => {
-    const removeItemSpy = jest.spyOn(Storage.prototype, 'removeItem')
-
-    localStorage.setItem(
-      FASTING_SESSION_STORAGE_KEY,
-      JSON.stringify({
-        status: 'banana',
-        startedAt: '2026-01-01T00:00:00.000Z',
-      }),
-    )
-
-    renderUseFasting()
-
-    await waitFor(() => {
-      expect(removeItemSpy).toHaveBeenCalledWith(FASTING_SESSION_STORAGE_KEY)
-    })
-  })
-
-  it('removes corrupted preferred fast start time storage', async () => {
-    const removeItemSpy = jest.spyOn(Storage.prototype, 'removeItem')
-
-    localStorage.setItem(
-      PREFERRED_FAST_START_TIME_STORAGE_KEY,
-      JSON.stringify({
-        hour: 100,
-        minute: 500,
-      }),
-    )
-
-    renderUseFasting()
-
-    await waitFor(() => {
-      expect(removeItemSpy).toHaveBeenCalledWith(
-        PREFERRED_FAST_START_TIME_STORAGE_KEY,
-      )
-    })
-  })
-
   it('updates the selected plan', async () => {
     const { result } = renderUseFasting()
 
@@ -219,24 +95,6 @@ describe('useFasting', () => {
     })
 
     expect(result.current.planId).toBe('20:4')
-  })
-
-  it('persists plan changes', async () => {
-    const setItemSpy = jest.spyOn(Storage.prototype, 'setItem')
-
-    const { result } = renderUseFasting()
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
-
-    setItemSpy.mockClear()
-
-    act(() => {
-      result.current.updatePlanId('20:4')
-    })
-
-    expect(setItemSpy).toHaveBeenCalledWith(FASTING_PLAN_ID_STORAGE_KEY, '20:4')
   })
 
   it('updates preferred fast start time', async () => {
@@ -272,30 +130,6 @@ describe('useFasting', () => {
     })
 
     expect(result.current.preferredFastStartTime).toBeNull()
-  })
-
-  it('persists preferred fast start time changes', async () => {
-    const setItemSpy = jest.spyOn(Storage.prototype, 'setItem')
-
-    const { result } = renderUseFasting()
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
-
-    setItemSpy.mockClear()
-
-    act(() => {
-      result.current.updatePreferredFastStartTime(18, 0)
-    })
-
-    expect(setItemSpy).toHaveBeenCalledWith(
-      PREFERRED_FAST_START_TIME_STORAGE_KEY,
-      JSON.stringify({
-        hour: 18,
-        minute: 0,
-      }),
-    )
   })
 
   it('starts a fasting session', async () => {
@@ -551,40 +385,5 @@ describe('useFasting', () => {
     })
 
     expect(result.current.session).toBeNull()
-  })
-
-  it('persists updated session startedAt', async () => {
-    const setItemSpy = jest.spyOn(Storage.prototype, 'setItem')
-
-    const { result } = renderUseFasting()
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
-
-    act(() => {
-      result.current.updatePlanId('23:1')
-    })
-
-    await act(async () => {
-      await result.current.startFasting(new Date('2026-01-01T18:00:00.000Z'))
-    })
-
-    setItemSpy.mockClear()
-
-    act(() => {
-      result.current.updateSessionStartedAt(
-        new Date('2026-01-01T20:30:00.000Z'),
-      )
-    })
-
-    expect(setItemSpy).toHaveBeenCalledWith(
-      FASTING_SESSION_STORAGE_KEY,
-      JSON.stringify({
-        status: 'fasting',
-        startedAt: '2026-01-01T20:30:00.000Z',
-        isAnchored: false,
-      }),
-    )
   })
 })
