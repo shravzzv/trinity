@@ -18,6 +18,18 @@ import { INITIAL_ANCHORS } from '@/constants/gamification'
 import { PROFILE_STORAGE_KEY } from '@/constants/storage-keys'
 import type { Profile } from '@/types/profile'
 
+const DEFAULT_PROFILE: Profile = {
+  fastingPlanId: null,
+  fastingSession: null,
+  preferredFastStartTime: null,
+  targetWeightKg: null,
+  xp: 0,
+  streak: 0,
+  anchors: INITIAL_ANCHORS,
+  needsSync: false,
+  lastSyncedAt: null,
+}
+
 /**
  * Returns the locally persisted profile.
  *
@@ -28,19 +40,7 @@ import type { Profile } from '@/types/profile'
 export const getProfile = (): Profile => {
   const saved = localStorage.getItem(PROFILE_STORAGE_KEY)
 
-  const defaultProfile: Profile = {
-    fastingPlanId: null,
-    fastingSession: null,
-    preferredFastStartTime: null,
-    targetWeightKg: null,
-    xp: 0,
-    streak: 0,
-    anchors: INITIAL_ANCHORS,
-    needsSync: false,
-    lastSyncedAt: null,
-  }
-
-  if (!saved) return defaultProfile
+  if (!saved) return DEFAULT_PROFILE
   return JSON.parse(saved) as Profile
 }
 
