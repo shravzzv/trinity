@@ -1,13 +1,13 @@
 'use client'
 
-import { TARGET_WEIGHT_KG_STORAGE_KEY } from '@/constants/storage-keys'
 import { sortWeightEntries } from '@/lib/weight'
 import type { WeightEntry } from '@/types/weight'
 import { isSameDay } from 'date-fns'
 import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import * as indexedDb from '@/lib/indexed-db'
-import { markProfileNeedsSync, requestSync } from '@/lib/sync'
+import { requestSync } from '@/lib/sync'
+import { getProfile, updateProfile } from '@/lib/profile'
 
 /**
  * The public API exposed by {@link useWeight}.
@@ -177,25 +177,10 @@ export const useWeight = (): UseWeightResult => {
 
   const clearTargetWeight = () => setTargetWeightKg(null)
 
-  const hydrateTargetWeightKg = () => {
-    try {
-      const saved = localStorage.getItem(TARGET_WEIGHT_KG_STORAGE_KEY)
-      if (!saved) return
+  const hydrateProfile = () => {
+    const profile = getProfile()
 
-      const targetWeightKg = JSON.parse(saved) as number | null
-
-      const isValidTargetWeightKg =
-        targetWeightKg === null || typeof targetWeightKg === 'number'
-
-      if (!isValidTargetWeightKg) {
-        throw Error('Target weight in local storage corrupted')
-      }
-
-      setTargetWeightKg(targetWeightKg)
-    } catch (error) {
-      console.error('Hydrating target weight from local storage failed', error)
-      localStorage.removeItem(TARGET_WEIGHT_KG_STORAGE_KEY)
-    }
+    setTargetWeightKg(profile.targetWeightKg)
   }
 
   const hydrateWeightEntries = async () => {
@@ -216,7 +201,7 @@ export const useWeight = (): UseWeightResult => {
   useEffect(() => {
     const hydrate = async () => {
       try {
-        hydrateTargetWeightKg()
+        hydrateProfile()
         await hydrateWeightEntries()
       } finally {
         setIsLoading(false)
@@ -230,15 +215,12 @@ export const useWeight = (): UseWeightResult => {
   useEffect(() => {
     if (isLoading) return
 
-    const syncTargetWeightKg = () => {
-      localStorage.setItem(
-        TARGET_WEIGHT_KG_STORAGE_KEY,
-        JSON.stringify(targetWeightKg),
-      )
-    }
+    updateProfile((profile) => ({
+      ...profile,
+      targetWeightKg,
+      needsSync: true,
+    }))
 
-    syncTargetWeightKg()
-    markProfileNeedsSync()
     void requestSync()
   }, [isLoading, targetWeightKg])
 

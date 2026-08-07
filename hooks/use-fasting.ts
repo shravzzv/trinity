@@ -1,11 +1,5 @@
 'use client'
 
-import { fastingPlans } from '@/constants/fasting-plans'
-import {
-  FASTING_PLAN_ID_STORAGE_KEY,
-  FASTING_SESSION_STORAGE_KEY,
-  PREFERRED_FAST_START_TIME_STORAGE_KEY,
-} from '@/constants/storage-keys'
 import { sortFasts } from '@/lib/fasting'
 import type {
   Fast,
@@ -18,7 +12,8 @@ import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import * as indexedDb from '@/lib/indexed-db'
 import { getStreakStatus } from '@/lib/gamification'
-import { markProfileNeedsSync, requestSync } from '@/lib/sync'
+import { requestSync } from '@/lib/sync'
+import { getProfile, updateProfile } from '@/lib/profile'
 
 /**
  * The public API exposed by {@link useFasting}.
@@ -331,103 +326,12 @@ export const useFasting = (): UseFastingResult => {
     }
   }
 
-  const hydratePlanId = () => {
-    try {
-      const saved = localStorage.getItem(FASTING_PLAN_ID_STORAGE_KEY)
-      if (!saved) return
+  const hydrateProfile = () => {
+    const profile = getProfile()
 
-      const planId = saved as FastingPlanId | null
-
-      const isValidPlanId =
-        planId === null || fastingPlans.some((plan) => plan.id === planId)
-
-      if (!isValidPlanId) {
-        throw Error('Fasting plan id in local storage corrupted')
-      }
-
-      setPlanId(planId)
-    } catch (error) {
-      console.error(
-        'Hydrating fasting plan id from local storage failed',
-        error,
-      )
-      localStorage.removeItem(FASTING_PLAN_ID_STORAGE_KEY)
-    }
-  }
-
-  const hydratePreferredFastStartTime = () => {
-    try {
-      const saved = localStorage.getItem(PREFERRED_FAST_START_TIME_STORAGE_KEY)
-      if (!saved) return
-
-      const preferredFastStartTime = JSON.parse(saved) as PreferredFastStartTime
-
-      const isObject =
-        typeof preferredFastStartTime === 'object' &&
-        preferredFastStartTime !== null
-
-      const hasValidHour =
-        Number.isInteger(preferredFastStartTime?.hour) &&
-        preferredFastStartTime.hour >= 0 &&
-        preferredFastStartTime.hour <= 23
-
-      const hasValidMinute =
-        Number.isInteger(preferredFastStartTime?.minute) &&
-        preferredFastStartTime.minute >= 0 &&
-        preferredFastStartTime.minute <= 59
-
-      const isValidPreferredFastStartTime =
-        preferredFastStartTime === null ||
-        (isObject && hasValidHour && hasValidMinute)
-
-      if (!isValidPreferredFastStartTime) {
-        throw Error('Preferred fast start time in local storage corrupted')
-      }
-
-      setPreferredFastStartTime(preferredFastStartTime)
-    } catch (error) {
-      console.error(
-        'Hydrating preferred fast start time from local storage failed',
-        error,
-      )
-      localStorage.removeItem(PREFERRED_FAST_START_TIME_STORAGE_KEY)
-    }
-  }
-
-  const hydrateSession = () => {
-    try {
-      const saved = localStorage.getItem(FASTING_SESSION_STORAGE_KEY)
-      if (!saved) return
-
-      const session = JSON.parse(saved) as FastingSession
-
-      const isValidSession =
-        session === null ||
-        (typeof session.startedAt === 'string' &&
-          (session.status === 'fasting' || session.status === 'eating'))
-
-      if (!isValidSession) {
-        throw Error('Fasting session in local storage corrupted')
-      }
-
-      setSession(
-        session === null
-          ? null
-          : {
-              ...session,
-              isAnchored:
-                typeof session.isAnchored === 'boolean'
-                  ? session.isAnchored
-                  : false,
-            },
-      )
-    } catch (error) {
-      console.error(
-        'Hydrating fasting session from local storage failed',
-        error,
-      )
-      localStorage.removeItem(FASTING_SESSION_STORAGE_KEY)
-    }
+    setPlanId(profile.fastingPlanId)
+    setSession(profile.fastingSession)
+    setPreferredFastStartTime(profile.preferredFastStartTime)
   }
 
   const hydrateFasts = async () => {
@@ -451,9 +355,7 @@ export const useFasting = (): UseFastingResult => {
   useEffect(() => {
     const hydrate = async () => {
       try {
-        hydratePlanId()
-        hydrateSession()
-        hydratePreferredFastStartTime()
+        hydrateProfile()
         await hydrateFasts()
       } finally {
         setIsLoading(false)
@@ -467,40 +369,36 @@ export const useFasting = (): UseFastingResult => {
   useEffect(() => {
     if (isLoading) return
 
-    const syncPlanId = () => {
-      if (planId === null) localStorage.removeItem(FASTING_PLAN_ID_STORAGE_KEY)
-      else localStorage.setItem(FASTING_PLAN_ID_STORAGE_KEY, planId)
-    }
+    updateProfile((profile) => ({
+      ...profile,
+      fastingPlanId: planId,
+      needsSync: true,
+    }))
 
-    syncPlanId()
-    markProfileNeedsSync()
     void requestSync()
   }, [isLoading, planId])
 
   useEffect(() => {
     if (isLoading) return
 
-    const syncSession = () => {
-      localStorage.setItem(FASTING_SESSION_STORAGE_KEY, JSON.stringify(session))
-    }
+    updateProfile((profile) => ({
+      ...profile,
+      fastingSession: session,
+      needsSync: true,
+    }))
 
-    syncSession()
-    markProfileNeedsSync()
     void requestSync()
   }, [isLoading, session])
 
   useEffect(() => {
     if (isLoading) return
 
-    const syncPreferredFastStartTime = () => {
-      localStorage.setItem(
-        PREFERRED_FAST_START_TIME_STORAGE_KEY,
-        JSON.stringify(preferredFastStartTime),
-      )
-    }
+    updateProfile((profile) => ({
+      ...profile,
+      preferredFastStartTime,
+      needsSync: true,
+    }))
 
-    syncPreferredFastStartTime()
-    markProfileNeedsSync()
     void requestSync()
   }, [isLoading, preferredFastStartTime])
 
