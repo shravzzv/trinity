@@ -21,3 +21,11 @@ export interface PendingDelete {
    */
   deletedAt: string
 }
+
+/**
+ * A callback invoked after synchronization completes.
+ *
+ * Subscribers use this notification to refresh any application state
+ * that depends on locally persisted data.
+ */
+export type SyncListener = () => void

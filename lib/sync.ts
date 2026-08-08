@@ -23,6 +23,7 @@ import { createClient } from '@/supabase/client'
 import type { Fast } from '@/types/fasting'
 import type { WeightEntry } from '@/types/weight'
 import { getProfile, saveProfile } from './profile'
+import type { SyncListener } from '@/types/sync'
 
 /**
  * Represents the currently running synchronization, if any.
@@ -32,6 +33,38 @@ import { getProfile, saveProfile } from './profile'
  * another synchronization.
  */
 let syncPromise: Promise<void> | null = null
+
+/**
+ * Subscribers waiting to be notified when synchronization completes.
+ */
+const syncListeners = new Set<SyncListener>()
+
+/**
+ * Subscribes to synchronization completion events.
+ *
+ * The listener is called after a synchronization cycle completes,
+ * allowing consumers to refresh state derived from local persistence.
+ *
+ * @param listener The callback to invoke after synchronization completes.
+ * @returns A function that removes the listener from the subscription.
+ */
+export const subscribeToSync = (listener: SyncListener): (() => void) => {
+  syncListeners.add(listener)
+
+  return () => {
+    syncListeners.delete(listener)
+  }
+}
+
+/**
+ * Notifies all subscribers that synchronization has completed.
+ *
+ * Listeners use this notification to re-read any locally persisted data
+ * that may have been changed by the synchronization engine.
+ */
+const notifySyncListeners = (): void => {
+  syncListeners.forEach((listener) => listener())
+}
 
 /**
  * Requests a synchronization.
@@ -61,17 +94,19 @@ export const requestSync = (): Promise<void> => {
 /**
  * Performs a complete synchronization cycle.
  *
- * Synchronization always proceeds in two phases:
- *
- * 1. Upload pending local changes.
- * 2. Download remote changes.
+ * Synchronization uploads pending local changes before downloading
+ * remote changes. Once both phases complete, subscribers are notified
+ * so application state can reflect any changes made to local
+ * persistence.
  */
 const sync = async (): Promise<void> => {
   if (!(await canSync())) return
 
-  // This shouldn't be Promise.all.
+  // These phases are intentionally sequential.
   await uploadPendingChanges()
   await downloadRemoteChanges()
+
+  notifySyncListeners()
 }
 
 /**

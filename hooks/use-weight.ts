@@ -6,7 +6,7 @@ import { isSameDay } from 'date-fns'
 import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import * as indexedDb from '@/lib/indexed-db'
-import { requestSync } from '@/lib/sync'
+import { requestSync, subscribeToSync } from '@/lib/sync'
 import { getProfile, updateProfile } from '@/lib/profile'
 
 /**
@@ -231,6 +231,17 @@ export const useWeight = (): UseWeightResult => {
     }
 
     hydrate()
+  }, [])
+
+  useEffect(() => {
+    const listener = () => {
+      hydrateProfile()
+      void hydrateWeightEntries()
+    }
+
+    const unsubscribe = subscribeToSync(listener)
+
+    return unsubscribe
   }, [])
 
   return {

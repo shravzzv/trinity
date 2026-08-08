@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import * as indexedDb from '@/lib/indexed-db'
 import { getStreakStatus } from '@/lib/gamification'
-import { requestSync } from '@/lib/sync'
+import { requestSync, subscribeToSync } from '@/lib/sync'
 import { getProfile, updateProfile } from '@/lib/profile'
 
 /**
@@ -429,6 +429,17 @@ export const useFasting = (): UseFastingResult => {
     }
 
     void hydrate()
+  }, [])
+
+  useEffect(() => {
+    const listener = () => {
+      hydrateProfile()
+      void hydrateFasts()
+    }
+
+    const unsubscribe = subscribeToSync(listener)
+
+    return unsubscribe
   }, [])
 
   return {

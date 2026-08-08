@@ -3,7 +3,7 @@
 import { INITIAL_ANCHORS } from '@/constants/gamification'
 import { getLevelForXp, shouldCelebrateStreak } from '@/lib/gamification'
 import { getProfile, updateProfile } from '@/lib/profile'
-import { requestSync } from '@/lib/sync'
+import { requestSync, subscribeToSync } from '@/lib/sync'
 import type { Achievement } from '@/types/gamification'
 import { useEffect, useState } from 'react'
 
@@ -216,6 +216,16 @@ export const useGamification = (): UseGamificationResult => {
     }
 
     hydrate()
+  }, [])
+
+  useEffect(() => {
+    const listener = () => {
+      hydrateProfile()
+    }
+
+    const unsubscribe = subscribeToSync(listener)
+
+    return unsubscribe
   }, [])
 
   return {
