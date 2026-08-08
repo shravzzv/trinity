@@ -412,15 +412,23 @@ export const useFasting = (): UseFastingResult => {
   useEffect(() => {
     const hydrate = async () => {
       try {
+        // Restore local state immediately so the UI can initialize
+        // without waiting for cloud synchronization.
         hydrateProfile()
+
         await hydrateFasts()
+
+        // Synchronization may replace the locally persisted profile with
+        // a newer remote profile, so hydrate again after synchronization
+        // to reflect any downloaded changes in React state.
+        await requestSync()
+        hydrateProfile()
       } finally {
         setIsLoading(false)
-        void requestSync()
       }
     }
 
-    hydrate()
+    void hydrate()
   }, [])
 
   return {

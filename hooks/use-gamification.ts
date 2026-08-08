@@ -204,12 +204,14 @@ export const useGamification = (): UseGamificationResult => {
   }
 
   useEffect(() => {
-    const hydrate = () => {
+    const hydrate = async () => {
       try {
+        hydrateProfile()
+
+        await requestSync()
         hydrateProfile()
       } finally {
         setIsLoading(false)
-        void requestSync()
       }
     }
 

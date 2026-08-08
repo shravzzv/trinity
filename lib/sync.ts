@@ -25,27 +25,37 @@ import type { WeightEntry } from '@/types/weight'
 import { getProfile, saveProfile } from './profile'
 
 /**
- * Whether a synchronization is currently in progress.
+ * Represents the currently running synchronization, if any.
+ *
+ * When a synchronization is in progress, subsequent calls to
+ * {@link requestSync} return this same promise rather than starting
+ * another synchronization.
  */
-let isSyncing = false
+let syncPromise: Promise<void> | null = null
 
 /**
  * Requests a synchronization.
  *
  * This is the public entry point used throughout the application.
  *
- * If a synchronization is already running, this function does nothing.
- * Otherwise, it starts a new synchronization.
+ * If a synchronization is already in progress, no additional
+ * synchronization is started. Instead, the promise for the existing
+ * synchronization is returned so callers can wait for it to finish.
+ *
+ * This ensures that synchronization requests are deduplicated while
+ * still allowing callers to reliably await the active synchronization.
+ *
+ * @returns A promise that resolves when the requested synchronization
+ * finishes, or when an already-running synchronization finishes.
  */
-export const requestSync = async (): Promise<void> => {
-  if (isSyncing) return
-  isSyncing = true
+export const requestSync = (): Promise<void> => {
+  if (syncPromise) return syncPromise
 
-  try {
-    await sync()
-  } finally {
-    isSyncing = false
-  }
+  syncPromise = sync().finally(() => {
+    syncPromise = null
+  })
+
+  return syncPromise
 }
 
 /**

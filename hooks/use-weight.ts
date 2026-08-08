@@ -220,10 +220,13 @@ export const useWeight = (): UseWeightResult => {
     const hydrate = async () => {
       try {
         hydrateProfile()
+
         await hydrateWeightEntries()
+
+        await requestSync()
+        hydrateProfile()
       } finally {
         setIsLoading(false)
-        void requestSync()
       }
     }
 
