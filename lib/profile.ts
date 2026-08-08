@@ -41,7 +41,10 @@ const DEFAULT_PROFILE: Profile = {
 export const getProfile = (): Profile => {
   const saved = localStorage.getItem(PROFILE_STORAGE_KEY)
 
-  if (!saved) return DEFAULT_PROFILE
+  if (!saved) {
+    saveProfile(DEFAULT_PROFILE)
+    return DEFAULT_PROFILE
+  }
 
   try {
     return JSON.parse(saved) as Profile
@@ -49,6 +52,7 @@ export const getProfile = (): Profile => {
     console.error('Hydrating profile from local storage failed', error)
     localStorage.removeItem(PROFILE_STORAGE_KEY)
 
+    saveProfile(DEFAULT_PROFILE)
     return DEFAULT_PROFILE
   }
 }
