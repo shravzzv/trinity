@@ -501,4 +501,6 @@ const toProfileRow = (
   xp: profile.xp,
   streak: profile.streak,
   anchors: profile.anchors,
+
+  last_synced_at: profile.lastSyncedAt,
 })
