@@ -367,11 +367,12 @@ const toFastRow = (fast: Fast, profileId: string): TablesInsert<'fasts'> => {
 const toFast = (row: Tables<'fasts'>): Fast => {
   return {
     id: row.id,
-    startedAt: row.started_at,
+    needsSync: false,
     endedAt: row.ended_at,
+    startedAt: row.started_at,
+    updatedAt: row.updated_at,
     planId: row.plan_id as FastingPlanId,
     streakStatus: row.streak_status as StreakStatus,
-    needsSync: false,
   }
 }
 

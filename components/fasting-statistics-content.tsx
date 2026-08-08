@@ -154,6 +154,7 @@ export default function FastingStatisticsContent({
           isAnchored: false,
         }),
         needsSync: true,
+        updatedAt: new Date().toISOString(),
       })
       toast.success('Fast added')
     } catch (error) {

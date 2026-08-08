@@ -274,19 +274,38 @@ const downloadProfile = async () => {
 
 /**
  * Downloads missing or newer fasts from Supabase.
+ *
+ * A remote fast is downloaded when it does not exist locally or when the
+ * remote version is newer than the local version.
+ *
+ * Local fasts with pending changes are not overwritten, because those
+ * changes have not yet been uploaded to Supabase.
  */
 const downloadFasts = async (): Promise<void> => {
   const remoteFasts = await supabaseDb.getFasts()
   const localFasts = await indexedDb.getFasts()
 
-  const localFastIds = new Set(localFasts.map((fast) => fast.id))
+  const localFastsById = new Map(localFasts.map((fast) => [fast.id, fast]))
 
-  const fastsNeedingDownload = remoteFasts.filter(
-    (fast) => !localFastIds.has(fast.id),
+  const fastsToAdd = remoteFasts.filter(
+    (remoteFast) => !localFastsById.has(remoteFast.id),
   )
-  if (fastsNeedingDownload.length === 0) return
 
-  await Promise.all(fastsNeedingDownload.map((fast) => indexedDb.addFast(fast)))
+  const fastsToUpdate = remoteFasts.filter((remoteFast) => {
+    const localFast = localFastsById.get(remoteFast.id)
+
+    if (!localFast) return false
+    if (localFast.needsSync) return false
+
+    return remoteFast.updatedAt > localFast.updatedAt
+  })
+
+  if (fastsToAdd.length === 0 && fastsToUpdate.length === 0) return
+
+  await Promise.all([
+    ...fastsToAdd.map((fast) => indexedDb.addFast(fast)),
+    ...fastsToUpdate.map((fast) => indexedDb.updateFast(fast)),
+  ])
 }
 
 /**

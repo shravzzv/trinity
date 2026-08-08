@@ -269,6 +269,7 @@ export const useFasting = (): UseFastingResult => {
         needsSync: true,
         startedAt: session.startedAt,
         endedAt: newSessionStartedAtISO,
+        updatedAt: new Date().toISOString(),
         streakStatus: getStreakStatus({
           planId,
           endedAt: newSessionStartedAt,
