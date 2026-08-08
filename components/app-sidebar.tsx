@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/tooltip'
 import { motion } from 'motion/react'
 import { appLinks } from '@/constants/navigation'
-import { BookOpenText, LifeBuoy, LogOut } from 'lucide-react'
+import { BookOpenText, LifeBuoy, LogIn, LogOut } from 'lucide-react'
 import { useAuthContext } from '@/providers/auth-provider'
 import { signOut } from '@/lib/auth'
 import { Spinner } from './ui/spinner'
@@ -130,7 +130,14 @@ export function AppSidebar() {
                   <LogOut />
                   <span>Sign out</span>
                 </SidebarMenuButton>
-              ) : null}
+              ) : (
+                <SidebarMenuButton asChild tooltip='Sign in'>
+                  <Link href='/signin'>
+                    <LogIn />
+                    <span>Sign in</span>
+                  </Link>
+                </SidebarMenuButton>
+              )}
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>

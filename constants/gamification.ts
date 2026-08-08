@@ -15,7 +15,7 @@ export const anchorsAccordionInfo: AccordionInfo[] = [
     value: 'earn',
     trigger: 'How do I earn more?',
     content:
-      'Earn an Anchor by completing a streak of seven successful fasts or by reaching new levels. Your progress toward the next Anchor is shown above.',
+      'Earn an Anchor by completing a streak of six successful fasts or by reaching new levels. Your progress toward the next Anchor is shown above.',
   },
 ]
 
@@ -77,6 +77,6 @@ export const xpRewards = {
   addedWeightEntry: 3,
 } as const
 
-export const ANCHOR_STREAK_REQUIREMENT = 7
+export const ANCHOR_STREAK_REQUIREMENT = 6
 
-export const INITIAL_ANCHORS = 1
+export const INITIAL_ANCHORS = 0

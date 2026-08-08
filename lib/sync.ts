@@ -1,9 +1,9 @@
 /**
  * Synchronization engine.
  *
- * Coordinates synchronization between Trinity's local storage and Supabase.
+ * Coordinates synchronization between Trinity's browser storage and Supabase.
  * This is the only module that communicates with both persistence layers:
- *   IndexedDB  ⇄  sync.ts  ⇄  Supabase
+ *   LocalStorage/IndexedDB  ⇄  sync.ts  ⇄  Supabase
  *
  * Responsibilities:
  * - Prevent concurrent synchronization attempts.
@@ -17,62 +17,96 @@
  * local database first and then call `requestSync()`.
  */
 
-import {
-  ANCHORS_STORAGE_KEY,
-  FASTING_PLAN_ID_STORAGE_KEY,
-  FASTING_SESSION_STORAGE_KEY,
-  PREFERRED_FAST_START_TIME_STORAGE_KEY,
-  PROFILE_LAST_SYNCED_AT_STORAGE_KEY,
-  PROFILE_NEEDS_SYNC_STORAGE_KEY,
-  STREAK_STORAGE_KEY,
-  TARGET_WEIGHT_KG_STORAGE_KEY,
-  XP_STORAGE_KEY,
-} from '@/constants/storage-keys'
 import * as indexedDb from '@/lib/indexed-db'
 import * as supabaseDb from '@/lib/supabase-db'
 import { createClient } from '@/supabase/client'
-import type { Tables, TablesUpdate } from '@/types/database'
 import type { Fast } from '@/types/fasting'
 import type { WeightEntry } from '@/types/weight'
+import { getProfile, saveProfile } from './profile'
+import type { SyncListener } from '@/types/sync'
 
 /**
- * Whether a synchronization is currently in progress.
+ * Represents the currently running synchronization, if any.
+ *
+ * When a synchronization is in progress, subsequent calls to
+ * {@link requestSync} return this same promise rather than starting
+ * another synchronization.
  */
-let isSyncing = false
+let syncPromise: Promise<void> | null = null
+
+/**
+ * Subscribers waiting to be notified when synchronization completes.
+ */
+const syncListeners = new Set<SyncListener>()
+
+/**
+ * Subscribes to synchronization completion events.
+ *
+ * The listener is called after a synchronization cycle completes,
+ * allowing consumers to refresh state derived from local persistence.
+ *
+ * @param listener The callback to invoke after synchronization completes.
+ * @returns A function that removes the listener from the subscription.
+ */
+export const subscribeToSync = (listener: SyncListener): (() => void) => {
+  syncListeners.add(listener)
+
+  return () => {
+    syncListeners.delete(listener)
+  }
+}
+
+/**
+ * Notifies all subscribers that synchronization has completed.
+ *
+ * Listeners use this notification to re-read any locally persisted data
+ * that may have been changed by the synchronization engine.
+ */
+const notifySyncListeners = (): void => {
+  syncListeners.forEach((listener) => listener())
+}
 
 /**
  * Requests a synchronization.
  *
  * This is the public entry point used throughout the application.
  *
- * If a synchronization is already running, this function does nothing.
- * Otherwise, it starts a new synchronization.
+ * If a synchronization is already in progress, no additional
+ * synchronization is started. Instead, the promise for the existing
+ * synchronization is returned so callers can wait for it to finish.
+ *
+ * This ensures that synchronization requests are deduplicated while
+ * still allowing callers to reliably await the active synchronization.
+ *
+ * @returns A promise that resolves when the requested synchronization
+ * finishes, or when an already-running synchronization finishes.
  */
-export const requestSync = async (): Promise<void> => {
-  if (isSyncing) return
-  isSyncing = true
+export const requestSync = (): Promise<void> => {
+  if (syncPromise) return syncPromise
 
-  try {
-    await sync()
-  } finally {
-    isSyncing = false
-  }
+  syncPromise = sync().finally(() => {
+    syncPromise = null
+  })
+
+  return syncPromise
 }
 
 /**
  * Performs a complete synchronization cycle.
  *
- * Synchronization always proceeds in two phases:
- *
- * 1. Upload pending local changes.
- * 2. Download remote changes.
+ * Synchronization uploads pending local changes before downloading
+ * remote changes. Once both phases complete, subscribers are notified
+ * so application state can reflect any changes made to local
+ * persistence.
  */
 const sync = async (): Promise<void> => {
   if (!(await canSync())) return
 
-  // This shouldn't be Promise.all.
+  // These phases are intentionally sequential.
   await uploadPendingChanges()
   await downloadRemoteChanges()
+
+  notifySyncListeners()
 }
 
 /**
@@ -121,19 +155,16 @@ const downloadRemoteChanges = async (): Promise<void> => {
  * Uploads the local profile to the cloud.
  */
 const uploadProfile = async () => {
-  const profileNeedsSync =
-    localStorage.getItem(PROFILE_NEEDS_SYNC_STORAGE_KEY) === 'true'
-  if (!profileNeedsSync) return
-
-  const profile = await buildProfile()
+  const profile = getProfile()
+  if (!profile.needsSync) return
 
   const syncedAt = new Date().toISOString()
-  profile.last_synced_at = syncedAt
+  profile.lastSyncedAt = syncedAt
 
   await supabaseDb.updateProfile(profile)
 
-  localStorage.setItem(PROFILE_LAST_SYNCED_AT_STORAGE_KEY, syncedAt)
-  clearProfileNeedsSync()
+  profile.needsSync = false
+  saveProfile(profile)
 }
 
 /**
@@ -228,23 +259,16 @@ const uploadPendingDeletes = async (): Promise<void> => {
  */
 const downloadProfile = async () => {
   const remoteProfile = await supabaseDb.getProfile()
+  const localProfile = getProfile()
 
-  const localLastSyncedAt = localStorage.getItem(
-    PROFILE_LAST_SYNCED_AT_STORAGE_KEY,
-  )
+  if (localProfile.needsSync) return
 
   if (
-    remoteProfile.last_synced_at &&
-    (!localLastSyncedAt || remoteProfile.last_synced_at > localLastSyncedAt)
+    remoteProfile.lastSyncedAt &&
+    (!localProfile.lastSyncedAt ||
+      remoteProfile.lastSyncedAt > localProfile.lastSyncedAt)
   ) {
-    applyProfile(remoteProfile)
-
-    localStorage.setItem(
-      PROFILE_LAST_SYNCED_AT_STORAGE_KEY,
-      remoteProfile.last_synced_at,
-    )
-
-    clearProfileNeedsSync()
+    saveProfile(remoteProfile)
   }
 }
 
@@ -314,110 +338,4 @@ const downloadWeightEntriesDeletions = async (): Promise<void> => {
       indexedDb.deleteWeightEntry(deletion.entityId),
     ),
   )
-}
-
-/**
- * Builds a Supabase profile update from the application's locally
- * persisted profile data.
- *
- * Trinity stores profile information across multiple local persistence
- * locations rather than as a single object. This helper gathers those
- * individual values and assembles them into the shape expected by the
- * `profiles` table.
- *
- * This function does not communicate with Supabase.
- *
- * @returns The locally assembled profile ready for upload.
- */
-const buildProfile = async (): Promise<TablesUpdate<'profiles'>> => {
-  const supabase = createClient()
-  const profileId = await supabaseDb.getProfileId(supabase)
-
-  // fasting
-  const fastingPlanId = localStorage.getItem(FASTING_PLAN_ID_STORAGE_KEY)
-  const fastingSession = localStorage.getItem(FASTING_SESSION_STORAGE_KEY)
-  const preferredFastStartTime = localStorage.getItem(
-    PREFERRED_FAST_START_TIME_STORAGE_KEY,
-  )
-
-  // weight
-  const targetWeightKg = localStorage.getItem(TARGET_WEIGHT_KG_STORAGE_KEY)
-
-  // gamification
-  const xp = localStorage.getItem(XP_STORAGE_KEY)
-  const streak = localStorage.getItem(STREAK_STORAGE_KEY)
-  const anchors = localStorage.getItem(ANCHORS_STORAGE_KEY)
-
-  return {
-    id: profileId,
-    fasting_plan_id: fastingPlanId,
-    fasting_session: fastingSession ? JSON.parse(fastingSession) : null,
-    preferred_fast_start_time: preferredFastStartTime
-      ? JSON.parse(preferredFastStartTime)
-      : null,
-    target_weight_kg: targetWeightKg ? Number(targetWeightKg) : null,
-    xp: xp ? Number(xp) : 0,
-    streak: streak ? Number(streak) : 0,
-    anchors: anchors ? Number(anchors) : 1,
-  }
-}
-
-/**
- * Applies a downloaded profile to the application's local persistence.
- *
- * Trinity stores profile information across multiple local persistence
- * locations. This helper distributes the values from the Supabase
- * profile into their respective local storage locations.
- *
- * This function does not communicate with Supabase.
- *
- * @param profile The downloaded profile.
- */
-const applyProfile = (profile: Tables<'profiles'>): void => {
-  // fasting
-  localStorage.setItem(
-    FASTING_PLAN_ID_STORAGE_KEY,
-    JSON.stringify(profile.fasting_plan_id),
-  )
-  localStorage.setItem(
-    FASTING_SESSION_STORAGE_KEY,
-    JSON.stringify(profile.fasting_session),
-  )
-  localStorage.setItem(
-    PREFERRED_FAST_START_TIME_STORAGE_KEY,
-    JSON.stringify(profile.preferred_fast_start_time),
-  )
-
-  // weight
-  localStorage.setItem(
-    TARGET_WEIGHT_KG_STORAGE_KEY,
-    JSON.stringify(profile.target_weight_kg),
-  )
-
-  // gamification
-  localStorage.setItem(XP_STORAGE_KEY, JSON.stringify(profile.xp))
-  localStorage.setItem(STREAK_STORAGE_KEY, JSON.stringify(profile.streak))
-  localStorage.setItem(ANCHORS_STORAGE_KEY, JSON.stringify(profile.anchors))
-}
-
-/**
- * Marks the locally persisted profile as requiring synchronization.
- *
- * Unlike fasts and weight entries, Trinity's profile is stored across
- * multiple LocalStorage keys rather than as a single object. This flag
- * indicates that one or more profile values have changed locally and
- * should be uploaded during the next synchronization cycle.
- */
-export const markProfileNeedsSync = () => {
-  localStorage.setItem(PROFILE_NEEDS_SYNC_STORAGE_KEY, 'true')
-}
-
-/**
- * Marks the locally persisted profile as synchronized.
- *
- * This should be called after a successful profile upload or whenever
- * the local profile has been updated to match the remote profile.
- */
-export const clearProfileNeedsSync = () => {
-  localStorage.setItem(PROFILE_NEEDS_SYNC_STORAGE_KEY, 'false')
 }

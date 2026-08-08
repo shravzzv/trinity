@@ -11,12 +11,19 @@
 import { createClient } from '@/supabase/client'
 import type {
   Database,
+  Json,
   Tables,
   TablesInsert,
   TablesUpdate,
 } from '@/types/database'
-import type { Fast, FastingPlanId } from '@/types/fasting'
+import type {
+  Fast,
+  FastingPlanId,
+  FastingSession,
+  PreferredFastStartTime,
+} from '@/types/fasting'
 import type { StreakStatus } from '@/types/gamification'
+import type { Profile } from '@/types/profile'
 import type { PendingDelete, PendingDeleteEntity } from '@/types/sync'
 import type { WeightEntry } from '@/types/weight'
 import { SupabaseClient } from '@supabase/supabase-js'
@@ -26,7 +33,7 @@ import { SupabaseClient } from '@supabase/supabase-js'
  *
  * @returns The user's profile.
  */
-export const getProfile = async (): Promise<Tables<'profiles'>> => {
+export const getProfile = async (): Promise<Profile> => {
   const supabase = createClient()
 
   const { data, error } = await supabase.from('profiles').select().single()
@@ -37,7 +44,7 @@ export const getProfile = async (): Promise<Tables<'profiles'>> => {
     })
   }
 
-  return data
+  return toProfile(data)
 }
 
 /**
@@ -45,13 +52,14 @@ export const getProfile = async (): Promise<Tables<'profiles'>> => {
  *
  * @param profile The updated profile.
  */
-export const updateProfile = async (profile: TablesUpdate<'profiles'>) => {
+export const updateProfile = async (profile: Profile) => {
   const supabase = createClient()
+  const profileId = await getProfileId(supabase)
 
   const { error } = await supabase
     .from('profiles')
-    .update(profile)
-    .eq('id', profile.id)
+    .update(toProfileRow(profile, profileId))
+    .eq('id', profileId)
 
   if (error) {
     throw Error('Updating profile failed', {
@@ -439,4 +447,60 @@ const toDeletionRow = (
   profile_id: profileId,
   entity_id: pendingDelete.entityId,
   deleted_at: pendingDelete.deletedAt,
+})
+
+/**
+ * Converts a Supabase profile row into a local {@link Profile}.
+ *
+ * Downloaded profiles are always synchronized and therefore have
+ * {@link Profile.needsSync} set to false.
+ *
+ * @param row The database row.
+ * @returns The corresponding local profile.
+ */
+const toProfile = (row: Tables<'profiles'>): Profile => {
+  return {
+    xp: row.xp,
+    streak: row.streak,
+    anchors: row.anchors,
+
+    fastingPlanId: row.fasting_plan_id,
+    fastingSession: row.fasting_session as FastingSession | null,
+    preferredFastStartTime:
+      row.preferred_fast_start_time as PreferredFastStartTime | null,
+
+    targetWeightKg: row.target_weight_kg,
+
+    lastSyncedAt: row.last_synced_at,
+    needsSync: false,
+  }
+}
+
+/**
+ * Converts a local {@link Profile} into a Supabase profile row.
+ *
+ * Synchronization metadata is intentionally omitted because it is managed
+ * by the synchronization engine.
+ *
+ * @param profile The local profile.
+ * @param profileId The owning profile's identifier.
+ * @returns The corresponding database row.
+ */
+const toProfileRow = (
+  profile: Profile,
+  profileId: string,
+): TablesUpdate<'profiles'> => ({
+  id: profileId,
+
+  fasting_plan_id: profile.fastingPlanId,
+  fasting_session: profile.fastingSession as Json,
+  preferred_fast_start_time: profile.preferredFastStartTime as Json,
+
+  target_weight_kg: profile.targetWeightKg,
+
+  xp: profile.xp,
+  streak: profile.streak,
+  anchors: profile.anchors,
+
+  last_synced_at: profile.lastSyncedAt,
 })
