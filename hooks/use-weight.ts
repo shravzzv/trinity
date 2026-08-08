@@ -173,9 +173,27 @@ export const useWeight = (): UseWeightResult => {
 
   const updateTargetWeight = (newTargetWeightKg: number) => {
     setTargetWeightKg(newTargetWeightKg)
+
+    updateProfile((profile) => ({
+      ...profile,
+      targetWeightKg: newTargetWeightKg,
+      needsSync: true,
+    }))
+
+    void requestSync()
   }
 
-  const clearTargetWeight = () => setTargetWeightKg(null)
+  const clearTargetWeight = () => {
+    setTargetWeightKg(null)
+
+    updateProfile((profile) => ({
+      ...profile,
+      targetWeightKg: null,
+      needsSync: true,
+    }))
+
+    void requestSync()
+  }
 
   const hydrateProfile = () => {
     const profile = getProfile()
@@ -211,18 +229,6 @@ export const useWeight = (): UseWeightResult => {
 
     hydrate()
   }, [])
-
-  useEffect(() => {
-    if (isLoading) return
-
-    updateProfile((profile) => ({
-      ...profile,
-      targetWeightKg,
-      needsSync: true,
-    }))
-
-    void requestSync()
-  }, [isLoading, targetWeightKg])
 
   return {
     isLoading,

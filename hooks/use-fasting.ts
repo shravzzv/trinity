@@ -174,24 +174,62 @@ export const useFasting = (): UseFastingResult => {
   const [preferredFastStartTime, setPreferredFastStartTime] =
     useState<PreferredFastStartTime | null>(null)
 
-  const updatePlanId = (planId: FastingPlanId) => setPlanId(planId)
+  const updatePlanId = (planId: FastingPlanId) => {
+    setPlanId(planId)
+
+    updateProfile((profile) => ({
+      ...profile,
+      fastingPlanId: planId,
+      needsSync: true,
+    }))
+
+    void requestSync()
+  }
 
   const updateSessionStartedAt = (updatedStartedAt: Date) => {
-    setSession((prev) => {
-      if (!prev) return prev
+    if (!session) return
 
-      return {
-        ...prev,
-        startedAt: updatedStartedAt.toISOString(),
-      }
-    })
+    const updatedSession: FastingSession = {
+      ...session,
+      startedAt: updatedStartedAt.toISOString(),
+    }
+
+    setSession(updatedSession)
+
+    updateProfile((profile) => ({
+      ...profile,
+      fastingSession: updatedSession,
+      needsSync: true,
+    }))
+
+    void requestSync()
   }
 
   const updatePreferredFastStartTime = (hour: number, minute: number) => {
-    setPreferredFastStartTime({ hour, minute })
+    const preferredFastStartTime = { hour, minute }
+
+    setPreferredFastStartTime(preferredFastStartTime)
+
+    updateProfile((profile) => ({
+      ...profile,
+      preferredFastStartTime,
+      needsSync: true,
+    }))
+
+    void requestSync()
   }
 
-  const clearPreferredFastStartTime = () => setPreferredFastStartTime(null)
+  const clearPreferredFastStartTime = () => {
+    setPreferredFastStartTime(null)
+
+    updateProfile((profile) => ({
+      ...profile,
+      preferredFastStartTime: null,
+      needsSync: true,
+    }))
+
+    void requestSync()
+  }
 
   const transitionToSession = async (
     status: FastingStatus,
@@ -210,6 +248,20 @@ export const useFasting = (): UseFastingResult => {
       session?.status === 'fasting' &&
       (status === 'eating' || session.isAnchored)
 
+    const nextSession: FastingSession = {
+      status,
+      startedAt: newSessionStartedAtISO,
+      isAnchored: options?.isAnchored ?? false,
+    }
+
+    setSession(nextSession)
+
+    updateProfile((profile) => ({
+      ...profile,
+      fastingSession: nextSession,
+      needsSync: true,
+    }))
+
     if (isLeavingFastingSession) {
       await addFast({
         planId,
@@ -224,21 +276,26 @@ export const useFasting = (): UseFastingResult => {
           startedAt: new Date(session.startedAt),
         }),
       })
+
+      return
     }
 
-    setSession({
-      status,
-      startedAt: newSessionStartedAtISO,
-      isAnchored: options?.isAnchored ?? false,
-    })
+    void requestSync()
   }
 
   const startAnchoredSession = () => {
-    setSession((prev) => {
-      if (!prev) return prev
+    if (!session) return
+    const nextSession = { ...session, isAnchored: true }
 
-      return { ...prev, isAnchored: true }
-    })
+    setSession(nextSession)
+
+    updateProfile((profile) => ({
+      ...profile,
+      fastingSession: nextSession,
+      needsSync: true,
+    }))
+
+    void requestSync()
   }
 
   /**
@@ -365,42 +422,6 @@ export const useFasting = (): UseFastingResult => {
 
     hydrate()
   }, [])
-
-  useEffect(() => {
-    if (isLoading) return
-
-    updateProfile((profile) => ({
-      ...profile,
-      fastingPlanId: planId,
-      needsSync: true,
-    }))
-
-    void requestSync()
-  }, [isLoading, planId])
-
-  useEffect(() => {
-    if (isLoading) return
-
-    updateProfile((profile) => ({
-      ...profile,
-      fastingSession: session,
-      needsSync: true,
-    }))
-
-    void requestSync()
-  }, [isLoading, session])
-
-  useEffect(() => {
-    if (isLoading) return
-
-    updateProfile((profile) => ({
-      ...profile,
-      preferredFastStartTime,
-      needsSync: true,
-    }))
-
-    void requestSync()
-  }, [isLoading, preferredFastStartTime])
 
   return {
     fasts,

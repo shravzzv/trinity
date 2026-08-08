@@ -70,9 +70,12 @@ export const saveProfile = (profile: Profile): void => {
  *
  * @param updater Produces the updated profile.
  */
-export const updateProfile = (updater: (profile: Profile) => Profile): void => {
+export const updateProfile = (
+  updater: (profile: Profile) => Profile,
+): Profile => {
   const profile = getProfile()
   const updatedProfile = updater(profile)
 
   saveProfile(updatedProfile)
+  return updatedProfile
 }

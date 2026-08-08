@@ -101,65 +101,98 @@ export const useGamification = (): UseGamificationResult => {
     setAchievements((prev) => [...prev, achievement])
   }
 
+  const dismissAchievement = () => {
+    setAchievements((prev) => prev.slice(1))
+  }
+
   const awardXp = (amount: number) => {
-    setXp((prev) => {
-      const next = prev + amount
-      const previousLevel = getLevelForXp(prev)
-      const nextLevel = getLevelForXp(next)
+    const previousXp = getProfile().xp
 
-      if (nextLevel > previousLevel) {
-        queueAchievement({
-          type: 'level',
-          title: `Level ${nextLevel} reached!`,
-          description:
-            'Keep going. Every fast brings you closer to your next milestone.',
-        })
-      }
+    const updatedProfile = updateProfile((profile) => ({
+      ...profile,
+      xp: profile.xp + amount,
+      needsSync: true,
+    }))
 
-      return next
-    })
+    const nextXp = updatedProfile.xp
+    const previousLevel = getLevelForXp(previousXp)
+    const nextLevel = getLevelForXp(nextXp)
+
+    setXp(nextXp)
+
+    if (nextLevel > previousLevel) {
+      queueAchievement({
+        type: 'level',
+        title: `Level ${nextLevel} reached!`,
+        description:
+          'Keep going. Every fast brings you closer to your next milestone.',
+      })
+    }
+
+    void requestSync()
   }
 
   const awardAnchor = () => {
-    setAnchors((prev) => prev + 1)
+    const updatedProfile = updateProfile((profile) => ({
+      ...profile,
+      anchors: profile.anchors + 1,
+      needsSync: true,
+    }))
+
+    setAnchors(updatedProfile.anchors)
 
     queueAchievement({
       type: 'anchor',
       title: 'Anchor earned!',
       description: 'You earned an Anchor by maintaining your fasting streak.',
     })
+
+    void requestSync()
   }
 
   const spendAnchor = () => {
-    setAnchors((prev) => {
-      if (prev < 1) return prev
-      return prev - 1
-    })
+    const updatedProfile = updateProfile((profile) => ({
+      ...profile,
+      anchors: Math.max(profile.anchors - 1, 0),
+      needsSync: true,
+    }))
+
+    setAnchors(updatedProfile.anchors)
+
+    void requestSync()
   }
 
   const incrementStreak = () => {
-    setStreak((prev) => {
-      const next = prev + 1
+    const updatedProfile = updateProfile((profile) => ({
+      ...profile,
+      streak: profile.streak + 1,
+      needsSync: true,
+    }))
 
-      if (shouldCelebrateStreak(next)) {
-        queueAchievement({
-          type: 'streak',
-          title: `${next} day streak!`,
-          description:
-            'Your consistency is paying off. Keep the momentum going!',
-        })
-      }
+    const nextStreak = updatedProfile.streak
+    setStreak(nextStreak)
 
-      return next
-    })
-  }
+    if (shouldCelebrateStreak(nextStreak)) {
+      queueAchievement({
+        type: 'streak',
+        title: `${nextStreak} day streak!`,
+        description: 'Your consistency is paying off. Keep the momentum going!',
+      })
+    }
 
-  const dismissAchievement = () => {
-    setAchievements((prev) => prev.slice(1))
+    void requestSync()
   }
 
   const resetStreak = () => {
-    setStreak(0)
+    const updatedProfile = updateProfile((profile) => ({
+      ...profile,
+      streak: 0,
+      needsSync: true,
+    }))
+
+    setStreak(updatedProfile.streak)
+
+    void requestSync()
   }
 
   const hydrateProfile = () => {
@@ -182,42 +215,6 @@ export const useGamification = (): UseGamificationResult => {
 
     hydrate()
   }, [])
-
-  useEffect(() => {
-    if (isLoading) return
-
-    updateProfile((profile) => ({
-      ...profile,
-      xp,
-      needsSync: true,
-    }))
-
-    void requestSync()
-  }, [isLoading, xp])
-
-  useEffect(() => {
-    if (isLoading) return
-
-    updateProfile((profile) => ({
-      ...profile,
-      streak,
-      needsSync: true,
-    }))
-
-    void requestSync()
-  }, [isLoading, streak])
-
-  useEffect(() => {
-    if (isLoading) return
-
-    updateProfile((profile) => ({
-      ...profile,
-      anchors,
-      needsSync: true,
-    }))
-
-    void requestSync()
-  }, [anchors, isLoading])
 
   return {
     xp,
