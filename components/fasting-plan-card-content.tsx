@@ -121,7 +121,7 @@ export default function FastingPlanCardContent() {
         </p>
 
         {!selectedPlan ? (
-          <p className='text-muted-foreground text-sm'>
+          <p className='text-muted-foreground text-sm md:text-center'>
             A fasting plan is needed to set a preferred schedule.
           </p>
         ) : preferredFastStartTime && preferredSchedule ? (
