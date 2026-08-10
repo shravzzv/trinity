@@ -24,10 +24,14 @@ import { useEffect } from 'react'
 export const useRealtime = (): void => {
   useEffect(() => {
     const supabase = createClient()
-    let channel: ReturnType<typeof supabase.channel> | undefined
+
+    let channel: ReturnType<typeof supabase.channel> | null = null
+    let cancelled = false
 
     const subscribe = async () => {
       const profileId = await getProfileId(supabase)
+
+      if (cancelled) return
 
       channel = supabase
         .channel('trinity-sync')
@@ -116,12 +120,14 @@ export const useRealtime = (): void => {
           },
         )
 
-      channel.subscribe()
+      void channel.subscribe()
     }
 
     void subscribe()
 
     return () => {
+      cancelled = true
+
       if (channel) {
         void supabase.removeChannel(channel)
       }
