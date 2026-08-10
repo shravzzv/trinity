@@ -29,98 +29,102 @@ export const useRealtime = (): void => {
     let cancelled = false
 
     const subscribe = async () => {
-      const profileId = await getProfileId(supabase)
+      try {
+        const profileId = await getProfileId(supabase)
 
-      if (cancelled) return
+        if (cancelled) return
 
-      channel = supabase
-        .channel('trinity-sync')
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'profiles',
-            filter: `id=eq.${profileId}`,
-          },
-          () => {
-            void requestSync()
-          },
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'fasts',
-            filter: `profile_id=eq.${profileId}`,
-          },
-          () => {
-            void requestSync()
-          },
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'fasts',
-            filter: `profile_id=eq.${profileId}`,
-          },
-          () => {
-            void requestSync()
-          },
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'weight_entries',
-            filter: `profile_id=eq.${profileId}`,
-          },
-          () => {
-            void requestSync()
-          },
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'weight_entries',
-            filter: `profile_id=eq.${profileId}`,
-          },
-          () => {
-            void requestSync()
-          },
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'fasts_deletions',
-            filter: `profile_id=eq.${profileId}`,
-          },
-          () => {
-            void requestSync()
-          },
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'weight_entries_deletions',
-            filter: `profile_id=eq.${profileId}`,
-          },
-          () => {
-            void requestSync()
-          },
-        )
+        channel = supabase
+          .channel('trinity-sync')
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'profiles',
+              filter: `id=eq.${profileId}`,
+            },
+            () => {
+              void requestSync()
+            },
+          )
+          .on(
+            'postgres_changes',
+            {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'fasts',
+              filter: `profile_id=eq.${profileId}`,
+            },
+            () => {
+              void requestSync()
+            },
+          )
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'fasts',
+              filter: `profile_id=eq.${profileId}`,
+            },
+            () => {
+              void requestSync()
+            },
+          )
+          .on(
+            'postgres_changes',
+            {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'weight_entries',
+              filter: `profile_id=eq.${profileId}`,
+            },
+            () => {
+              void requestSync()
+            },
+          )
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'weight_entries',
+              filter: `profile_id=eq.${profileId}`,
+            },
+            () => {
+              void requestSync()
+            },
+          )
+          .on(
+            'postgres_changes',
+            {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'fasts_deletions',
+              filter: `profile_id=eq.${profileId}`,
+            },
+            () => {
+              void requestSync()
+            },
+          )
+          .on(
+            'postgres_changes',
+            {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'weight_entries_deletions',
+              filter: `profile_id=eq.${profileId}`,
+            },
+            () => {
+              void requestSync()
+            },
+          )
 
-      void channel.subscribe()
+        void channel.subscribe()
+      } catch {
+        return
+      }
     }
 
     void subscribe()
