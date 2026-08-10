@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/tooltip'
 import { motion } from 'motion/react'
 import { appLinks } from '@/constants/navigation'
-import { BookOpenText, LifeBuoy, LogIn, LogOut } from 'lucide-react'
+import { BookOpenText, Download, LifeBuoy, LogIn, LogOut } from 'lucide-react'
 import { useAuthContext } from '@/providers/auth-provider'
 import { signOut } from '@/lib/auth'
 import { Spinner } from './ui/spinner'
@@ -106,6 +106,15 @@ export function AppSidebar() {
                 <Link href='/docs'>
                   <BookOpenText />
                   <span>Docs</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip='Download'>
+                <Link href='/download'>
+                  <Download />
+                  <span>Download</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
