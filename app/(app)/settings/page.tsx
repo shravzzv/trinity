@@ -18,6 +18,8 @@ import {
   UserX,
   Link as LinkIcon,
   Pen,
+  Unlink,
+  Send,
 } from 'lucide-react'
 import {
   InputGroup,
@@ -28,6 +30,10 @@ import {
 
 export default function Page() {
   const { isAuthenticated } = useAuthContext()
+  const isEmailVerified = true
+  const isPasswordSet = true
+  const isGoogleLinked = false
+  const isGitHubLinked = false
 
   return (
     <div className='mx-auto w-full max-w-xl space-y-6'>
@@ -114,9 +120,19 @@ export default function Page() {
             <div className='flex flex-col items-start gap-2 md:flex-row md:items-center md:justify-between md:gap-0'>
               <div className='flex-1 space-y-1'>
                 <p className='text-base font-medium'>Email</p>
+
                 <p className='text-muted-foreground text-xs'>
-                  Your email has been verified and is active.
+                  {isEmailVerified
+                    ? 'Your email has been verified and is active.'
+                    : 'Your email is unverified.'}
                 </p>
+
+                {!isEmailVerified && (
+                  <Button variant='outline' size='xs'>
+                    <Send />
+                    Send verification email
+                  </Button>
+                )}
               </div>
 
               <InputGroup className='flex-1'>
@@ -133,7 +149,7 @@ export default function Page() {
                     onClick={() => {}}
                   >
                     <Pen />
-                    <span className='hidden md:inline'>Send</span>
+                    <span className='hidden md:inline'>Edit</span>
                   </InputGroupButton>
                 </InputGroupAddon>
               </InputGroup>
@@ -145,7 +161,9 @@ export default function Page() {
               <div className='flex-1 space-y-1'>
                 <p className='text-base font-medium'>Password</p>
                 <p className='text-muted-foreground text-xs'>
-                  Changing your password will sign you out of other sessions.
+                  {isPasswordSet
+                    ? 'Changing your password will sign you out of other sessions. No one except you (even us) can know your password.'
+                    : `You haven't set a password for your account yet.`}
                 </p>
               </div>
 
@@ -158,7 +176,7 @@ export default function Page() {
                     onClick={() => {}}
                   >
                     <Pen />
-                    <span className='hidden md:inline'>Send</span>
+                    <span className='hidden md:inline'>Edit</span>
                   </InputGroupButton>
                 </InputGroupAddon>
               </InputGroup>
@@ -174,13 +192,22 @@ export default function Page() {
               <div className='flex-1 space-y-1'>
                 <p className='text-base font-medium'>Google</p>
                 <p className='text-muted-foreground text-xs'>
-                  You&apos;ll be able to sign in with Google once connected.
+                  {isGoogleLinked
+                    ? 'You can sign in to Trinity using Google.'
+                    : `You'll be able to sign in with Google once connected.`}
                 </p>
               </div>
-              <Button variant='outline' size='sm'>
-                <LinkIcon />
-                Connect
-              </Button>
+              {isGoogleLinked ? (
+                <Button variant='outline' size='sm'>
+                  <Unlink />
+                  Disconnect
+                </Button>
+              ) : (
+                <Button variant='outline' size='sm'>
+                  <LinkIcon />
+                  Connect
+                </Button>
+              )}
             </div>
 
             <Separator />
@@ -189,13 +216,22 @@ export default function Page() {
               <div className='flex-1 space-y-1'>
                 <p className='text-base font-medium'>GitHub</p>
                 <p className='text-muted-foreground text-xs'>
-                  You&apos;ll be able to sign in with GitHub once connected.
+                  {isGitHubLinked
+                    ? 'You can sign in to Trinity using GitHub.'
+                    : `You'll be able to sign in with GitHub once connected.`}
                 </p>
               </div>
-              <Button variant='outline' size='sm'>
-                <LinkIcon />
-                Connect
-              </Button>
+              {isGitHubLinked ? (
+                <Button variant='outline' size='sm'>
+                  <Unlink />
+                  Disconnect
+                </Button>
+              ) : (
+                <Button variant='outline' size='sm'>
+                  <LinkIcon />
+                  Connect
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -205,7 +241,13 @@ export default function Page() {
       <Card>
         <CardContent className='flex flex-col gap-4'>
           <div className='flex items-center justify-between'>
-            <p className='text-base font-medium'>Reset fasting progress</p>
+            <div className='space-y-1'>
+              <p className='text-base font-medium'>Reset fasting progress</p>
+              <p className='text-muted-foreground text-xs'>
+                This will remove all your fasting history.
+              </p>
+            </div>
+
             <Button variant='outline' size='sm'>
               <RotateCcw />
               Reset
@@ -215,7 +257,13 @@ export default function Page() {
           <Separator />
 
           <div className='flex items-center justify-between'>
-            <p className='text-base font-medium'>Reset weight progress</p>
+            <div className='space-y-1'>
+              <p className='text-base font-medium'>Reset weight progress</p>
+              <p className='text-muted-foreground text-xs'>
+                This will remove all your weight entries.
+              </p>
+            </div>
+
             <Button variant='outline' size='sm'>
               <RotateCcw />
               Reset
