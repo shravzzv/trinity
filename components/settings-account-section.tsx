@@ -12,6 +12,20 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from './ui/input-group'
+import { signOut } from '@/lib/auth'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from './ui/alert-dialog'
+import { toast } from 'sonner'
 
 export default function SettingsAccountSection() {
   const { isAuthenticated } = useAuthContext()
@@ -52,7 +66,11 @@ export default function SettingsAccountSection() {
                     sync the next time you sign in.
                   </p>
                 </div>
-                <Button variant='outline' size='sm'>
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onClick={() => signOut('local')}
+                >
                   <LogOut />
                   Sign out
                 </Button>
@@ -62,10 +80,58 @@ export default function SettingsAccountSection() {
 
               <div className='flex items-center justify-between'>
                 <p className='text-base font-medium'>Sign out everywhere</p>
-                <Button variant='outline' size='sm'>
-                  <LogOut />
-                  Sign out
-                </Button>
+
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant='outline' size='sm'>
+                      <LogOut />
+                      Sign out
+                    </Button>
+                  </AlertDialogTrigger>
+
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogMedia>
+                        <LogOut />
+                      </AlertDialogMedia>
+
+                      <AlertDialogTitle>
+                        Sign out of all sessions?
+                      </AlertDialogTitle>
+
+                      <AlertDialogDescription>
+                        This will sign you out everywhere, including this
+                        session.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+
+                    <section className='space-y-4 text-center md:text-left'>
+                      <p className='text-muted-foreground text-sm'>
+                        Prefer to stay signed in here? You can log out of all
+                        other sessions instead.
+                      </p>
+
+                      <Button
+                        size='sm'
+                        variant='outline'
+                        onClick={() => {
+                          signOut('others')
+                          toast.success('Signed out of all other sessions')
+                        }}
+                      >
+                        <LogOut />
+                        Sign out of all other sessions
+                      </Button>
+                    </section>
+
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => signOut('global')}>
+                        Sign out everywhere
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </>
           )}

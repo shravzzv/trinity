@@ -31,6 +31,8 @@ export async function signOut(scope: 'global' | 'local' | 'others' = 'local') {
     redirect('/auth-error')
   }
 
+  if (scope === 'others') return
+
   redirect('/signin')
 }
 
