@@ -103,21 +103,23 @@ describe('useWeight', () => {
       )
     })
 
-    expect(result.current.entries).toEqual([
-      {
+    expect(result.current.entries[0]).toEqual(
+      expect.objectContaining({
         id: 'test-uuid',
         recordedAt: '2026-01-01T10:00:00.000Z',
         weightKg: 61.5,
         needsSync: true,
-      },
-    ])
+      }),
+    )
 
-    expect(addWeightEntryMock).toHaveBeenCalledWith({
-      id: 'test-uuid',
-      recordedAt: '2026-01-01T10:00:00.000Z',
-      weightKg: 61.5,
-      needsSync: true,
-    })
+    expect(addWeightEntryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'test-uuid',
+        recordedAt: '2026-01-01T10:00:00.000Z',
+        weightKg: 61.5,
+        needsSync: true,
+      }),
+    )
   })
 
   it('should keep entries sorted when adding', async () => {
@@ -176,12 +178,14 @@ describe('useWeight', () => {
 
     expect(result.current.entries).toHaveLength(1)
 
-    expect(result.current.entries[0]).toEqual({
-      id: 'test-uuid',
-      recordedAt: '2026-01-01T18:00:00.000Z',
-      weightKg: 60.5,
-      needsSync: true,
-    })
+    expect(result.current.entries[0]).toEqual(
+      expect.objectContaining({
+        id: 'test-uuid',
+        recordedAt: '2026-01-01T18:00:00.000Z',
+        weightKg: 60.5,
+        needsSync: true,
+      }),
+    )
 
     expect(updateWeightEntryMock).toHaveBeenCalled()
   })

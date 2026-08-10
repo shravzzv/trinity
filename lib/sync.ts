@@ -310,21 +310,40 @@ const downloadFasts = async (): Promise<void> => {
 
 /**
  * Downloads missing or newer weight entries from Supabase.
+ *
+ * A remote weight entry is downloaded when it does not exist locally or
+ * when the remote version is newer than the local version.
+ *
+ * Local entries with pending changes are not overwritten, because those
+ * changes have not yet been uploaded to Supabase.
  */
 const downloadWeightEntries = async (): Promise<void> => {
   const remoteWeightEntries = await supabaseDb.getWeightEntries()
   const localWeightEntries = await indexedDb.getWeightEntries()
 
-  const localEntryIds = new Set(localWeightEntries.map((entry) => entry.id))
-
-  const entriesNeedingDownload = remoteWeightEntries.filter(
-    (entry) => !localEntryIds.has(entry.id),
+  const localEntriesById = new Map(
+    localWeightEntries.map((entry) => [entry.id, entry]),
   )
-  if (entriesNeedingDownload.length === 0) return
 
-  await Promise.all(
-    entriesNeedingDownload.map((entry) => indexedDb.addWeightEntry(entry)),
+  const entriesToAdd = remoteWeightEntries.filter(
+    (remoteEntry) => !localEntriesById.has(remoteEntry.id),
   )
+
+  const entriesToUpdate = remoteWeightEntries.filter((remoteEntry) => {
+    const localEntry = localEntriesById.get(remoteEntry.id)
+
+    if (!localEntry) return false
+    if (localEntry.needsSync) return false
+
+    return remoteEntry.updatedAt > localEntry.updatedAt
+  })
+
+  if (entriesToAdd.length === 0 && entriesToUpdate.length === 0) return
+
+  await Promise.all([
+    ...entriesToAdd.map((entry) => indexedDb.addWeightEntry(entry)),
+    ...entriesToUpdate.map((entry) => indexedDb.updateWeightEntry(entry)),
+  ])
 }
 
 /**

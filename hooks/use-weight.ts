@@ -95,9 +95,10 @@ export const useWeight = (): UseWeightResult => {
 
     const entry: WeightEntry = {
       id: existingEntry?.id ?? uuidv4(),
+      needsSync: true,
+      updatedAt: new Date().toISOString(),
       recordedAt: recordedAt.toISOString(),
       weightKg: Number(weightKg.toFixed(1)),
-      needsSync: true,
     }
 
     setWeightEntries(

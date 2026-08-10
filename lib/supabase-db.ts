@@ -410,6 +410,7 @@ const toWeightEntry = (row: Tables<'weight_entries'>): WeightEntry => {
     needsSync: false,
     weightKg: row.weight_kg,
     recordedAt: row.recorded_at,
+    updatedAt: new Date().toISOString(),
   }
 }
 
