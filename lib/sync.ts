@@ -75,11 +75,16 @@ const notifySyncListeners = (): void => {
  * synchronization is started. Instead, the promise for the existing
  * synchronization is returned so callers can wait for it to finish.
  *
- * This ensures that synchronization requests are deduplicated while
- * still allowing callers to reliably await the active synchronization.
+ * Synchronization requests are therefore deduplicated: multiple requests
+ * made while a synchronization is in progress share the same
+ * synchronization cycle.
  *
- * @returns A promise that resolves when the requested synchronization
- * finishes, or when an already-running synchronization finishes.
+ * Requests are not coalesced. If a change occurs after the relevant
+ * part of the active synchronization has already completed, that change
+ * is not guaranteed to trigger another synchronization automatically.
+ *
+ * @returns A promise that resolves when the active synchronization
+ * finishes.
  */
 export const requestSync = (): Promise<void> => {
   if (syncPromise) return syncPromise
