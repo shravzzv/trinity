@@ -25,22 +25,16 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { MIN_TARGET_WEIGHT_KG, MAX_TARGET_WEIGHT_KG } from '@/constants/weight'
 import { xpRewards } from '@/constants/gamification'
+import { useWeightContext } from '@/providers/weight-provider'
+import { useGamificationContext } from '@/providers/gamification-provider'
 
-interface TargetWeightCardContentProps {
-  clear: () => void
-  targetWeight: number | null
-  awardXp: (amount: number) => void
-  update: (newTarget: number) => void
-}
-
-export default function TargetWeightCardContent({
-  clear,
-  update,
-  awardXp,
-  targetWeight,
-}: TargetWeightCardContentProps) {
+export default function TargetWeightCardContent() {
   const [input, setInput] = useState<number | null>(null)
   const [open, setOpen] = useState(false)
+
+  const { targetWeightKg, clearTargetWeight, updateTargetWeight } =
+    useWeightContext()
+  const { awardXp } = useGamificationContext()
 
   const isValidWeight =
     input !== null &&
@@ -48,19 +42,21 @@ export default function TargetWeightCardContent({
     input >= MIN_TARGET_WEIGHT_KG &&
     input <= MAX_TARGET_WEIGHT_KG
   const hasInvalidWeight = input !== null && !isValidWeight
-  const isDirty = !Object.is(input, targetWeight)
+  const isDirty = !Object.is(input, targetWeightKg)
 
   const handleSave = () => {
     if (!isValidWeight || !isDirty || input === null) return
 
-    update(input)
+    updateTargetWeight(input)
     setOpen(false)
     awardXp(xpRewards.setTargetWeight)
-    toast.success(`Target weight ${targetWeight === null ? 'set' : 'updated'}`)
+    toast.success(
+      `Target weight ${targetWeightKg === null ? 'set' : 'updated'}`,
+    )
   }
 
   const handleClear = () => {
-    clear()
+    clearTargetWeight()
     setOpen(false)
     toast.success('Target weight deleted')
   }
@@ -76,13 +72,13 @@ export default function TargetWeightCardContent({
             onOpenChange={(open) => {
               setOpen(open)
 
-              if (open) setInput(targetWeight)
+              if (open) setInput(targetWeightKg)
               else setInput(null)
             }}
           >
             <DialogTrigger asChild>
-              <Button variant={targetWeight ? 'outline' : 'default'}>
-                {targetWeight ? (
+              <Button variant={targetWeightKg ? 'outline' : 'default'}>
+                {targetWeightKg ? (
                   <>
                     <Pen />
                     Edit
@@ -99,7 +95,7 @@ export default function TargetWeightCardContent({
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>
-                  {targetWeight ? 'Edit' : 'Set'} target weight
+                  {targetWeightKg ? 'Edit' : 'Set'} target weight
                 </DialogTitle>
 
                 <DialogDescription>
@@ -150,7 +146,7 @@ export default function TargetWeightCardContent({
               </Field>
 
               <DialogFooter>
-                {targetWeight && (
+                {targetWeightKg && (
                   <Button
                     variant='ghost'
                     className='text-destructive hover:text-destructive hover:bg-destructive/20 dark:hover:bg-destructive/30'
@@ -179,11 +175,11 @@ export default function TargetWeightCardContent({
       </CardHeader>
 
       <CardContent>
-        {targetWeight ? (
+        {targetWeightKg ? (
           <div className='flex items-center gap-2'>
             <Target className='text-muted-foreground size-5 shrink-0' />
             <p className='text-2xl font-semibold'>
-              {targetWeight.toFixed(1)} kg
+              {targetWeightKg.toFixed(1)} kg
             </p>
           </div>
         ) : (
