@@ -5,4 +5,5 @@ export interface WeightEntry {
   weightKg: number
   recordedAt: string
   needsSync: boolean
+  updatedAt: string
 }

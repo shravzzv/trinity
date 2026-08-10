@@ -49,6 +49,7 @@ const fasts: Fast[] = [
     streakStatus: 'completed',
     planId: '',
     needsSync: false,
+    updatedAt: new Date().toISOString(),
   },
   {
     id: '2',
@@ -57,6 +58,7 @@ const fasts: Fast[] = [
     streakStatus: 'completed',
     planId: '',
     needsSync: false,
+    updatedAt: new Date().toISOString(),
   },
 ]
 
@@ -173,14 +175,16 @@ describe('FastingStatisticsContent', () => {
       new Date('2026-01-01T18:00:00.000Z'),
     )
 
-    expect(addFast).toHaveBeenCalledWith({
-      id: 'test-uuid',
-      startedAt: '2026-01-01T10:00:00.000Z',
-      endedAt: '2026-01-01T18:00:00.000Z',
-      planId: '16:8',
-      streakStatus: 'missed',
-      needsSync: true,
-    })
+    expect(addFast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'test-uuid',
+        startedAt: '2026-01-01T10:00:00.000Z',
+        endedAt: '2026-01-01T18:00:00.000Z',
+        planId: '16:8',
+        streakStatus: 'missed',
+        needsSync: true,
+      }),
+    )
   })
 
   it('should pass all existing fasts to FastDialog', () => {

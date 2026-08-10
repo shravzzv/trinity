@@ -1,13 +1,9 @@
 'use client'
 
 import { INITIAL_ANCHORS } from '@/constants/gamification'
-import {
-  ANCHORS_STORAGE_KEY,
-  STREAK_STORAGE_KEY,
-  XP_STORAGE_KEY,
-} from '@/constants/storage-keys'
 import { getLevelForXp, shouldCelebrateStreak } from '@/lib/gamification'
-import { markProfileNeedsSync, requestSync } from '@/lib/sync'
+import { getProfile, updateProfile } from '@/lib/profile'
+import { requestSync, subscribeToSync } from '@/lib/sync'
 import type { Achievement } from '@/types/gamification'
 import { useEffect, useState } from 'react'
 
@@ -105,136 +101,117 @@ export const useGamification = (): UseGamificationResult => {
     setAchievements((prev) => [...prev, achievement])
   }
 
+  const dismissAchievement = () => {
+    setAchievements((prev) => prev.slice(1))
+  }
+
   const awardXp = (amount: number) => {
-    setXp((prev) => {
-      const next = prev + amount
-      const previousLevel = getLevelForXp(prev)
-      const nextLevel = getLevelForXp(next)
+    const previousXp = getProfile().xp
 
-      if (nextLevel > previousLevel) {
-        queueAchievement({
-          type: 'level',
-          title: `Level ${nextLevel} reached!`,
-          description:
-            'Keep going. Every fast brings you closer to your next milestone.',
-        })
-      }
+    const updatedProfile = updateProfile((profile) => ({
+      ...profile,
+      xp: profile.xp + amount,
+      needsSync: true,
+    }))
 
-      return next
-    })
+    const nextXp = updatedProfile.xp
+    const previousLevel = getLevelForXp(previousXp)
+    const nextLevel = getLevelForXp(nextXp)
+
+    setXp(nextXp)
+
+    if (nextLevel > previousLevel) {
+      queueAchievement({
+        type: 'level',
+        title: `Level ${nextLevel} reached!`,
+        description:
+          'Keep going. Every fast brings you closer to your next milestone.',
+      })
+    }
+
+    void requestSync()
   }
 
   const awardAnchor = () => {
-    setAnchors((prev) => prev + 1)
+    const updatedProfile = updateProfile((profile) => ({
+      ...profile,
+      anchors: profile.anchors + 1,
+      needsSync: true,
+    }))
+
+    setAnchors(updatedProfile.anchors)
 
     queueAchievement({
       type: 'anchor',
       title: 'Anchor earned!',
       description: 'You earned an Anchor by maintaining your fasting streak.',
     })
+
+    void requestSync()
   }
 
   const spendAnchor = () => {
-    setAnchors((prev) => {
-      if (prev < 1) return prev
-      return prev - 1
-    })
+    const updatedProfile = updateProfile((profile) => ({
+      ...profile,
+      anchors: Math.max(profile.anchors - 1, 0),
+      needsSync: true,
+    }))
+
+    setAnchors(updatedProfile.anchors)
+
+    void requestSync()
   }
 
   const incrementStreak = () => {
-    setStreak((prev) => {
-      const next = prev + 1
+    const updatedProfile = updateProfile((profile) => ({
+      ...profile,
+      streak: profile.streak + 1,
+      needsSync: true,
+    }))
 
-      if (shouldCelebrateStreak(next)) {
-        queueAchievement({
-          type: 'streak',
-          title: `${next} day streak!`,
-          description:
-            'Your consistency is paying off. Keep the momentum going!',
-        })
-      }
+    const nextStreak = updatedProfile.streak
+    setStreak(nextStreak)
 
-      return next
-    })
-  }
+    if (shouldCelebrateStreak(nextStreak)) {
+      queueAchievement({
+        type: 'streak',
+        title: `${nextStreak} day streak!`,
+        description: 'Your consistency is paying off. Keep the momentum going!',
+      })
+    }
 
-  const dismissAchievement = () => {
-    setAchievements((prev) => prev.slice(1))
+    void requestSync()
   }
 
   const resetStreak = () => {
-    setStreak(0)
+    const updatedProfile = updateProfile((profile) => ({
+      ...profile,
+      streak: 0,
+      needsSync: true,
+    }))
+
+    setStreak(updatedProfile.streak)
+
+    void requestSync()
   }
 
-  const hydrateXp = () => {
-    try {
-      const saved = localStorage.getItem(XP_STORAGE_KEY)
-      if (!saved) return
+  const hydrateProfile = () => {
+    const profile = getProfile()
 
-      const xp = JSON.parse(saved) as number
-
-      const isValidXp = typeof xp === 'number'
-
-      if (!isValidXp) {
-        throw Error('XP in local storage corrupted')
-      }
-
-      setXp(xp)
-    } catch (error) {
-      console.error('Hydrating xp from local storage failed', error)
-      localStorage.removeItem(XP_STORAGE_KEY)
-    }
-  }
-
-  const hydrateStreak = () => {
-    try {
-      const saved = localStorage.getItem(STREAK_STORAGE_KEY)
-      if (!saved) return
-
-      const streak = JSON.parse(saved) as number
-
-      const isValidStreak = typeof streak === 'number'
-
-      if (!isValidStreak) {
-        throw Error('Streak in local storage corrupted')
-      }
-
-      setStreak(streak)
-    } catch (error) {
-      console.error('Hydrating streak from local storage failed', error)
-      localStorage.removeItem(STREAK_STORAGE_KEY)
-    }
-  }
-
-  const hydrateAnchors = () => {
-    try {
-      const saved = localStorage.getItem(ANCHORS_STORAGE_KEY)
-      if (!saved) return
-
-      const anchors = JSON.parse(saved) as number
-
-      const isValidAnchors = typeof anchors === 'number'
-
-      if (!isValidAnchors) {
-        throw Error('Anchors in local storage corrupted')
-      }
-
-      setAnchors(anchors)
-    } catch (error) {
-      console.error('Hydrating anchors from local storage failed', error)
-      localStorage.removeItem(ANCHORS_STORAGE_KEY)
-    }
+    setXp(profile.xp)
+    setStreak(profile.streak)
+    setAnchors(profile.anchors)
   }
 
   useEffect(() => {
-    const hydrate = () => {
+    const hydrate = async () => {
       try {
-        hydrateXp()
-        hydrateStreak()
-        hydrateAnchors()
+        hydrateProfile()
+
+        await requestSync()
+        hydrateProfile()
       } finally {
         setIsLoading(false)
-        void requestSync()
       }
     }
 
@@ -242,40 +219,14 @@ export const useGamification = (): UseGamificationResult => {
   }, [])
 
   useEffect(() => {
-    if (isLoading) return
-
-    const syncXp = () => {
-      localStorage.setItem(XP_STORAGE_KEY, JSON.stringify(xp))
+    const listener = () => {
+      hydrateProfile()
     }
 
-    syncXp()
-    markProfileNeedsSync()
-    void requestSync()
-  }, [isLoading, xp])
+    const unsubscribe = subscribeToSync(listener)
 
-  useEffect(() => {
-    if (isLoading) return
-
-    const syncStreak = () => {
-      localStorage.setItem(STREAK_STORAGE_KEY, JSON.stringify(streak))
-    }
-
-    syncStreak()
-    markProfileNeedsSync()
-    void requestSync()
-  }, [isLoading, streak])
-
-  useEffect(() => {
-    if (isLoading) return
-
-    const syncAnchors = () => {
-      localStorage.setItem(ANCHORS_STORAGE_KEY, JSON.stringify(anchors))
-    }
-
-    syncAnchors()
-    markProfileNeedsSync()
-    void requestSync()
-  }, [anchors, isLoading])
+    return unsubscribe
+  }, [])
 
   return {
     xp,
