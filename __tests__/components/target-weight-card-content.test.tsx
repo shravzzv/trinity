@@ -2,25 +2,55 @@ import userEvent from '@testing-library/user-event'
 import { render, screen } from '@testing-library/react'
 import { toast } from 'sonner'
 import TargetWeightCardContent from '@/components/target-weight-card-content'
+import { useWeightContext } from '@/providers/weight-provider'
+import { useGamificationContext } from '@/providers/gamification-provider'
 
 jest.mock('sonner')
 
-const update = jest.fn()
-const clear = jest.fn()
-const mockAwardXp = jest.fn()
+jest.mock('@/providers/weight-provider', () => ({
+  useWeightContext: jest.fn(),
+}))
 
-const renderComponent = (
-  props: Partial<React.ComponentProps<typeof TargetWeightCardContent>> = {},
-) => {
-  render(
-    <TargetWeightCardContent
-      clear={clear}
-      update={update}
-      targetWeight={null}
-      awardXp={mockAwardXp}
-      {...props}
-    />,
-  )
+jest.mock('@/providers/gamification-provider', () => ({
+  useGamificationContext: jest.fn(),
+}))
+
+const mockUseWeightContext = jest.mocked(useWeightContext)
+const mockUseGamificationContext = jest.mocked(useGamificationContext)
+
+const updateTargetWeight = jest.fn()
+const clearTargetWeight = jest.fn()
+const awardXp = jest.fn()
+
+const renderComponent = (targetWeightKg: number | null = null) => {
+  mockUseWeightContext.mockReturnValue({
+    targetWeightKg,
+    updateTargetWeight,
+    clearTargetWeight,
+    // The component only uses these three values from the context.
+    entries: [],
+    addWeightEntry: jest.fn(),
+    deleteWeightEntry: jest.fn(),
+    updateWeightEntry: jest.fn(),
+    isLoading: false,
+  })
+
+  mockUseGamificationContext.mockReturnValue({
+    awardXp,
+    // The component only uses awardXp from this context.
+    xp: 0,
+    streak: 0,
+    anchors: 0,
+    isLoading: false,
+    awardAnchor: jest.fn(),
+    spendAnchor: jest.fn(),
+    incrementStreak: jest.fn(),
+    resetStreak: jest.fn(),
+    currentAchievement: null,
+    dismissAchievement: jest.fn(),
+  })
+
+  render(<TargetWeightCardContent />)
 }
 
 const openDialog = async (
@@ -54,9 +84,7 @@ describe('TargetWeightCardContent', () => {
   })
 
   it('renders the current target weight', () => {
-    renderComponent({
-      targetWeight: 58,
-    })
+    renderComponent(58)
 
     expect(screen.getByText('58.0 kg')).toBeInTheDocument()
     expect(
@@ -84,9 +112,7 @@ describe('TargetWeightCardContent', () => {
   it('prefills the input with the existing target weight', async () => {
     const user = userEvent.setup()
 
-    renderComponent({
-      targetWeight: 58,
-    })
+    renderComponent(58)
 
     await openDialog(user)
 
@@ -100,9 +126,7 @@ describe('TargetWeightCardContent', () => {
   it('disables save when nothing changed', async () => {
     const user = userEvent.setup()
 
-    renderComponent({
-      targetWeight: 58,
-    })
+    renderComponent(58)
 
     await openDialog(user)
 
@@ -171,17 +195,16 @@ describe('TargetWeightCardContent', () => {
       }),
     )
 
-    expect(update).toHaveBeenCalledTimes(1)
-    expect(update).toHaveBeenCalledWith(58)
+    expect(updateTargetWeight).toHaveBeenCalledTimes(1)
+    expect(updateTargetWeight).toHaveBeenCalledWith(58)
+    expect(awardXp).toHaveBeenCalledTimes(1)
     expect(toast.success).toHaveBeenCalledWith('Target weight set')
   })
 
   it('shows update toast when editing', async () => {
     const user = userEvent.setup()
 
-    renderComponent({
-      targetWeight: 60,
-    })
+    renderComponent(60)
 
     await openDialog(user)
 
@@ -198,8 +221,9 @@ describe('TargetWeightCardContent', () => {
       }),
     )
 
-    expect(update).toHaveBeenCalledTimes(1)
-    expect(update).toHaveBeenCalledWith(58)
+    expect(updateTargetWeight).toHaveBeenCalledTimes(1)
+    expect(updateTargetWeight).toHaveBeenCalledWith(58)
+    expect(awardXp).toHaveBeenCalledTimes(1)
     expect(toast.success).toHaveBeenCalledWith('Target weight updated')
   })
 
@@ -216,8 +240,9 @@ describe('TargetWeightCardContent', () => {
 
     await user.type(input, '58{Enter}')
 
-    expect(update).toHaveBeenCalledTimes(1)
-    expect(update).toHaveBeenCalledWith(58)
+    expect(updateTargetWeight).toHaveBeenCalledTimes(1)
+    expect(updateTargetWeight).toHaveBeenCalledWith(58)
+    expect(awardXp).toHaveBeenCalledTimes(1)
     expect(toast.success).toHaveBeenCalledWith('Target weight set')
   })
 
@@ -234,16 +259,15 @@ describe('TargetWeightCardContent', () => {
 
     await user.type(input, '1{Enter}')
 
-    expect(update).not.toHaveBeenCalled()
+    expect(updateTargetWeight).not.toHaveBeenCalled()
+    expect(awardXp).not.toHaveBeenCalled()
     expect(toast.success).not.toHaveBeenCalled()
   })
 
   it('does not save when the value is unchanged', async () => {
     const user = userEvent.setup()
 
-    renderComponent({
-      targetWeight: 58,
-    })
+    renderComponent(58)
 
     await openDialog(user)
 
@@ -254,21 +278,21 @@ describe('TargetWeightCardContent', () => {
       '{Enter}',
     )
 
-    expect(update).not.toHaveBeenCalled()
+    expect(updateTargetWeight).not.toHaveBeenCalled()
+    expect(awardXp).not.toHaveBeenCalled()
   })
 
   it('resets the input when the dialog is closed', async () => {
     const user = userEvent.setup()
 
-    renderComponent({
-      targetWeight: 58,
-    })
+    renderComponent(58)
 
     await openDialog(user)
 
     const input = screen.getByRole('spinbutton', {
       name: /^weight$/i,
     })
+
     const closeButtons = screen.getAllByRole('button', {
       name: /^close$/i,
     })
@@ -303,6 +327,7 @@ describe('TargetWeightCardContent', () => {
       }),
       '58',
     )
+
     await user.click(closeButtons.at(-1)!)
 
     await openDialog(user)
@@ -312,5 +337,22 @@ describe('TargetWeightCardContent', () => {
         name: /^weight$/i,
       }),
     ).toHaveValue(null)
+  })
+
+  it('clears the target weight', async () => {
+    const user = userEvent.setup()
+
+    renderComponent(58)
+
+    await openDialog(user)
+
+    await user.click(
+      screen.getByRole('button', {
+        name: /delete target weight/i,
+      }),
+    )
+
+    expect(clearTargetWeight).toHaveBeenCalledTimes(1)
+    expect(toast.success).toHaveBeenCalledWith('Target weight deleted')
   })
 })
