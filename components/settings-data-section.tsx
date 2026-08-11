@@ -1,18 +1,33 @@
 'use client'
 
 import { RotateCcw } from 'lucide-react'
+import { useState } from 'react'
+import { toast } from 'sonner'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Button } from './ui/button'
 import { Card, CardContent } from './ui/card'
 import { Separator } from './ui/separator'
-import { useFastingContext } from '@/providers/fasting-provider'
-import { useState } from 'react'
 import { Spinner } from './ui/spinner'
+import { useFastingContext } from '@/providers/fasting-provider'
 import { useWeightContext } from '@/providers/weight-provider'
-import { toast } from 'sonner'
 
 export default function SettingsDataSection() {
   const [isFastingResetLoading, setIsFastingResetLoading] = useState(false)
-  const [isWeightsResetLoading, setIsWeightsResetLoading] = useState(false)
+  const [isWeightResetLoading, setIsWeightResetLoading] = useState(false)
+  const [isFastingResetDialogOpen, setIsFastingResetDialogOpen] =
+    useState(false)
+  const [isWeightResetDialogOpen, setIsWeightResetDialogOpen] = useState(false)
 
   const { resetFastingProgress } = useFastingContext()
   const { resetWeightProgress } = useWeightContext()
@@ -22,6 +37,7 @@ export default function SettingsDataSection() {
 
     try {
       await resetFastingProgress()
+      setIsFastingResetDialogOpen(false)
       toast.success('Fasting progress has been reset')
     } finally {
       setIsFastingResetLoading(false)
@@ -29,13 +45,14 @@ export default function SettingsDataSection() {
   }
 
   const handleWeightsReset = async () => {
-    setIsWeightsResetLoading(true)
+    setIsWeightResetLoading(true)
 
     try {
       await resetWeightProgress()
+      setIsWeightResetDialogOpen(false)
       toast.success('Weight progress has been reset')
     } finally {
-      setIsWeightsResetLoading(false)
+      setIsWeightResetLoading(false)
     }
   }
 
@@ -53,24 +70,62 @@ export default function SettingsDataSection() {
               </p>
             </div>
 
-            <Button
-              variant='outline'
-              size='sm'
-              onClick={handleFastsReset}
-              disabled={isFastingResetLoading}
+            <AlertDialog
+              open={isFastingResetDialogOpen}
+              onOpenChange={(open) => {
+                if (!isFastingResetLoading) {
+                  setIsFastingResetDialogOpen(open)
+                }
+              }}
             >
-              {isFastingResetLoading ? (
-                <>
-                  <Spinner />
-                  Resetting...
-                </>
-              ) : (
-                <>
+              <AlertDialogTrigger asChild>
+                <Button variant='outline' size='sm'>
                   <RotateCcw />
                   Reset
-                </>
-              )}
-            </Button>
+                </Button>
+              </AlertDialogTrigger>
+
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogMedia>
+                    <RotateCcw />
+                  </AlertDialogMedia>
+
+                  <AlertDialogTitle>
+                    Reset all your fasting data?
+                  </AlertDialogTitle>
+
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete
+                    your fasting data from your servers.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={isFastingResetLoading}>
+                    Cancel
+                  </AlertDialogCancel>
+
+                  <AlertDialogAction
+                    variant='destructive'
+                    disabled={isFastingResetLoading}
+                    onClick={(event) => {
+                      event.preventDefault()
+                      void handleFastsReset()
+                    }}
+                  >
+                    {isFastingResetLoading ? (
+                      <>
+                        <Spinner />
+                        Resetting...
+                      </>
+                    ) : (
+                      'Reset fasting data'
+                    )}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
 
           <Separator />
@@ -83,24 +138,62 @@ export default function SettingsDataSection() {
               </p>
             </div>
 
-            <Button
-              variant='outline'
-              size='sm'
-              onClick={handleWeightsReset}
-              disabled={isWeightsResetLoading}
+            <AlertDialog
+              open={isWeightResetDialogOpen}
+              onOpenChange={(open) => {
+                if (!isWeightResetLoading) {
+                  setIsWeightResetDialogOpen(open)
+                }
+              }}
             >
-              {isWeightsResetLoading ? (
-                <>
-                  <Spinner />
-                  Resetting...
-                </>
-              ) : (
-                <>
+              <AlertDialogTrigger asChild>
+                <Button variant='outline' size='sm'>
                   <RotateCcw />
                   Reset
-                </>
-              )}
-            </Button>
+                </Button>
+              </AlertDialogTrigger>
+
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogMedia>
+                    <RotateCcw />
+                  </AlertDialogMedia>
+
+                  <AlertDialogTitle>
+                    Reset all your weight data?
+                  </AlertDialogTitle>
+
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete
+                    your weight data from your servers.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={isWeightResetLoading}>
+                    Cancel
+                  </AlertDialogCancel>
+
+                  <AlertDialogAction
+                    variant='destructive'
+                    disabled={isWeightResetLoading}
+                    onClick={(event) => {
+                      event.preventDefault()
+                      void handleWeightsReset()
+                    }}
+                  >
+                    {isWeightResetLoading ? (
+                      <>
+                        <Spinner />
+                        Resetting...
+                      </>
+                    ) : (
+                      'Reset weight data'
+                    )}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </CardContent>
       </Card>
