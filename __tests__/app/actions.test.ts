@@ -1,4 +1,5 @@
 import {
+  deleteAccount,
   sendPasswordResetEmail,
   signInWithProvider,
   signup,
@@ -7,9 +8,14 @@ import {
 import { getSiteURL } from '@/lib/links'
 import { createClient } from '@/supabase/server'
 import { redirect } from 'next/navigation'
+import { createAdminClient } from '@/supabase/admin'
 
 jest.mock('@/supabase/server', () => ({
   createClient: jest.fn(),
+}))
+
+jest.mock('@/supabase/admin', () => ({
+  createAdminClient: jest.fn(),
 }))
 
 jest.mock('next/navigation', () => ({
@@ -325,5 +331,81 @@ describe('updatePassword', () => {
     await updatePassword(formData)
 
     expect(redirect).not.toHaveBeenCalled()
+  })
+})
+
+describe('deleteAccount', () => {
+  const getUserMock = jest.fn()
+  const deleteUserMock = jest.fn()
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+
+    ;(createClient as jest.Mock).mockResolvedValue({
+      auth: {
+        getUser: getUserMock,
+      },
+    })
+
+    ;(createAdminClient as jest.Mock).mockReturnValue({
+      auth: {
+        admin: {
+          deleteUser: deleteUserMock,
+        },
+      },
+    })
+  })
+
+  it('throws when the user is not authenticated', async () => {
+    getUserMock.mockResolvedValue({
+      data: {
+        user: null,
+      },
+    })
+
+    await expect(deleteAccount()).rejects.toThrow('Not authenticated')
+
+    expect(createAdminClient).not.toHaveBeenCalled()
+    expect(deleteUserMock).not.toHaveBeenCalled()
+  })
+
+  it('deletes the currently authenticated user', async () => {
+    getUserMock.mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+        },
+      },
+    })
+
+    deleteUserMock.mockResolvedValue({
+      error: null,
+    })
+
+    await expect(deleteAccount()).resolves.toBeUndefined()
+
+    expect(createAdminClient).toHaveBeenCalledTimes(1)
+    expect(deleteUserMock).toHaveBeenCalledTimes(1)
+    expect(deleteUserMock).toHaveBeenCalledWith('user-123')
+  })
+
+  it('propagates the error when account deletion fails', async () => {
+    const error = new Error('Failed to delete user')
+
+    getUserMock.mockResolvedValue({
+      data: {
+        user: {
+          id: 'user-123',
+        },
+      },
+    })
+
+    deleteUserMock.mockResolvedValue({
+      error,
+    })
+
+    await expect(deleteAccount()).rejects.toThrow(error)
+
+    expect(deleteUserMock).toHaveBeenCalledWith('user-123')
   })
 })

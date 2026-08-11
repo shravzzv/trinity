@@ -1,84 +1,89 @@
 'use client'
 
-import FastingPlanCard from '@/components/fasting-plan-card'
-import TargetWeightCard from '@/components/target-weight-card'
-import { useFastingContext } from '@/providers/fasting-provider'
-import { useWeightContext } from '@/providers/weight-provider'
-import { useGamificationContext } from '@/providers/gamification-provider'
-import ThemeToggleCard from '@/components/theme-toggle-card'
-import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { BookOpenText, LifeBuoy, LogOut } from 'lucide-react'
+import { motion, type Variants } from 'motion/react'
+import { siteLinks } from '@/constants/navigation'
+import SettingsPreferencesSection from '@/components/settings-preferences-section'
+import SettingsFastingSection from '@/components/settings-fasting-section'
+import SettingsWeightSection from '@/components/settings-weight-section'
+import SettingsAccountSection from '@/components/settings-account-section'
+import SettingsDataSection from '@/components/settings-data-section'
+import SettingsDangerZone from '@/components/settings-danger-zone'
 import { useAuthContext } from '@/providers/auth-provider'
-import { Card, CardContent } from '@/components/ui/card'
-import { signOut } from '@/lib/auth'
+
+const containerVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.06,
+    },
+  },
+}
+
+const itemVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 8,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.3,
+      ease: 'easeOut',
+    },
+  },
+}
 
 export default function Page() {
-  const {
-    planId,
-    updatePlanId,
-    preferredFastStartTime,
-    clearPreferredFastStartTime,
-    updatePreferredFastStartTime,
-    isLoading: isFastingStateLoading,
-  } = useFastingContext()
-
-  const {
-    targetWeightKg,
-    clearTargetWeight,
-    updateTargetWeight,
-    isLoading: isWeightStateLoading,
-  } = useWeightContext()
-
-  const { awardXp } = useGamificationContext()
   const { isAuthenticated } = useAuthContext()
 
   return (
-    <div className='mx-auto w-full max-w-xl space-y-6'>
-      <ThemeToggleCard />
+    <motion.div
+      className='mx-auto w-full max-w-xl space-y-6'
+      variants={containerVariants}
+      initial='hidden'
+      animate='visible'
+    >
+      <motion.div variants={itemVariants}>
+        <SettingsPreferencesSection />
+      </motion.div>
 
-      <FastingPlanCard
-        planId={planId}
-        awardXp={awardXp}
-        updatePlanId={updatePlanId}
-        isLoading={isFastingStateLoading}
-        preferredFastStartTime={preferredFastStartTime}
-        clearPreferredFastStartTime={clearPreferredFastStartTime}
-        updatePreferredFastStartTime={updatePreferredFastStartTime}
-      />
+      <motion.div variants={itemVariants}>
+        <SettingsFastingSection />
+      </motion.div>
 
-      <TargetWeightCard
-        awardXp={awardXp}
-        clear={clearTargetWeight}
-        update={updateTargetWeight}
-        targetWeight={targetWeightKg}
-        isLoading={isWeightStateLoading}
-      />
+      <motion.div variants={itemVariants}>
+        <SettingsWeightSection />
+      </motion.div>
 
-      <Card>
-        <CardContent className='flex items-center justify-evenly'>
-          <Button asChild>
-            <Link href='/docs'>
-              <BookOpenText />
-              Docs
+      <motion.div variants={itemVariants}>
+        <SettingsAccountSection />
+      </motion.div>
+
+      <motion.div variants={itemVariants}>
+        <SettingsDataSection />
+      </motion.div>
+
+      {isAuthenticated && (
+        <motion.div variants={itemVariants}>
+          <SettingsDangerZone />
+        </motion.div>
+      )}
+
+      <motion.div variants={itemVariants}>
+        <div className='text-muted-foreground flex flex-wrap items-center justify-between gap-2 px-2'>
+          {siteLinks.map((link) => (
+            <Link
+              key={link.name}
+              href={link.href}
+              className='hover:text-primary text-sm underline underline-offset-2'
+            >
+              {link.name}
             </Link>
-          </Button>
-
-          <Button asChild>
-            <Link href='/support'>
-              <LifeBuoy />
-              Support
-            </Link>
-          </Button>
-
-          {isAuthenticated && (
-            <Button onClick={() => signOut('local')}>
-              <LogOut />
-              Sign out
-            </Button>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+          ))}
+        </div>
+      </motion.div>
+    </motion.div>
   )
 }

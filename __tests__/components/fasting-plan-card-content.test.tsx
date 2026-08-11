@@ -1,11 +1,22 @@
-import FastingPlanCard from '@/components/fasting-plan-card'
 import { fastingPlans } from '@/constants/fasting-plans'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { toast } from 'sonner'
 import PreferredFastTimeDialog from '@/components/preferred-fast-time-dialog'
+import FastingPlanCardContent from '@/components/fasting-plan-card-content'
+import { useFastingContext } from '@/providers/fasting-provider'
+import { useGamificationContext } from '@/providers/gamification-provider'
 
 jest.mock('sonner')
+
+jest.mock('@/providers/fasting-provider', () => ({
+  useFastingContext: jest.fn(),
+}))
+
+jest.mock('@/providers/gamification-provider', () => ({
+  useGamificationContext: jest.fn(),
+}))
+
 jest.mock('@/lib/fasting', () => ({
   formatPreferredTime: jest.fn(() => '6:00 PM'),
   getPreferredFastSchedule: jest.fn(() => ({
@@ -45,41 +56,83 @@ jest.mock('@/components/preferred-fast-time-dialog', () => {
   }
 })
 
+const mockUseFastingContext = jest.mocked(useFastingContext)
+const mockUseGamificationContext = jest.mocked(useGamificationContext)
+
 const mockUpdatePlanId = jest.fn()
 const mockUpdatePreferredFastStartTime = jest.fn()
 const mockClearPreferredFastStartTime = jest.fn()
 const mockAwardXp = jest.fn()
 
-const renderFastingPlanCard = (props = {}) =>
-  render(
-    <FastingPlanCard
-      planId='16:8'
-      isLoading={false}
-      preferredFastStartTime={null}
-      awardXp={mockAwardXp}
-      updatePlanId={mockUpdatePlanId}
-      updatePreferredFastStartTime={mockUpdatePreferredFastStartTime}
-      clearPreferredFastStartTime={mockClearPreferredFastStartTime}
-      {...props}
-    />,
-  )
+const renderFastingPlanCard = ({
+  planId = '16:8',
+  preferredFastStartTime = null,
+}: {
+  planId?: '16:8' | '20:4' | '18:6' | '23:1' | null
+  preferredFastStartTime?: {
+    hour: number
+    minute: number
+  } | null
+} = {}) => {
+  mockUseFastingContext.mockReturnValue({
+    planId,
+    preferredFastStartTime,
+    updatePlanId: mockUpdatePlanId,
+    updatePreferredFastStartTime: mockUpdatePreferredFastStartTime,
+    clearPreferredFastStartTime: mockClearPreferredFastStartTime,
+    // Unused by the component
+    session: null,
+    fasts: [],
+    isLoading: false,
+    startFasting: jest.fn(),
+    addFast: jest.fn(),
+    endFasting: jest.fn(),
+    deleteFast: jest.fn(),
+    updateFast: jest.fn(),
+    updateSessionStartedAt: jest.fn(),
+    startAnchoredSession: jest.fn(),
+  })
+
+  mockUseGamificationContext.mockReturnValue({
+    awardXp: mockAwardXp,
+    // The component only uses awardXp from this context.
+    xp: 0,
+    streak: 0,
+    anchors: 0,
+    isLoading: false,
+    awardAnchor: jest.fn(),
+    spendAnchor: jest.fn(),
+    incrementStreak: jest.fn(),
+    resetStreak: jest.fn(),
+    currentAchievement: null,
+    dismissAchievement: jest.fn(),
+  })
+
+  render(<FastingPlanCardContent />)
+}
 
 describe('Fasting plan card', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-  })
 
-  it('should render the loading skeleton', () => {
-    renderFastingPlanCard({
-      isLoading: true,
+    const { getPreferredFastSchedule } = jest.requireMock('@/lib/fasting')
+
+    getPreferredFastSchedule.mockReturnValue({
+      startsAt: {
+        hour: 18,
+        minute: 0,
+      },
+      endsAt: {
+        hour: 10,
+        minute: 0,
+      },
+      endsNextDay: true,
     })
-
-    expect(screen.getByText(/fasting plan/i)).toBeInTheDocument()
-    expect(screen.queryByText('16:8')).not.toBeInTheDocument()
   })
 
   it('should render the fasting plan heading', () => {
     renderFastingPlanCard()
+
     expect(screen.getByText('Fasting plan')).toBeInTheDocument()
   })
 
@@ -101,11 +154,17 @@ describe('Fasting plan card', () => {
 
   it('should render an edit button', () => {
     renderFastingPlanCard()
-    expect(screen.getByRole('button', { name: /edit/i })).toBeInTheDocument()
+
+    expect(
+      screen.getByRole('button', {
+        name: /edit/i,
+      }),
+    ).toBeInTheDocument()
   })
 
   it('should render the fasting plan title and description', () => {
     renderFastingPlanCard()
+
     expect(screen.getByText('16:8')).toBeInTheDocument()
     expect(
       screen.getByText('16 hours fasting with 8 hours eating window.'),
@@ -115,7 +174,10 @@ describe('Fasting plan card', () => {
   it('should open the dialog when edit button is clicked', async () => {
     renderFastingPlanCard()
 
-    const button = screen.getByRole('button', { name: /edit/i })
+    const button = screen.getByRole('button', {
+      name: /edit/i,
+    })
+
     const user = userEvent.setup()
     await user.click(button)
 
@@ -125,9 +187,13 @@ describe('Fasting plan card', () => {
   it('should display all the fasting plans in the dialog', async () => {
     renderFastingPlanCard()
 
-    const button = screen.getByRole('button', { name: /edit/i })
+    const button = screen.getByRole('button', {
+      name: /edit/i,
+    })
+
     const user = userEvent.setup()
     await user.click(button)
+
     const dialog = screen.getByRole('dialog')
 
     fastingPlans.forEach((plan) => {
@@ -143,10 +209,16 @@ describe('Fasting plan card', () => {
     renderFastingPlanCard()
 
     const user = userEvent.setup()
-    await user.click(screen.getByRole('button', { name: /edit/i }))
+    await user.click(
+      screen.getByRole('button', {
+        name: /edit/i,
+      }),
+    )
 
     const dialog = screen.getByRole('dialog')
-    const saveButton = within(dialog).getByRole('button', { name: /save/i })
+    const saveButton = within(dialog).getByRole('button', {
+      name: /save/i,
+    })
 
     expect(saveButton).toBeInTheDocument()
     expect(saveButton).toBeDisabled()
@@ -156,23 +228,36 @@ describe('Fasting plan card', () => {
     renderFastingPlanCard()
 
     const user = userEvent.setup()
-    await user.click(screen.getByRole('button', { name: /edit/i }))
+    await user.click(
+      screen.getByRole('button', {
+        name: /edit/i,
+      }),
+    )
 
     const dialog = screen.getByRole('dialog')
-    const saveButton = within(dialog).getByRole('button', { name: /save/i })
+    const saveButton = within(dialog).getByRole('button', {
+      name: /save/i,
+    })
 
     await user.click(within(dialog).getByText('20:4'))
+
     expect(saveButton).toBeEnabled()
   })
 
-  it('should call setPlan when save is clicked', async () => {
+  it('should call updatePlanId when save is clicked', async () => {
     renderFastingPlanCard()
 
     const user = userEvent.setup()
-    await user.click(screen.getByRole('button', { name: /edit/i }))
+    await user.click(
+      screen.getByRole('button', {
+        name: /edit/i,
+      }),
+    )
 
     const dialog = screen.getByRole('dialog')
-    const saveButton = within(dialog).getByRole('button', { name: /save/i })
+    const saveButton = within(dialog).getByRole('button', {
+      name: /save/i,
+    })
 
     await user.click(within(dialog).getByText('20:4'))
     await user.click(saveButton)
@@ -184,10 +269,16 @@ describe('Fasting plan card', () => {
     renderFastingPlanCard()
 
     const user = userEvent.setup()
-    await user.click(screen.getByRole('button', { name: /edit/i }))
+    await user.click(
+      screen.getByRole('button', {
+        name: /edit/i,
+      }),
+    )
 
     const dialog = screen.getByRole('dialog')
-    const saveButton = within(dialog).getByRole('button', { name: /save/i })
+    const saveButton = within(dialog).getByRole('button', {
+      name: /save/i,
+    })
 
     await user.click(within(dialog).getByText('20:4'))
     await user.click(saveButton)
@@ -199,7 +290,10 @@ describe('Fasting plan card', () => {
     renderFastingPlanCard()
 
     const user = userEvent.setup()
-    const editButton = screen.getByRole('button', { name: /edit/i })
+    const editButton = screen.getByRole('button', {
+      name: /edit/i,
+    })
+
     await user.click(editButton)
 
     const dialog = screen.getByRole('dialog')
@@ -218,10 +312,11 @@ describe('Fasting plan card', () => {
       }),
     ).toHaveValue('20:4')
 
-    await user.keyboard('{Escape}') // close dialog
+    await user.keyboard('{Escape}')
     await user.click(editButton)
 
     const reopenedDialog = screen.getByRole('dialog')
+
     expect(
       within(reopenedDialog).getByRole('radio', {
         checked: true,
@@ -230,17 +325,78 @@ describe('Fasting plan card', () => {
   })
 
   it('should show a success toast after saving a new plan', async () => {
-    renderFastingPlanCard()
+    renderFastingPlanCard({
+      planId: '16:8',
+    })
 
     const user = userEvent.setup()
-    await user.click(screen.getByRole('button', { name: /edit/i }))
+
+    await user.click(
+      screen.getByRole('button', {
+        name: /edit/i,
+      }),
+    )
 
     const dialog = screen.getByRole('dialog')
 
     await user.click(within(dialog).getByText('20:4'))
-    await user.click(within(dialog).getByRole('button', { name: /save/i }))
+    await user.click(
+      within(dialog).getByRole('button', {
+        name: /save/i,
+      }),
+    )
 
     expect(toast.success).toHaveBeenCalledWith('Fasting plan updated')
+  })
+
+  it('should award XP when selecting a fasting plan for the first time', async () => {
+    renderFastingPlanCard({
+      planId: null,
+    })
+
+    const user = userEvent.setup()
+
+    await user.click(
+      screen.getByRole('button', {
+        name: /select plan/i,
+      }),
+    )
+
+    const dialog = screen.getByRole('dialog')
+
+    await user.click(within(dialog).getByText('20:4'))
+    await user.click(
+      within(dialog).getByRole('button', {
+        name: /save/i,
+      }),
+    )
+
+    expect(mockAwardXp).toHaveBeenCalledTimes(1)
+  })
+
+  it('should not award XP when updating an existing fasting plan', async () => {
+    renderFastingPlanCard({
+      planId: '16:8',
+    })
+
+    const user = userEvent.setup()
+
+    await user.click(
+      screen.getByRole('button', {
+        name: /edit/i,
+      }),
+    )
+
+    const dialog = screen.getByRole('dialog')
+
+    await user.click(within(dialog).getByText('20:4'))
+    await user.click(
+      within(dialog).getByRole('button', {
+        name: /save/i,
+      }),
+    )
+
+    expect(mockAwardXp).not.toHaveBeenCalled()
   })
 
   it('should render the preferred fasting schedule', () => {
@@ -298,6 +454,7 @@ describe('Fasting plan card', () => {
 
     expect(mockUpdatePreferredFastStartTime).toHaveBeenCalledWith(18, 0)
     expect(toast.success).toHaveBeenCalledWith('Fasting schedule updated')
+    expect(mockAwardXp).not.toHaveBeenCalled()
   })
 
   it('should create a preferred fasting schedule', async () => {
@@ -312,6 +469,7 @@ describe('Fasting plan card', () => {
     )
 
     expect(mockUpdatePreferredFastStartTime).toHaveBeenCalledWith(18, 0)
+    expect(mockAwardXp).toHaveBeenCalledTimes(1)
     expect(toast.success).toHaveBeenCalledWith('Fasting schedule set')
   })
 

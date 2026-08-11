@@ -63,6 +63,19 @@ interface UseWeightResult {
    * Resets the target weight to null.
    */
   clearTargetWeight: () => void
+
+  /**
+   * Resets all recorded weight progress.
+   *
+   * Synchronizes first to ensure local persistence contains the latest
+   * remote data, removes all weight entries locally, records their
+   * deletions for cloud synchronization, clears the in-memory weight history,
+   * and synchronizes again to propagate the deletions remotely.
+   *
+   * @returns A promise that resolves when the local reset and remote
+   * synchronization are complete.
+   */
+  resetWeightProgress: () => Promise<void>
 }
 
 /**
@@ -75,9 +88,12 @@ interface UseWeightResult {
  * - Restores previously saved state from persistent storage.
  * - Persists state changes automatically.
  * - Exposes actions for adding, updating, and deleting weight entries.
+ * - Allows all recorded weight progress to be reset.
  * - Ensures weight entries remain in ascending chronological order.
  *
  * The hook initializes with no recorded weights and no target weight.
+ * Once mounted, it attempts to hydrate state from persisted storage and
+ * synchronize it with the remote database.
  *
  * @returns The current weight state and actions for updating it.
  */
@@ -196,6 +212,28 @@ export const useWeight = (): UseWeightResult => {
     void requestSync()
   }
 
+  const resetWeightProgress = async (): Promise<void> => {
+    await requestSync()
+
+    const progress = await indexedDb.getWeightEntries()
+
+    await Promise.all([
+      ...progress.map((entry) => indexedDb.deleteWeightEntry(entry.id)),
+      ...progress.map((entry) =>
+        indexedDb.addPendingDelete({
+          id: uuidv4(),
+          entity: 'weightEntry',
+          entityId: entry.id,
+          deletedAt: new Date().toISOString(),
+        }),
+      ),
+    ])
+
+    setWeightEntries([])
+
+    await requestSync()
+  }
+
   const hydrateProfile = () => {
     const profile = getProfile()
 
@@ -253,6 +291,7 @@ export const useWeight = (): UseWeightResult => {
     deleteWeightEntry,
     clearTargetWeight,
     updateTargetWeight,
+    resetWeightProgress,
     entries: weightEntries,
   }
 }

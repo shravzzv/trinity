@@ -145,6 +145,19 @@ export interface UseFastingResult {
    * anchored fast when it ends.
    */
   startAnchoredSession: () => void
+
+  /**
+   * Resets all fasting progress.
+   *
+   * Synchronizes first to ensure local persistence contains the latest
+   * remote data, removes all fasting records locally, records their deletions
+   * for cloud synchronization, clears the in-memory fasting history, and
+   * synchronizes again to propagate the deletions remotely.
+   *
+   * @returns A promise that resolves when the local reset and remote
+   * synchronization are complete.
+   */
+  resetFastingProgress: () => Promise<void>
 }
 
 /**
@@ -384,6 +397,32 @@ export const useFasting = (): UseFastingResult => {
     }
   }
 
+  const resetFastingProgress = async (): Promise<void> => {
+    // First synchronize so local persistence contains the latest remote data.
+    await requestSync()
+
+    // Read the now-current local data.
+    const progress = await indexedDb.getFasts()
+
+    // Remove the records locally and record their deletions.
+    await Promise.all([
+      ...progress.map((fast) => indexedDb.deleteFast(fast.id)),
+      ...progress.map((fast) =>
+        indexedDb.addPendingDelete({
+          id: uuidv4(),
+          entity: 'fast',
+          entityId: fast.id,
+          deletedAt: new Date().toISOString(),
+        }),
+      ),
+    ])
+
+    setFasts([])
+
+    // Upload the pending deletions and synchronize again.
+    await requestSync()
+  }
+
   const hydrateProfile = () => {
     const profile = getProfile()
 
@@ -452,6 +491,7 @@ export const useFasting = (): UseFastingResult => {
     deleteFast,
     updateFast,
     updatePlanId,
+    resetFastingProgress,
     startAnchoredSession,
     updateSessionStartedAt,
     preferredFastStartTime,
