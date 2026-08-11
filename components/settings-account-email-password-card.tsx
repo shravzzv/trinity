@@ -76,7 +76,7 @@ export default function SettingsAccountEmailPasswordCard() {
                   onClick={() => email && sendVerificationEmail(email)}
                 >
                   <Send />
-                  Send verification email
+                  Resend verification email
                 </Button>
               </>
             )}
