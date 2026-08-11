@@ -23,6 +23,7 @@ import { FieldGroup } from './ui/field'
 import EmailInput from './email-input'
 import { Alert, AlertDescription, AlertTitle } from './ui/alert'
 import { Spinner } from './ui/spinner'
+import { getSiteURL } from '@/lib/links'
 
 const emailSchema = z.object({
   email: z.email({ error: 'A valid email is required' }),
@@ -52,7 +53,12 @@ export default function SettingsEmailAlertDialog() {
     setError(null)
 
     const supabase = createClient()
-    const { error } = await supabase.auth.updateUser({ email })
+    const emailRedirectTo = `${getSiteURL()}home`
+
+    const { error } = await supabase.auth.updateUser(
+      { email },
+      { emailRedirectTo },
+    )
 
     if (error) {
       setError(error.message)
