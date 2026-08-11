@@ -3,8 +3,37 @@
 import { UserX } from 'lucide-react'
 import { Button } from './ui/button'
 import { Card, CardContent } from './ui/card'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { useState } from 'react'
+import { deleteAccount } from '@/app/actions'
+import { Spinner } from './ui/spinner'
+import { signOut } from '@/lib/auth'
 
 export default function SettingsDangerZone() {
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [open, setOpen] = useState(false)
+
+  const handleDeleteAccount = async () => {
+    try {
+      setIsDeleting(true)
+      await deleteAccount()
+      await signOut('local')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   return (
     <section className='space-y-6'>
       <h2 className='text-destructive font-semibold'>Danger zone</h2>
@@ -19,10 +48,51 @@ export default function SettingsDangerZone() {
               </p>
             </div>
 
-            <Button variant='destructive' size='sm'>
-              <UserX />
-              Delete
-            </Button>
+            <AlertDialog
+              open={open}
+              onOpenChange={(open) => {
+                if (isDeleting) return
+                setOpen(open)
+              }}
+            >
+              <AlertDialogTrigger asChild>
+                <Button variant='destructive' size='sm'>
+                  <UserX />
+                  Delete
+                </Button>
+              </AlertDialogTrigger>
+
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogMedia>
+                    <UserX />
+                  </AlertDialogMedia>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete
+                    your account from our servers.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    variant='destructive'
+                    disabled={isDeleting}
+                    onClick={handleDeleteAccount}
+                  >
+                    {isDeleting ? (
+                      <>
+                        <Spinner />
+                        Deleting account...
+                      </>
+                    ) : (
+                      <span>Delete account</span>
+                    )}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </CardContent>
       </Card>

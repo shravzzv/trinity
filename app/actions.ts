@@ -17,6 +17,7 @@ import { getSiteURL } from '@/lib/links'
 import { createClient } from '../supabase/server'
 import { redirect } from 'next/navigation'
 import type { OAuthProvider } from '@/types/oauth'
+import { createAdminClient } from '@/supabase/admin'
 
 /**
  * Creates a new user account using email + password.
@@ -139,4 +140,32 @@ export async function updatePassword(formData: FormData) {
   }
 
   redirect('/home')
+}
+
+/**
+ * Permanently deletes the currently authenticated user's account
+ * and redirects them to the sign-in page.
+ *
+ * The user's identity is established using the authenticated server
+ * client. The admin client is then used to perform the privileged
+ * deletion.
+ */
+export async function deleteAccount() {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw Error('Not authenticated')
+  }
+
+  const admin = createAdminClient()
+
+  const { error } = await admin.auth.admin.deleteUser(user.id)
+
+  if (error) {
+    throw error
+  }
 }
