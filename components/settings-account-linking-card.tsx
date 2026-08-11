@@ -10,9 +10,11 @@ import { toast } from 'sonner'
 import { getSiteURL } from '@/lib/links'
 import { useEffect, useState } from 'react'
 import { type UserIdentity } from '@supabase/supabase-js'
+import { useNetworkContext } from '@/providers/network-provider'
 
 export default function SettingsAccountLinkingCard() {
   const [identities, setIdentities] = useState<UserIdentity[]>([])
+  const { isOnline } = useNetworkContext()
 
   useEffect(() => {
     const loadIdentities = async () => {
@@ -101,8 +103,9 @@ export default function SettingsAccountLinkingCard() {
           </div>
           {isGoogleLinked ? (
             <Button
-              variant='outline'
               size='sm'
+              variant='outline'
+              disabled={!isOnline}
               onClick={() => unlinkIdentity('google')}
             >
               <Unlink />
@@ -110,8 +113,9 @@ export default function SettingsAccountLinkingCard() {
             </Button>
           ) : (
             <Button
-              variant='outline'
               size='sm'
+              variant='outline'
+              disabled={!isOnline}
               onClick={() => linkIdentity('google')}
             >
               <LinkIcon />
@@ -133,8 +137,9 @@ export default function SettingsAccountLinkingCard() {
           </div>
           {isGitHubLinked ? (
             <Button
-              variant='outline'
               size='sm'
+              variant='outline'
+              disabled={!isOnline}
               onClick={() => unlinkIdentity('github')}
             >
               <Unlink />
@@ -142,8 +147,9 @@ export default function SettingsAccountLinkingCard() {
             </Button>
           ) : (
             <Button
-              variant='outline'
               size='sm'
+              variant='outline'
+              disabled={!isOnline}
               onClick={() => linkIdentity('github')}
             >
               <LinkIcon />

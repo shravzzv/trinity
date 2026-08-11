@@ -19,10 +19,12 @@ import { useState } from 'react'
 import { deleteAccount } from '@/app/actions'
 import { Spinner } from './ui/spinner'
 import { signOut } from '@/lib/auth'
+import { useNetworkContext } from '@/providers/network-provider'
 
 export default function SettingsDangerZone() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [open, setOpen] = useState(false)
+  const { isOnline } = useNetworkContext()
 
   const handleDeleteAccount = async () => {
     try {
@@ -56,7 +58,7 @@ export default function SettingsDangerZone() {
               }}
             >
               <AlertDialogTrigger asChild>
-                <Button variant='destructive' size='sm'>
+                <Button variant='destructive' size='sm' disabled={!isOnline}>
                   <UserX />
                   Delete
                 </Button>

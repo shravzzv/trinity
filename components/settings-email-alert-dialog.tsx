@@ -24,6 +24,7 @@ import EmailInput from './email-input'
 import { Alert, AlertDescription, AlertTitle } from './ui/alert'
 import { Spinner } from './ui/spinner'
 import { getSiteURL } from '@/lib/links'
+import { useNetworkContext } from '@/providers/network-provider'
 
 const emailSchema = z.object({
   email: z.email({ error: 'A valid email is required' }),
@@ -34,6 +35,7 @@ export default function SettingsEmailAlertDialog() {
   const [error, setError] = useState<string | null>(null)
   const [showConfirmEmail, setShowConfirmEmail] = useState(false)
 
+  const { isOnline } = useNetworkContext()
   const { session } = useAuthContext()
   const email = session?.user.email
 
@@ -80,7 +82,7 @@ export default function SettingsEmailAlertDialog() {
       }}
     >
       <AlertDialogTrigger asChild>
-        <Button variant='outline' size='sm'>
+        <Button variant='outline' size='sm' disabled={!isOnline}>
           <Pen />
           Edit
         </Button>
@@ -103,7 +105,7 @@ export default function SettingsEmailAlertDialog() {
           <FieldGroup>
             <EmailInput
               control={control}
-              disabled={isSubmitting || showConfirmEmail}
+              disabled={isSubmitting || showConfirmEmail || !isOnline}
             />
 
             {error && (
@@ -130,7 +132,10 @@ export default function SettingsEmailAlertDialog() {
               {showConfirmEmail ? 'Close' : 'Cancel'}
             </AlertDialogCancel>
 
-            <Button type='submit' disabled={isSubmitting || showConfirmEmail}>
+            <Button
+              type='submit'
+              disabled={isSubmitting || showConfirmEmail || !isOnline}
+            >
               {isSubmitting ? (
                 <>
                   <Spinner />

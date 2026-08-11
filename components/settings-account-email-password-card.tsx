@@ -10,9 +10,11 @@ import SettingsPasswordAlertDialog from './settings-password-alert-dialog'
 import { createClient } from '@/supabase/client'
 import { toast } from 'sonner'
 import { getSiteURL } from '@/lib/links'
+import { useNetworkContext } from '@/providers/network-provider'
 
 export default function SettingsAccountEmailPasswordCard() {
   const { session } = useAuthContext()
+  const { isOnline } = useNetworkContext()
 
   const email = session?.user.email
   const newEmail = session?.user.new_email
@@ -54,6 +56,7 @@ export default function SettingsAccountEmailPasswordCard() {
                 <Button
                   variant='outline'
                   size='xs'
+                  disabled={!isOnline}
                   onClick={() => newEmail && sendVerificationEmail(newEmail)}
                 >
                   <Send />
@@ -73,6 +76,7 @@ export default function SettingsAccountEmailPasswordCard() {
                 <Button
                   variant='outline'
                   size='xs'
+                  disabled={!isOnline}
                   onClick={() => email && sendVerificationEmail(email)}
                 >
                   <Send />

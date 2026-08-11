@@ -23,6 +23,7 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert'
 import { Spinner } from './ui/spinner'
 import PasswordInput from './password-input'
 import { toast } from 'sonner'
+import { useNetworkContext } from '@/providers/network-provider'
 
 const passwordSchema = z.object({
   password: z
@@ -35,6 +36,8 @@ type PasswordSchema = z.infer<typeof passwordSchema>
 export default function SettingsPasswordAlertDialog() {
   const [error, setError] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
+
+  const { isOnline } = useNetworkContext()
 
   const {
     reset,
@@ -75,7 +78,12 @@ export default function SettingsPasswordAlertDialog() {
       }}
     >
       <AlertDialogTrigger asChild>
-        <Button variant='outline' size='sm' onClick={() => setOpen(true)}>
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={() => setOpen(true)}
+          disabled={!isOnline}
+        >
           <Pen />
           Edit
         </Button>
@@ -96,7 +104,10 @@ export default function SettingsPasswordAlertDialog() {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup>
-            <PasswordInput control={control} disabled={isSubmitting} />
+            <PasswordInput
+              control={control}
+              disabled={isSubmitting || !isOnline}
+            />
 
             {error && (
               <Alert variant='destructive'>
@@ -112,7 +123,7 @@ export default function SettingsPasswordAlertDialog() {
               Close
             </AlertDialogCancel>
 
-            <Button type='submit' disabled={isSubmitting}>
+            <Button type='submit' disabled={isSubmitting || !isOnline}>
               {isSubmitting ? (
                 <>
                   <Spinner />

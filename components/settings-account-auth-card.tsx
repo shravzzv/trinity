@@ -21,9 +21,11 @@ import {
 } from './ui/alert-dialog'
 import { toast } from 'sonner'
 import { Skeleton } from './ui/skeleton'
+import { useNetworkContext } from '@/providers/network-provider'
 
 export default function SettingsAccountAuthCard() {
   const { isAuthenticated, isLoading } = useAuthContext()
+  const { isOnline } = useNetworkContext()
 
   if (isLoading) {
     return (
@@ -54,7 +56,7 @@ export default function SettingsAccountAuthCard() {
                   Enable cloud saving, cross device syncing and much more.
                 </p>
               </div>
-              <Button size='sm' asChild>
+              <Button size='sm' asChild disabled={!isOnline}>
                 <Link href='/signin'>
                   <LogIn /> Sign in
                 </Link>
@@ -88,7 +90,7 @@ export default function SettingsAccountAuthCard() {
 
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant='outline' size='sm'>
+                  <Button variant='outline' size='sm' disabled={!isOnline}>
                     <LogOut />
                     Sign out
                   </Button>
@@ -122,6 +124,7 @@ export default function SettingsAccountAuthCard() {
                         signOut('others')
                         toast.success('Signed out of all other sessions')
                       }}
+                      disabled={!isOnline}
                     >
                       <LogOut />
                       Sign out of all other sessions
@@ -130,7 +133,10 @@ export default function SettingsAccountAuthCard() {
 
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => signOut('global')}>
+                    <AlertDialogAction
+                      onClick={() => signOut('global')}
+                      disabled={!isOnline}
+                    >
                       Sign out everywhere
                     </AlertDialogAction>
                   </AlertDialogFooter>

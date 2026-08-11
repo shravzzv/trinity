@@ -5,9 +5,11 @@ import { ThemeToggle } from './theme-toggle'
 import { Card, CardContent } from './ui/card'
 import { Separator } from './ui/separator'
 import { Switch } from './ui/switch'
+import { useNetworkContext } from '@/providers/network-provider'
 
 export default function SettingsPreferencesSection() {
   const { isAuthenticated } = useAuthContext()
+  const { isOnline } = useNetworkContext()
 
   return (
     <section className='space-y-6'>
@@ -31,7 +33,7 @@ export default function SettingsPreferencesSection() {
                     Notifications may not be available on all devices.
                   </p>
                 </div>
-                <Switch />
+                <Switch disabled={!isOnline} />
               </div>
             </>
           )}
