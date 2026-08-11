@@ -3,29 +3,16 @@
 import { useAuthContext } from '@/providers/auth-provider'
 import { Card, CardContent } from './ui/card'
 import { Button } from './ui/button'
-import { Pen, Send, UserRoundKey } from 'lucide-react'
+import { Send } from 'lucide-react'
 import SettingsEmailAlertDialog from './settings-email-alert-dialog'
 import { Separator } from './ui/separator'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from './ui/alert-dialog'
-import { Input } from './ui/input'
+import SettingsPasswordAlertDialog from './settings-password-alert-dialog'
 
 export default function SettingsAccountEmailPasswordCard() {
   const { session } = useAuthContext()
 
   const email = session?.user.email
-  const isEmailVerified = true
-  const isPasswordSet = true
+  const isEmailVerified = Boolean(session?.user.email_confirmed_at)
 
   return (
     <Card>
@@ -56,49 +43,12 @@ export default function SettingsAccountEmailPasswordCard() {
           <div className='space-y-1'>
             <p className='text-base font-medium'>Password</p>
             <p className='text-muted-foreground text-xs'>
-              {isPasswordSet
-                ? 'Changing your password will sign you out of other sessions. No one except you (even us) can know your password.'
-                : `You haven't set a password for your account yet.`}
+              Changing your password will sign you out of other sessions. No one
+              except you (even us) can know your password.
             </p>
           </div>
 
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant='outline' size='sm'>
-                <Pen />
-                Edit
-              </Button>
-            </AlertDialogTrigger>
-
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogMedia>
-                  <UserRoundKey />
-                </AlertDialogMedia>
-
-                <AlertDialogTitle>Change Password?</AlertDialogTitle>
-
-                <AlertDialogDescription>
-                  Enter your new password. You&apos;ll be signed out of all
-                  other sessions on updating your password.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-
-              <section>
-                <Input
-                  type='password'
-                  className='text-sm'
-                  onChange={() => {}}
-                  autoFocus
-                />
-              </section>
-
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction>Update password</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <SettingsPasswordAlertDialog />
         </div>
       </CardContent>
     </Card>
