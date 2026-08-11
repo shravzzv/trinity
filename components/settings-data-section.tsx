@@ -97,7 +97,7 @@ export default function SettingsDataSection() {
 
                   <AlertDialogDescription>
                     This action cannot be undone. This will permanently delete
-                    your fasting data from your servers.
+                    your fasting data from our servers.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
 
@@ -165,7 +165,7 @@ export default function SettingsDataSection() {
 
                   <AlertDialogDescription>
                     This action cannot be undone. This will permanently delete
-                    your weight data from your servers.
+                    your weight data from our servers.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
 
