@@ -1,11 +1,44 @@
 'use client'
 
-import { FileUp, RotateCcw } from 'lucide-react'
+import { RotateCcw } from 'lucide-react'
 import { Button } from './ui/button'
 import { Card, CardContent } from './ui/card'
 import { Separator } from './ui/separator'
+import { useFastingContext } from '@/providers/fasting-provider'
+import { useState } from 'react'
+import { Spinner } from './ui/spinner'
+import { useWeightContext } from '@/providers/weight-provider'
+import { toast } from 'sonner'
 
 export default function SettingsDataSection() {
+  const [isFastingResetLoading, setIsFastingResetLoading] = useState(false)
+  const [isWeightsResetLoading, setIsWeightsResetLoading] = useState(false)
+
+  const { resetFastingProgress } = useFastingContext()
+  const { resetWeightProgress } = useWeightContext()
+
+  const handleFastsReset = async () => {
+    setIsFastingResetLoading(true)
+
+    try {
+      await resetFastingProgress()
+      toast.success('Fasting progress has been reset')
+    } finally {
+      setIsFastingResetLoading(false)
+    }
+  }
+
+  const handleWeightsReset = async () => {
+    setIsWeightsResetLoading(true)
+
+    try {
+      await resetWeightProgress()
+      toast.success('Weight progress has been reset')
+    } finally {
+      setIsWeightsResetLoading(false)
+    }
+  }
+
   return (
     <section className='space-y-6'>
       <h2 className='font-semibold'>Data</h2>
@@ -20,9 +53,23 @@ export default function SettingsDataSection() {
               </p>
             </div>
 
-            <Button variant='outline' size='sm'>
-              <RotateCcw />
-              Reset
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={handleFastsReset}
+              disabled={isFastingResetLoading}
+            >
+              {isFastingResetLoading ? (
+                <>
+                  <Spinner />
+                  Resetting...
+                </>
+              ) : (
+                <>
+                  <RotateCcw />
+                  Reset
+                </>
+              )}
             </Button>
           </div>
 
@@ -36,19 +83,23 @@ export default function SettingsDataSection() {
               </p>
             </div>
 
-            <Button variant='outline' size='sm'>
-              <RotateCcw />
-              Reset
-            </Button>
-          </div>
-
-          <Separator />
-
-          <div className='flex items-center justify-between'>
-            <p className='text-base font-medium'>Export your data</p>
-            <Button variant='outline' size='sm'>
-              <FileUp />
-              Export
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={handleWeightsReset}
+              disabled={isWeightsResetLoading}
+            >
+              {isWeightsResetLoading ? (
+                <>
+                  <Spinner />
+                  Resetting...
+                </>
+              ) : (
+                <>
+                  <RotateCcw />
+                  Reset
+                </>
+              )}
             </Button>
           </div>
         </CardContent>
