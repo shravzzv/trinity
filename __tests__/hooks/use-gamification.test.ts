@@ -150,7 +150,7 @@ describe('useGamification', () => {
         type: 'level',
         title: 'Level 1 reached!',
         description:
-          'Keep going. Every fast brings you closer to your next milestone.',
+          'Congratulations! You earned an Anchor as a reward for leveling up. Keep going!',
       })
     })
 

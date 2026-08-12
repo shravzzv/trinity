@@ -77,10 +77,12 @@ describe('getStreakCalendarDays', () => {
         endedAt: '2026-07-02T17:00:00.000Z',
         streakStatus: 'completed',
         planId: '23:1',
+        needsSync: false,
+        updatedAt: new Date().toISOString(),
       },
     ])
 
-    expect(result.completed).toEqual([new Date('2026-07-01T18:00:00.000Z')])
+    expect(result.completed).toEqual([new Date('2026-07-02T17:00:00.000Z')])
     expect(result.missed).toEqual([])
     expect(result.anchored).toEqual([])
   })
@@ -93,11 +95,13 @@ describe('getStreakCalendarDays', () => {
         endedAt: '2026-07-03T12:00:00.000Z',
         streakStatus: 'missed',
         planId: '23:1',
+        needsSync: false,
+        updatedAt: new Date().toISOString(),
       },
     ])
 
     expect(result.completed).toEqual([])
-    expect(result.missed).toEqual([new Date('2026-07-02T18:00:00.000Z')])
+    expect(result.missed).toEqual([new Date('2026-07-03T12:00:00.000Z')])
     expect(result.anchored).toEqual([])
   })
 
@@ -109,12 +113,14 @@ describe('getStreakCalendarDays', () => {
         endedAt: '2026-07-04T17:00:00.000Z',
         streakStatus: 'anchored',
         planId: '23:1',
+        needsSync: false,
+        updatedAt: new Date().toISOString(),
       },
     ])
 
     expect(result.completed).toEqual([])
     expect(result.missed).toEqual([])
-    expect(result.anchored).toEqual([new Date('2026-07-03T18:00:00.000Z')])
+    expect(result.anchored).toEqual([new Date('2026-07-04T17:00:00.000Z')])
   })
 
   it('groups multiple fasts', () => {
@@ -125,6 +131,8 @@ describe('getStreakCalendarDays', () => {
         endedAt: '2026-07-02T17:00:00.000Z',
         streakStatus: 'completed',
         planId: '23:1',
+        needsSync: false,
+        updatedAt: new Date().toISOString(),
       },
       {
         id: '2',
@@ -132,6 +140,8 @@ describe('getStreakCalendarDays', () => {
         endedAt: '2026-07-03T10:00:00.000Z',
         streakStatus: 'missed',
         planId: '23:1',
+        needsSync: false,
+        updatedAt: new Date().toISOString(),
       },
       {
         id: '3',
@@ -139,6 +149,8 @@ describe('getStreakCalendarDays', () => {
         endedAt: '2026-07-04T17:00:00.000Z',
         streakStatus: 'anchored',
         planId: '23:1',
+        needsSync: false,
+        updatedAt: new Date().toISOString(),
       },
     ])
 
@@ -197,6 +209,8 @@ describe('getLongestStreak', () => {
     startedAt: '2026-07-01T00:00:00.000Z',
     endedAt: '2026-07-01T16:00:00.000Z',
     streakStatus,
+    needsSync: false,
+    updatedAt: new Date().toISOString(),
   })
 
   it('returns 0 when there are no fasts', () => {
