@@ -64,7 +64,7 @@ export const filterWeightEntriesByCadence = (
 
   switch (cadence) {
     case 'week':
-      cutoff.setDate(cutoff.getDate() - 7)
+      cutoff.setDate(cutoff.getDate() - 8)
       break
 
     case 'month':
