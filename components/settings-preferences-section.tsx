@@ -16,27 +16,11 @@ export default function SettingsPreferencesSection() {
       <h2 className='font-semibold'>Preferences</h2>
 
       <Card>
-        <CardContent className='flex flex-col gap-4'>
+        <CardContent>
           <div className='flex items-center justify-between'>
             <p className='text-base font-medium'>Theme</p>
             <ThemeToggle />
           </div>
-
-          {isAuthenticated && (
-            <>
-              <Separator />
-
-              <div className='flex items-center justify-between'>
-                <div className='space-y-1'>
-                  <p className='text-base font-medium'>Notifications</p>
-                  <p className='text-muted-foreground text-xs'>
-                    Notifications may not be available on all devices.
-                  </p>
-                </div>
-                <Switch disabled={!isOnline} />
-              </div>
-            </>
-          )}
         </CardContent>
       </Card>
     </section>
