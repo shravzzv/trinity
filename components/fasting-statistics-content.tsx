@@ -126,7 +126,7 @@ export default function FastingStatisticsContent({
       : Math.max(...filteredFasts.map((fast) => getFastDurationHours(fast)))
 
   const chartData = filteredFasts.map((fast) => ({
-    date: new Date(fast.startedAt).toLocaleDateString(
+    date: new Date(fast.endedAt).toLocaleDateString(
       'en-US',
       cadence === 'week'
         ? { weekday: 'short' }
