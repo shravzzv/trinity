@@ -134,7 +134,7 @@ export const getStreakCalendarDays = (fasts: Fast[]) => {
   const completed: Date[] = []
 
   for (const fast of fasts) {
-    const day = new Date(fast.startedAt)
+    const day = new Date(fast.endedAt)
 
     switch (fast.streakStatus) {
       case 'completed':
