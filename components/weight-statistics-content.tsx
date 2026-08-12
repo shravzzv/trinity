@@ -176,7 +176,10 @@ export default function WeightStatisticsContent({
             submitLabel='Save'
             onSave={handleAddWeight}
           >
-            <Button className='size-8 p-0 md:w-auto md:gap-1.5 md:px-3'>
+            <Button
+              className='size-8 p-0 md:w-auto md:gap-1.5 md:px-3'
+              aria-label='Add weight'
+            >
               <Plus />
               <span className='hidden md:inline'>Add</span>
             </Button>
