@@ -121,11 +121,19 @@ export const useGamification = (): UseGamificationResult => {
     setXp(nextXp)
 
     if (nextLevel > previousLevel) {
+      const updatedProfile = updateProfile((profile) => ({
+        ...profile,
+        anchors: profile.anchors + 1,
+        needsSync: true,
+      }))
+
+      setAnchors(updatedProfile.anchors)
+
       queueAchievement({
         type: 'level',
         title: `Level ${nextLevel} reached!`,
         description:
-          'Keep going. Every fast brings you closer to your next milestone.',
+          'Congratulations! You earned an Anchor as a reward for leveling up. Keep going!',
       })
     }
 
