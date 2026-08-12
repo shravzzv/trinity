@@ -55,7 +55,7 @@ Install dependencies:
 
 ```bash
 npm install
-````
+```
 
 Start the development server:
 
