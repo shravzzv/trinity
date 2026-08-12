@@ -123,7 +123,7 @@ export const useGamification = (): UseGamificationResult => {
     if (nextLevel > previousLevel) {
       const updatedProfile = updateProfile((profile) => ({
         ...profile,
-        anchors: profile.anchors + 1,
+        anchors: profile.anchors + nextLevel,
         needsSync: true,
       }))
 
@@ -132,8 +132,7 @@ export const useGamification = (): UseGamificationResult => {
       queueAchievement({
         type: 'level',
         title: `Level ${nextLevel} reached!`,
-        description:
-          'Congratulations! You earned an Anchor as a reward for leveling up. Keep going!',
+        description: `Congratulations! You earned ${nextLevel} ${nextLevel === 1 ? 'Anchor' : 'Anchors'} as a reward for leveling up. Keep going!`,
       })
     }
 
