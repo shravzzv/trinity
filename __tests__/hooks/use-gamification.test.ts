@@ -149,8 +149,7 @@ describe('useGamification', () => {
       expect(result.current.currentAchievement).toEqual({
         type: 'level',
         title: 'Level 1 reached!',
-        description:
-          'Congratulations! You earned an Anchor as a reward for leveling up. Keep going!',
+        description: `Congratulations! You earned 1 Anchor as a reward for leveling up. Keep going!`,
       })
     })
 
