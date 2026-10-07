@@ -50,43 +50,43 @@ export default function Page() {
   } = useGamificationContext()
 
   return (
-    <div className='mx-auto max-w-6xl space-y-6'>
+    <>
       <CelebrationDialog
         achievement={currentAchievement}
         onDismiss={dismissAchievement}
       />
 
-      <div className='mx-auto max-w-xl space-y-6'>
-        <ProgressCard
-          xp={xp}
-          fasts={fasts}
-          streak={streak}
-          anchors={anchors}
-          isLoading={isGamificationLoading}
-        />
+      <div className='grid items-start gap-8 sm:grid-cols-2 lg:grid-cols-3'>
+        <div className='space-y-8'>
+          <ProgressCard
+            xp={xp}
+            fasts={fasts}
+            streak={streak}
+            anchors={anchors}
+            isLoading={isGamificationLoading}
+          />
 
-        <FastingTimer
-          fasts={fasts}
-          planId={planId}
-          streak={streak}
-          anchors={anchors}
-          session={session}
-          awardXp={awardXp}
-          endFasting={endFasting}
-          resetStreak={resetStreak}
-          awardAnchor={awardAnchor}
-          spendAnchor={spendAnchor}
-          startFasting={startFasting}
-          updatePlanId={updatePlanId}
-          incrementStreak={incrementStreak}
-          isLoading={isFastingStateLoading}
-          startAnchoredSession={startAnchoredSession}
-          updateSessionStartedAt={updateSessionStartedAt}
-          preferredFastStartTime={preferredFastStartTime}
-        />
-      </div>
+          <FastingTimer
+            fasts={fasts}
+            planId={planId}
+            streak={streak}
+            anchors={anchors}
+            session={session}
+            awardXp={awardXp}
+            endFasting={endFasting}
+            resetStreak={resetStreak}
+            awardAnchor={awardAnchor}
+            spendAnchor={spendAnchor}
+            startFasting={startFasting}
+            updatePlanId={updatePlanId}
+            incrementStreak={incrementStreak}
+            isLoading={isFastingStateLoading}
+            startAnchoredSession={startAnchoredSession}
+            updateSessionStartedAt={updateSessionStartedAt}
+            preferredFastStartTime={preferredFastStartTime}
+          />
+        </div>
 
-      <div className='mx-auto grid max-w-xl gap-6 lg:max-w-6xl lg:grid-cols-2'>
         <FastingStatistics
           fasts={fasts}
           planId={planId}
@@ -107,6 +107,6 @@ export default function Page() {
           isLoading={isWeightStateLoading}
         />
       </div>
-    </div>
+    </>
   )
 }

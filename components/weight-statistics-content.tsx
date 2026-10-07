@@ -11,7 +11,6 @@ import {
   Card,
   CardAction,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -142,33 +141,6 @@ export default function WeightStatisticsContent({
       <CardHeader>
         <CardTitle>Weight statistics</CardTitle>
 
-        <CardDescription className='flex items-center gap-2'>
-          {targetProgress ? (
-            <>
-              {targetProgress.reached ? (
-                <PartyPopper className='size-4 shrink-0' />
-              ) : (
-                <Target className='size-4 shrink-0' />
-              )}
-
-              <span className='flex-1'>
-                {targetProgress.reached
-                  ? `Target ${targetWeight!.toFixed(1)} kg reached!`
-                  : `${targetProgress.remainingWeight.toFixed(1)} kg remaining to reach ${targetWeight} kg.`}
-              </span>
-            </>
-          ) : (
-            <>
-              <Target className='size-4 shrink-0' />
-              <span className='flex-1'>
-                {targetWeight
-                  ? 'No weights in this period.'
-                  : 'Set a target weight to track your progress.'}
-              </span>
-            </>
-          )}
-        </CardDescription>
-
         <CardAction className='flex items-center gap-2'>
           <WeightDialog
             dialogTitle='Add weight'
@@ -204,10 +176,35 @@ export default function WeightStatisticsContent({
         </CardAction>
       </CardHeader>
 
-      <CardContent>
-        <div className='space-y-1 text-center'>
-          <p className='text-muted-foreground text-xs'>Current weight</p>
+      <CardContent className='space-y-2'>
+        <div className='text-muted-foreground mb-4 flex items-center justify-center gap-2'>
+          {targetProgress ? (
+            <>
+              {targetProgress.reached ? (
+                <PartyPopper className='size-4 shrink-0' />
+              ) : (
+                <Target className='size-4 shrink-0' />
+              )}
 
+              <span>
+                {targetProgress.reached
+                  ? `Target ${targetWeight!.toFixed(1)} kg reached!`
+                  : `${targetProgress.remainingWeight.toFixed(1)} kg remaining to reach ${targetWeight} kg.`}
+              </span>
+            </>
+          ) : (
+            <>
+              <Target className='size-4 shrink-0' />
+              <span className='flex-1'>
+                {targetWeight
+                  ? 'No weights in this period.'
+                  : 'Set a target weight to track your progress.'}
+              </span>
+            </>
+          )}
+        </div>
+
+        <div className='space-y-1 text-center'>
           {currentWeight ? (
             <p className='text-3xl font-bold lg:text-4xl'>
               {formatWeight(currentWeight)}
@@ -215,6 +212,8 @@ export default function WeightStatisticsContent({
           ) : (
             <p>No weight available in this period.</p>
           )}
+
+          <p className='text-muted-foreground text-xs'>Current weight</p>
         </div>
 
         <ChartContainer config={chartConfig} className='h-54 w-full'>
