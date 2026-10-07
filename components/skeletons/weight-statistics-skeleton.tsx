@@ -3,7 +3,6 @@ import {
   Card,
   CardAction,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -14,9 +13,6 @@ export default function WeightStatisticsSkeleton() {
     <Card>
       <CardHeader>
         <CardTitle>Weight statistics</CardTitle>
-        <CardDescription>
-          <Skeleton className='h-4 w-32 md:w-56' />
-        </CardDescription>
 
         <CardAction className='flex items-center gap-2'>
           <Skeleton className='h-9 w-9 rounded-full md:w-24 md:rounded-2xl' />
@@ -24,13 +20,17 @@ export default function WeightStatisticsSkeleton() {
         </CardAction>
       </CardHeader>
 
-      <CardContent>
-        <div className='flex flex-col items-center space-y-1 text-center'>
-          <Skeleton className='h-4 w-16' />
-          <Skeleton className='h-10 w-36' />
+      <CardContent className='space-y-2'>
+        <div className='mb-4 flex justify-center'>
+          <Skeleton className='h-4 w-56' />
         </div>
 
-        <div className='h-[30vh]'>
+        <div className='flex flex-col items-center space-y-2 text-center'>
+          <Skeleton className='h-10 w-36' />
+          <Skeleton className='h-4 w-16' />
+        </div>
+
+        <div className='mb-6 h-[25vh]'>
           <svg
             className='h-full w-full animate-pulse'
             viewBox='0 0 100 40'
@@ -46,12 +46,12 @@ export default function WeightStatisticsSkeleton() {
 
       <CardFooter className='flex flex-col gap-4'>
         <div className='flex w-full items-center justify-evenly'>
-          <Skeleton className='h-4 w-36' />
+          <Skeleton className='h-4 w-48' />
         </div>
 
         <div className='flex w-full flex-wrap items-center justify-evenly'>
-          <Skeleton className='h-4 w-24' />
-          <Skeleton className='h-4 w-24' />
+          <Skeleton className='h-4 w-32' />
+          <Skeleton className='h-4 w-32' />
         </div>
 
         <div className='flex items-center justify-center'>
