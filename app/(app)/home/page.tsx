@@ -56,7 +56,7 @@ export default function Page() {
         onDismiss={dismissAchievement}
       />
 
-      <div className='grid gap-8 sm:grid-cols-2 lg:grid-cols-3'>
+      <div className='grid items-start gap-8 sm:grid-cols-2 lg:grid-cols-3'>
         <div className='space-y-8'>
           <ProgressCard
             xp={xp}
