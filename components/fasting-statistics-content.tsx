@@ -316,7 +316,7 @@ export default function FastingStatisticsContent({
 
 const FastingStatisticsChartLegend = () => {
   return (
-    <div className='flex items-center justify-center gap-5 py-2 text-xs'>
+    <div className='flex flex-wrap items-center justify-evenly gap-2 py-2 text-xs'>
       <div className='flex items-center gap-2'>
         <div className='bg-primary size-3 rounded-full' />
         <span>Completed</span>
