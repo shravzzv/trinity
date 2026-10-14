@@ -296,7 +296,11 @@ export default function ActiveFastingTimer({
         )}
 
         <div className='flex items-center gap-4'>
-          <span className='text-muted-foreground text-xs'>88:88:88</span>
+          <span className='text-muted-foreground text-xs'>
+            {hasExceededSessionLength
+              ? formatDuration(sessionLengthMs + excessMs)
+              : formatDuration(sessionLengthMs - remainingMs)}
+          </span>
 
           <Progress
             value={progress}
