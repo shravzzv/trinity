@@ -189,7 +189,7 @@ export default function WeightStatisticsContent({
               <span>
                 {targetProgress.reached
                   ? `Target ${targetWeight!.toFixed(2)} kg reached!`
-                  : `${targetProgress.remainingWeight.toFixed(2)} kg remaining to reach ${targetWeight?.toFixed(2)} kg.`}
+                  : `${targetProgress.remainingWeight.toFixed(2)} kg remaining to reach ${targetWeight!.toFixed(2)} kg.`}
               </span>
             </>
           ) : (

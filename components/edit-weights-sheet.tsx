@@ -40,7 +40,7 @@ export default function EditWeightsSheet({
   ) => {
     const updatedWeight: WeightEntry = {
       ...entry,
-      weightKg,
+      weightKg: Number(weightKg.toFixed(2)),
       recordedAt: recordedAt.toISOString(),
       needsSync: true,
     }

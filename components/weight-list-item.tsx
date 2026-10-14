@@ -63,7 +63,7 @@ export default function WeightListItem({
               )}
             >
               {changeFromPreviousKg > 0 ? '+' : ''}
-              {changeFromPreviousKg.toFixed(1)} kg
+              {changeFromPreviousKg.toFixed(2)} kg
             </span>
           )}
         </CardTitle>
