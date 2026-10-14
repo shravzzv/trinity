@@ -14,16 +14,22 @@ describe('sortWeightEntries', () => {
         id: 'late',
         weightKg: 60,
         recordedAt: '2026-01-03T10:00:00.000Z',
+        updatedAt: '2026-01-03T10:00:00.000Z',
+        needsSync: false,
       },
       {
         id: 'early',
         weightKg: 62,
         recordedAt: '2026-01-01T10:00:00.000Z',
+        updatedAt: '2026-01-01T10:00:00.000Z',
+        needsSync: false,
       },
       {
         id: 'middle',
         weightKg: 61,
         recordedAt: '2026-01-02T10:00:00.000Z',
+        updatedAt: '2026-01-02T10:00:00.000Z',
+        needsSync: false,
       },
     ]
 
@@ -38,11 +44,15 @@ describe('sortWeightEntries', () => {
         id: 'late',
         weightKg: 60,
         recordedAt: '2026-01-03T10:00:00.000Z',
+        updatedAt: '2026-01-03T10:00:00.000Z',
+        needsSync: false,
       },
       {
         id: 'early',
         weightKg: 62,
         recordedAt: '2026-01-01T10:00:00.000Z',
+        updatedAt: '2026-01-01T10:00:00.000Z',
+        needsSync: false,
       },
     ]
 
@@ -59,16 +69,22 @@ describe('sortWeightEntries', () => {
         id: '1',
         weightKg: 62,
         recordedAt: '2026-01-01T10:00:00.000Z',
+        updatedAt: '2026-01-01T10:00:00.000Z',
+        needsSync: false,
       },
       {
         id: '2',
         weightKg: 61,
         recordedAt: '2026-01-02T10:00:00.000Z',
+        updatedAt: '2026-01-02T10:00:00.000Z',
+        needsSync: false,
       },
       {
         id: '3',
         weightKg: 60,
         recordedAt: '2026-01-03T10:00:00.000Z',
+        updatedAt: '2026-01-03T10:00:00.000Z',
+        needsSync: false,
       },
     ]
 
@@ -85,6 +101,8 @@ describe('sortWeightEntries', () => {
         id: '1',
         weightKg: 61.5,
         recordedAt: '2026-01-01T10:00:00.000Z',
+        updatedAt: '2026-01-01T10:00:00.000Z',
+        needsSync: false,
       },
     ]
 
@@ -97,16 +115,22 @@ describe('sortWeightEntries', () => {
         id: '3',
         weightKg: 60,
         recordedAt: '2026-01-03T10:00:00.000Z',
+        updatedAt: '2026-01-03T10:00:00.000Z',
+        needsSync: false,
       },
       {
         id: '1',
         weightKg: 62,
         recordedAt: '2026-01-01T10:00:00.000Z',
+        updatedAt: '2026-01-01T10:00:00.000Z',
+        needsSync: false,
       },
       {
         id: '2',
         weightKg: 61,
         recordedAt: '2026-01-02T10:00:00.000Z',
+        updatedAt: '2026-01-02T10:00:00.000Z',
+        needsSync: false,
       },
     ]
 
@@ -122,11 +146,15 @@ describe('sortWeightEntries', () => {
         id: '1',
         weightKg: 61,
         recordedAt: '2026-01-01T10:00:00.000Z',
+        updatedAt: '2026-01-01T10:00:00.000Z',
+        needsSync: false,
       },
       {
         id: '2',
         weightKg: 62,
         recordedAt: '2026-01-01T10:00:00.000Z',
+        updatedAt: '2026-01-01T10:00:00.000Z',
+        needsSync: false,
       },
     ]
 
@@ -152,21 +180,29 @@ describe('filterWeightEntriesByCadence', () => {
       id: '1',
       weightKg: 80,
       recordedAt: new Date('2024-12-01T12:00:00Z').toISOString(),
+      updatedAt: new Date('2024-12-01T12:00:00Z').toISOString(),
+      needsSync: false,
     },
     {
       id: '2',
       weightKg: 79,
       recordedAt: new Date('2025-12-20T12:00:00Z').toISOString(),
+      updatedAt: new Date('2025-12-20T12:00:00Z').toISOString(),
+      needsSync: false,
     },
     {
       id: '3',
       weightKg: 78,
       recordedAt: new Date('2026-01-10T12:00:00Z').toISOString(),
+      updatedAt: new Date('2026-01-10T12:00:00Z').toISOString(),
+      needsSync: false,
     },
     {
       id: '4',
       weightKg: 77,
       recordedAt: new Date('2026-01-14T12:00:00Z').toISOString(),
+      updatedAt: new Date('2026-01-14T12:00:00Z').toISOString(),
+      needsSync: false,
     },
   ]
 
@@ -200,6 +236,8 @@ describe('filterWeightEntriesByCadence', () => {
             id: '1',
             weightKg: 80,
             recordedAt: new Date('2020-01-01').toISOString(),
+            updatedAt: new Date('2020-01-01').toISOString(),
+            needsSync: false,
           },
         ],
         'week',
@@ -240,6 +278,8 @@ describe('getWeightStatistics', () => {
         id: '1',
         weightKg: 75,
         recordedAt: new Date('2026-01-10').toISOString(),
+        updatedAt: new Date('2026-01-10').toISOString(),
+        needsSync: false,
       },
     ]
 
@@ -258,16 +298,22 @@ describe('getWeightStatistics', () => {
         id: '1',
         weightKg: 80,
         recordedAt: new Date('2026-01-01').toISOString(),
+        updatedAt: new Date('2026-01-01').toISOString(),
+        needsSync: false,
       },
       {
         id: '2',
         weightKg: 78,
         recordedAt: new Date('2026-01-05').toISOString(),
+        updatedAt: new Date('2026-01-05').toISOString(),
+        needsSync: false,
       },
       {
         id: '3',
         weightKg: 79,
         recordedAt: new Date('2026-01-10').toISOString(),
+        updatedAt: new Date('2026-01-10').toISOString(),
+        needsSync: false,
       },
     ]
 
@@ -286,11 +332,15 @@ describe('getWeightStatistics', () => {
         id: '1',
         weightKg: 90,
         recordedAt: new Date('2024-01-01').toISOString(),
+        updatedAt: new Date('2024-01-01').toISOString(),
+        needsSync: false,
       },
       {
         id: '2',
         weightKg: 80,
         recordedAt: new Date('2026-01-12').toISOString(),
+        updatedAt: new Date('2026-01-12').toISOString(),
+        needsSync: false,
       },
     ]
 
@@ -337,11 +387,11 @@ describe('getTargetProgress', () => {
 
 describe('formatWeight', () => {
   it('formats a weight', () => {
-    expect(formatWeight(72.34)).toBe('72.3 kg')
+    expect(formatWeight(72.344)).toBe('72.34 kg')
   })
 
-  it('formats whole numbers with one decimal place', () => {
-    expect(formatWeight(70)).toBe('70.0 kg')
+  it('formats whole numbers to two decimal places', () => {
+    expect(formatWeight(70)).toBe('70.00 kg')
   })
 
   it('returns an em dash for null', () => {

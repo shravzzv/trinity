@@ -33,6 +33,7 @@ const renderComponent = (targetWeightKg: number | null = null) => {
     deleteWeightEntry: jest.fn(),
     updateWeightEntry: jest.fn(),
     isLoading: false,
+    resetWeightProgress: jest.fn(),
   })
 
   mockUseGamificationContext.mockReturnValue({
@@ -86,7 +87,7 @@ describe('TargetWeightCardContent', () => {
   it('renders the current target weight', () => {
     renderComponent(58)
 
-    expect(screen.getByText('58.0 kg')).toBeInTheDocument()
+    expect(screen.getByText('58.00 kg')).toBeInTheDocument()
     expect(
       screen.getByRole('button', {
         name: /edit/i,
