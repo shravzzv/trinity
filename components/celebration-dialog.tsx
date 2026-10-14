@@ -8,9 +8,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Achievement, AchievementType } from '@/types/gamification'
-import { Anchor, Flame, LucideIcon, Trophy, X } from 'lucide-react'
+import { Anchor, Flame, LucideIcon, PartyPopper, Trophy, X } from 'lucide-react'
 import { Button } from './ui/button'
 import { Card } from './ui/card'
+import { useEffect } from 'react'
+import confetti from 'canvas-confetti'
 
 interface CelebrationDialogProps {
   achievement: Achievement | null
@@ -27,6 +29,15 @@ export default function CelebrationDialog({
   onDismiss,
   achievement,
 }: CelebrationDialogProps) {
+  const blastConfetti = () => {
+    confetti({ particleCount: 150, origin: { y: 0.7 } })
+  }
+
+  useEffect(() => {
+    if (!achievement) return
+    blastConfetti()
+  }, [achievement])
+
   if (!achievement) return null
 
   const Icon = achievementIcons[achievement.type]
@@ -57,6 +68,14 @@ export default function CelebrationDialog({
           <Button onClick={onDismiss}>
             <X />
             Close
+          </Button>
+
+          <Button
+            variant='secondary'
+            size='icon'
+            onClick={() => blastConfetti()}
+          >
+            <PartyPopper />
           </Button>
         </div>
       </DialogContent>
