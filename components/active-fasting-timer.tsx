@@ -295,11 +295,15 @@ export default function ActiveFastingTimer({
           </div>
         )}
 
-        <Progress
-          value={progress}
-          aria-label={`Current ${status} session progress.`}
-          aria-valuetext={`${Math.round(progress)} percent complete`}
-        />
+        <div className='flex items-center gap-4'>
+          <span className='text-muted-foreground text-xs'>88:88:88</span>
+
+          <Progress
+            value={progress}
+            aria-label={`Current ${status} session progress.`}
+            aria-valuetext={`${Math.round(progress)} percent complete`}
+          />
+        </div>
       </CardContent>
 
       <Separator />
