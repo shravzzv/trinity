@@ -179,7 +179,7 @@ export default function TargetWeightCardContent() {
           <div className='flex items-center gap-2'>
             <Target className='text-muted-foreground size-5 shrink-0' />
             <p className='text-2xl font-semibold'>
-              {targetWeightKg.toFixed(1)} kg
+              {targetWeightKg.toFixed(2)} kg
             </p>
           </div>
         ) : (
