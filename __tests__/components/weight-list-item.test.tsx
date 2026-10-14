@@ -52,13 +52,13 @@ describe('WeightListItem', () => {
   it('renders the weight change from the previous entry', () => {
     renderComponent(-2)
 
-    expect(screen.getByText('-2.0 kg')).toBeInTheDocument()
+    expect(screen.getByText('-2.00 kg')).toBeInTheDocument()
   })
 
   it('renders the weight gain from the previous entry', () => {
     renderComponent(1.5)
 
-    expect(screen.getByText('+1.5 kg')).toBeInTheDocument()
+    expect(screen.getByText('+1.50 kg')).toBeInTheDocument()
   })
 
   it('does not render a weight change for the first recorded weight', () => {
