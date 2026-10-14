@@ -35,7 +35,12 @@ export default function CelebrationDialog({
 
   useEffect(() => {
     if (!achievement) return
-    blastConfetti()
+
+    const timeoutId = window.setTimeout(() => {
+      blastConfetti()
+    }, 150)
+
+    return () => window.clearTimeout(timeoutId)
   }, [achievement])
 
   if (!achievement) return null
@@ -65,16 +70,12 @@ export default function CelebrationDialog({
         </DialogHeader>
 
         <div className='flex items-center justify-center gap-2'>
-          <Button onClick={onDismiss}>
+          <Button variant='outline' onClick={onDismiss}>
             <X />
             Close
           </Button>
 
-          <Button
-            variant='secondary'
-            size='icon'
-            onClick={() => blastConfetti()}
-          >
+          <Button variant='secondary' size='icon' onClick={blastConfetti}>
             <PartyPopper />
           </Button>
         </div>
