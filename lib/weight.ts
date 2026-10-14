@@ -176,5 +176,5 @@ export const getTargetProgress = (
  * @returns A human-readable weight string.
  */
 export const formatWeight = (weight: number | null) => {
-  return weight === null ? '—' : `${weight.toFixed(1)} kg`
+  return weight === null ? '—' : `${weight.toFixed(2)} kg`
 }
