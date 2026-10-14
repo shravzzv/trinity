@@ -1,18 +1,18 @@
 'use client'
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { Achievement, AchievementType } from '@/types/gamification'
 import { Anchor, Flame, LucideIcon, PartyPopper, Trophy, X } from 'lucide-react'
 import { Button } from './ui/button'
 import { Card } from './ui/card'
 import { useEffect } from 'react'
 import confetti from 'canvas-confetti'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from './ui/alert-dialog'
 
 interface CelebrationDialogProps {
   achievement: Achievement | null
@@ -48,13 +48,13 @@ export default function CelebrationDialog({
   const Icon = achievementIcons[achievement.type]
 
   return (
-    <Dialog
+    <AlertDialog
       open
       onOpenChange={(open) => {
         if (!open) onDismiss()
       }}
     >
-      <DialogContent showCloseButton={false}>
+      <AlertDialogContent>
         <Card>
           <div
             aria-label={`${achievement.type} achievement`}
@@ -64,10 +64,14 @@ export default function CelebrationDialog({
           </div>
         </Card>
 
-        <DialogHeader className='items-center text-center'>
-          <DialogTitle className='text-2xl'>{achievement.title}</DialogTitle>
-          <DialogDescription>{achievement.description}</DialogDescription>
-        </DialogHeader>
+        <AlertDialogHeader className='items-center text-center'>
+          <AlertDialogTitle className='w-full text-center text-2xl'>
+            {achievement.title}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            {achievement.description}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
 
         <div className='flex items-center justify-center gap-2'>
           <Button variant='outline' onClick={onDismiss}>
@@ -79,7 +83,7 @@ export default function CelebrationDialog({
             <PartyPopper />
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
