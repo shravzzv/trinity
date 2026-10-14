@@ -188,14 +188,15 @@ export default function WeightStatisticsContent({
 
               <span>
                 {targetProgress.reached
-                  ? `Target ${targetWeight!.toFixed(1)} kg reached!`
-                  : `${targetProgress.remainingWeight.toFixed(1)} kg remaining to reach ${targetWeight} kg.`}
+                  ? `Target ${targetWeight!.toFixed(2)} kg reached!`
+                  : `${targetProgress.remainingWeight.toFixed(2)} kg remaining to reach ${targetWeight!.toFixed(2)} kg.`}
               </span>
             </>
           ) : (
             <>
               <Target className='size-4 shrink-0' />
-              <span className='flex-1'>
+
+              <span>
                 {targetWeight
                   ? 'No weights in this period.'
                   : 'Set a target weight to track your progress.'}
@@ -265,7 +266,7 @@ export default function WeightStatisticsContent({
                   className='fill-foreground'
                   fontSize={12}
                   formatter={(value) =>
-                    typeof value === 'number' ? value.toFixed(1) : value
+                    typeof value === 'number' ? value.toFixed(2) : value
                   }
                 />
               )}
@@ -292,7 +293,7 @@ export default function WeightStatisticsContent({
               )}
 
               <span>
-                {Math.abs(weightChange).toFixed(1)} kg
+                {Math.abs(weightChange).toFixed(2)} kg
                 {weightChange < 0 ? ' lost' : ' gained'}{' '}
                 {cadence === 'all' ? 'all time' : `this ${cadence}`}
               </span>

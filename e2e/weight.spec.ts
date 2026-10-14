@@ -25,17 +25,17 @@ test.describe('Weight', () => {
       name: /^weight$/i,
     })
 
-    await weightInput.fill('61.5')
+    await weightInput.fill('61.55')
 
     // Save the entry.
     await page.getByRole('button', { name: /^save$/i }).click()
 
     // Verify that the new weight appears in the UI.
-    await expect(page.getByText('61.5 kg').first()).toBeVisible()
+    await expect(page.getByText('61.55 kg').first()).toBeVisible()
 
     // Verify that it persists after a reload.
     await page.reload()
 
-    await expect(page.getByText('61.5 kg').first()).toBeVisible()
+    await expect(page.getByText('61.55 kg').first()).toBeVisible()
   })
 })

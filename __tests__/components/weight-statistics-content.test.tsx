@@ -58,11 +58,15 @@ const entries = [
     id: '1',
     weightKg: 80,
     recordedAt: new Date('2026-01-10T12:00:00Z').toISOString(),
+    needsSync: false,
+    updatedAt: new Date('2026-01-10T12:00:00Z').toISOString(),
   },
   {
     id: '2',
     weightKg: 78,
     recordedAt: new Date('2026-01-15T12:00:00Z').toISOString(),
+    needsSync: false,
+    updatedAt: new Date('2026-01-15T12:00:00Z').toISOString(),
   },
 ]
 
@@ -137,26 +141,26 @@ describe('WeightStatisticsContent', () => {
     renderComponent()
 
     expect(screen.getByText(/current weight/i)).toBeInTheDocument()
-    expect(screen.getByText('78.0 kg')).toBeInTheDocument()
+    expect(screen.getByText('78.00 kg')).toBeInTheDocument()
   })
 
   it('renders lowest weight', () => {
     renderComponent()
 
-    expect(screen.getByText(/78.0 kg lowest/i)).toBeInTheDocument()
+    expect(screen.getByText(/78.00 kg lowest/i)).toBeInTheDocument()
   })
 
   it('renders highest weight', () => {
     renderComponent()
 
-    expect(screen.getByText(/80.0 kg highest/i)).toBeInTheDocument()
+    expect(screen.getByText(/80.00 kg highest/i)).toBeInTheDocument()
   })
 
   it('renders target progress when a target weight exists', () => {
     renderComponent()
 
     expect(
-      screen.getByText(/3.0 kg remaining to reach 75 kg/i),
+      screen.getByText(/3.00 kg remaining to reach 75.00 kg/i),
     ).toBeInTheDocument()
   })
 
@@ -175,7 +179,7 @@ describe('WeightStatisticsContent', () => {
       targetWeight: 80,
     })
 
-    expect(screen.getByText(/target 80.0 kg reached/i)).toBeInTheDocument()
+    expect(screen.getByText(/target 80.00 kg reached/i)).toBeInTheDocument()
   })
 
   it('passes entries to EditWeightsSheet', () => {
@@ -301,6 +305,8 @@ describe('WeightStatisticsContent', () => {
           id: '1',
           weightKg: 80,
           recordedAt: new Date('2026-01-15T12:00:00Z').toISOString(),
+          needsSync: false,
+          updatedAt: new Date('2026-01-15T12:00:00Z').toISOString(),
         },
       ],
     })
@@ -313,7 +319,7 @@ describe('WeightStatisticsContent', () => {
   it('renders weight loss summary', () => {
     renderComponent()
 
-    expect(screen.getByText(/2.0 kg lost this week/i)).toBeInTheDocument()
+    expect(screen.getByText(/2.00 kg lost this week/i)).toBeInTheDocument()
   })
 
   it('renders weight gain summary', () => {
@@ -323,16 +329,20 @@ describe('WeightStatisticsContent', () => {
           id: '1',
           weightKg: 78,
           recordedAt: new Date('2026-01-10T12:00:00Z').toISOString(),
+          needsSync: false,
+          updatedAt: new Date('2026-01-10T12:00:00Z').toISOString(),
         },
         {
           id: '2',
           weightKg: 80,
           recordedAt: new Date('2026-01-15T12:00:00Z').toISOString(),
+          needsSync: false,
+          updatedAt: new Date('2026-01-15T12:00:00Z').toISOString(),
         },
       ],
     })
 
-    expect(screen.getByText(/2.0 kg gained this week/i)).toBeInTheDocument()
+    expect(screen.getByText(/2.00 kg gained this week/i)).toBeInTheDocument()
   })
 
   it('renders all cadence options', async () => {

@@ -114,7 +114,7 @@ export const useWeight = (): UseWeightResult => {
       needsSync: true,
       updatedAt: new Date().toISOString(),
       recordedAt: recordedAt.toISOString(),
-      weightKg: Number(weightKg.toFixed(1)),
+      weightKg: Number(weightKg.toFixed(2)),
     }
 
     setWeightEntries(
@@ -189,7 +189,7 @@ export const useWeight = (): UseWeightResult => {
   }
 
   const updateTargetWeight = (newTargetWeightKg: number) => {
-    setTargetWeightKg(newTargetWeightKg)
+    setTargetWeightKg(Number(newTargetWeightKg.toFixed(2)))
 
     updateProfile((profile) => ({
       ...profile,

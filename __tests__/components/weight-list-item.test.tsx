@@ -7,6 +7,8 @@ const entry: WeightEntry = {
   id: 'weight-1',
   weightKg: 72.5,
   recordedAt: new Date('2026-01-10T12:00:00Z').toISOString(),
+  needsSync: false,
+  updatedAt: new Date('2026-01-10T12:00:00Z').toISOString(),
 }
 
 const renderComponent = (changeFromPreviousKg: number | null = null) => {
@@ -44,19 +46,19 @@ describe('WeightListItem', () => {
   it('renders the weight', () => {
     renderComponent()
 
-    expect(screen.getByText('72.5 kg')).toBeInTheDocument()
+    expect(screen.getByText('72.50 kg')).toBeInTheDocument()
   })
 
   it('renders the weight change from the previous entry', () => {
     renderComponent(-2)
 
-    expect(screen.getByText('-2.0 kg')).toBeInTheDocument()
+    expect(screen.getByText('-2.00 kg')).toBeInTheDocument()
   })
 
   it('renders the weight gain from the previous entry', () => {
     renderComponent(1.5)
 
-    expect(screen.getByText('+1.5 kg')).toBeInTheDocument()
+    expect(screen.getByText('+1.50 kg')).toBeInTheDocument()
   })
 
   it('does not render a weight change for the first recorded weight', () => {
