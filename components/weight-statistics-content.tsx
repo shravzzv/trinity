@@ -195,7 +195,8 @@ export default function WeightStatisticsContent({
           ) : (
             <>
               <Target className='size-4 shrink-0' />
-              <span className='flex-1'>
+
+              <span>
                 {targetWeight
                   ? 'No weights in this period.'
                   : 'Set a target weight to track your progress.'}
