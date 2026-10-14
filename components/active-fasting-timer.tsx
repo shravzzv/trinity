@@ -111,6 +111,7 @@ export default function ActiveFastingTimer({
         await endFasting(selectedEndedAt)
         if (hasExceededSessionLength) awardXp(xpRewards.completedFast)
         else awardXp(xpRewards.missedFast)
+
         toast.success('Fast ended')
       } else {
         await startFasting(selectedEndedAt)
