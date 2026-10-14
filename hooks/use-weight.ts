@@ -189,7 +189,7 @@ export const useWeight = (): UseWeightResult => {
   }
 
   const updateTargetWeight = (newTargetWeightKg: number) => {
-    setTargetWeightKg(newTargetWeightKg)
+    setTargetWeightKg(Number(newTargetWeightKg.toFixed(2)))
 
     updateProfile((profile) => ({
       ...profile,
