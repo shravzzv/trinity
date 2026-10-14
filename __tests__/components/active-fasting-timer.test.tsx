@@ -162,6 +162,22 @@ describe('ActiveFastingTimer', () => {
     expect(screen.getByLabelText('elapsed-time')).toHaveTextContent('01:00:00')
   })
 
+  it('renders elapsed time correctly when session length has exceeded', () => {
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2026-01-02T12:00:00Z'))
+
+    renderComponent({
+      planId: '16:8',
+      session: {
+        status: 'fasting',
+        startedAt: '2026-01-01T12:00:00Z',
+        isAnchored: false,
+      },
+    })
+
+    expect(screen.getByLabelText('elapsed-time')).toHaveTextContent('24:00:00')
+  })
+
   it('renders progress bar', () => {
     renderComponent()
 
