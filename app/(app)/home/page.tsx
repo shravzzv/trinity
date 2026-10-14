@@ -56,6 +56,16 @@ export default function Page() {
         onDismiss={dismissAchievement}
       />
 
+      <CelebrationDialog
+        achievement={{
+          title: 'Anchor earned!',
+          description:
+            'Congratulations, you earned an Anchor by maintaining your fasting streak!',
+          type: 'anchor',
+        }}
+        onDismiss={() => {}}
+      />
+
       <div className='grid items-start gap-8 sm:grid-cols-2 lg:grid-cols-3'>
         <div className='space-y-8'>
           <ProgressCard
