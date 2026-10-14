@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Achievement, AchievementType } from '@/types/gamification'
-import { Anchor, Flame, LucideIcon, PartyPopper, Trophy, X } from 'lucide-react'
+import { Anchor, Flame, LucideIcon, Trophy, X } from 'lucide-react'
 import { Button } from './ui/button'
 import { Card } from './ui/card'
 
@@ -54,14 +54,10 @@ export default function CelebrationDialog({
         </DialogHeader>
 
         <div className='flex items-center justify-center gap-2'>
-          <Button>
+          <Button onClick={onDismiss}>
             <X />
             Close
           </Button>
-
-          {/* <Button variant='outline' size='icon'>
-            <PartyPopper />
-          </Button> */}
         </div>
       </DialogContent>
     </Dialog>
