@@ -27,6 +27,15 @@ const dialogContentChildVariants: Variants = {
   animate: { opacity: 1, scale: 1 },
 }
 
+const titleVariants: Variants = {
+  initial: { opacity: 0, scale: 0, y: 4 },
+  animate: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+  },
+}
+
 export default function SuccessfulFastDialog() {
   return (
     <Dialog>
@@ -51,10 +60,11 @@ export default function SuccessfulFastDialog() {
           <DialogHeader className='items-center text-center'>
             <MotionDialogTitle
               className='w-full text-center text-2xl'
-              variants={dialogContentChildVariants}
+              variants={titleVariants}
             >
               Fast completed!
             </MotionDialogTitle>
+
             <MotionDialogDescription
               className='w-full text-center'
               variants={dialogContentChildVariants}
