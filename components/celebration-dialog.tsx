@@ -58,7 +58,7 @@ export default function CelebrationDialog({
         <Card>
           <div
             aria-label={`${achievement.type} achievement`}
-            className='bg-primary/10 mx-auto flex size-20 items-center justify-center rounded-full'
+            className='bg-primary/10 dark:bg-primary/40 mx-auto flex size-20 items-center justify-center rounded-full'
           >
             <Icon className='mx-auto size-10' />
           </div>

@@ -20,7 +20,7 @@ export default function SuccessfulFastDialog() {
       </DialogTrigger>
 
       <DialogContent>
-        <div className='bg-primary/10 mx-auto flex size-20 items-center justify-center rounded-full'>
+        <div className='bg-primary/10 dark:bg-primary/40 mx-auto flex size-20 items-center justify-center rounded-full'>
           <PartyPopper className='mx-auto size-10' />
         </div>
 
