@@ -53,13 +53,14 @@ export default function SuccessfulFastDialog() {
     const intervalId = setInterval(() => {
       setxp((prev) => {
         if (prev >= 10) {
-          if (prev === 10) clearInterval(intervalId)
+          clearInterval(intervalId)
+          incrementStreak()
           return prev
         }
 
         return prev + 1
       })
-    }, 100)
+    }, 150)
   }
 
   const incrementStreak = () => {
@@ -70,7 +71,7 @@ export default function SuccessfulFastDialog() {
     const intervalId = setInterval(() => {
       setFastHours((prev) => {
         if (prev >= 23) {
-          if (prev === 23) clearInterval(intervalId)
+          clearInterval(intervalId)
           return prev
         }
 
@@ -83,15 +84,14 @@ export default function SuccessfulFastDialog() {
     const intervalId = setInterval(() => {
       setFastMinutes((prev) => {
         if (prev >= 30) {
-          if (prev === 30) {
-            clearInterval(intervalId)
-          }
+          clearInterval(intervalId)
+          incrementxp()
           return prev
         }
 
         return prev + 1
       })
-    }, 60)
+    }, 30)
   }
 
   return (
@@ -141,17 +141,12 @@ export default function SuccessfulFastDialog() {
           >
             <p>Fasting duration</p>
             <p className='text-2xl font-semibold'>
-              {fastHours}h {fastMinutes}m
+              <span>{fastHours}</span>h <span>{fastMinutes}</span>m
             </p>
           </motion.div>
 
           <div className='grid grid-cols-2 gap-6'>
-            <MotionCard
-              variants={dialogContentChildVariants}
-              onAnimationComplete={() => {
-                // incrementxp()
-              }}
-            >
+            <MotionCard variants={dialogContentChildVariants}>
               <CardContent className='space-y-2'>
                 <div className='flex items-center justify-center gap-2'>
                   <Sparkles className='size-6' />
@@ -164,12 +159,7 @@ export default function SuccessfulFastDialog() {
               </CardContent>
             </MotionCard>
 
-            <MotionCard
-              variants={dialogContentChildVariants}
-              onAnimationComplete={() => {
-                incrementStreak()
-              }}
-            >
+            <MotionCard variants={dialogContentChildVariants}>
               <CardContent className='space-y-2'>
                 <div className='flex items-center justify-center gap-2'>
                   <Flame className='size-6' />
