@@ -11,7 +11,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog'
-import { motion, type Variants } from 'motion/react'
+import {
+  animate,
+  motion,
+  useMotionValue,
+  useTransform,
+  type Variants,
+} from 'motion/react'
+import { useEffect, useState } from 'react'
 
 const MotionCard = motion.create(Card)
 const MotionDialogTitle = motion.create(DialogTitle)
@@ -37,6 +44,56 @@ const titleVariants: Variants = {
 }
 
 export default function SuccessfulFastDialog() {
+  const [xp, setxp] = useState(0)
+  const [streak, setStreak] = useState(7)
+  const [fastHours, setFastHours] = useState(0)
+  const [fastMinutes, setFastMinutes] = useState(0)
+
+  const incrementxp = () => {
+    const intervalId = setInterval(() => {
+      setxp((prev) => {
+        if (prev >= 10) {
+          if (prev === 10) clearInterval(intervalId)
+          return prev
+        }
+
+        return prev + 1
+      })
+    }, 100)
+  }
+
+  const incrementStreak = () => {
+    setStreak((prev) => prev + 1)
+  }
+
+  const incrementFastHours = () => {
+    const intervalId = setInterval(() => {
+      setFastHours((prev) => {
+        if (prev >= 23) {
+          if (prev === 23) clearInterval(intervalId)
+          return prev
+        }
+
+        return prev + 1
+      })
+    }, 30)
+  }
+
+  const incrementFastMinutes = () => {
+    const intervalId = setInterval(() => {
+      setFastMinutes((prev) => {
+        if (prev >= 30) {
+          if (prev === 30) {
+            clearInterval(intervalId)
+          }
+          return prev
+        }
+
+        return prev + 1
+      })
+    }, 60)
+  }
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -77,17 +134,28 @@ export default function SuccessfulFastDialog() {
           <motion.div
             className='flex flex-col items-center justify-center'
             variants={dialogContentChildVariants}
+            onAnimationComplete={() => {
+              incrementFastHours()
+              incrementFastMinutes()
+            }}
           >
             <p>Fasting duration</p>
-            <p className='text-2xl font-semibold'>23h 30m</p>
+            <p className='text-2xl font-semibold'>
+              {fastHours}h {fastMinutes}m
+            </p>
           </motion.div>
 
           <div className='grid grid-cols-2 gap-6'>
-            <MotionCard variants={dialogContentChildVariants}>
+            <MotionCard
+              variants={dialogContentChildVariants}
+              onAnimationComplete={() => {
+                // incrementxp()
+              }}
+            >
               <CardContent className='space-y-2'>
                 <div className='flex items-center justify-center gap-2'>
                   <Sparkles className='size-6' />
-                  <p className='text-2xl font-bold'>10</p>
+                  <motion.p className='text-2xl font-bold'>{xp}</motion.p>
                 </div>
 
                 <p className='text-muted-foreground text-center text-sm'>
@@ -96,11 +164,16 @@ export default function SuccessfulFastDialog() {
               </CardContent>
             </MotionCard>
 
-            <MotionCard variants={dialogContentChildVariants}>
+            <MotionCard
+              variants={dialogContentChildVariants}
+              onAnimationComplete={() => {
+                incrementStreak()
+              }}
+            >
               <CardContent className='space-y-2'>
                 <div className='flex items-center justify-center gap-2'>
                   <Flame className='size-6' />
-                  <p className='text-2xl font-bold'>8</p>
+                  <p className='text-2xl font-bold'>{streak}</p>
                 </div>
 
                 <p className='text-muted-foreground text-center text-sm'>
