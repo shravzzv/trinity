@@ -177,7 +177,8 @@ describe('useGamification', () => {
       expect(result.current.currentAchievement).toEqual({
         type: 'anchor',
         title: 'Anchor earned!',
-        description: 'You earned an Anchor by maintaining your fasting streak.',
+        description:
+          'Congratulations, you earned an Anchor by maintaining your fasting streak!',
       })
     })
 
