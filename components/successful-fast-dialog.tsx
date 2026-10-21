@@ -11,6 +11,36 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog'
+import { motion, type MotionNodeAnimationOptions } from 'motion/react'
+
+const partyIconAnimations: MotionNodeAnimationOptions = {
+  initial: { opacity: 0, scale: 0 },
+  animate: { opacity: 1, scale: 1 },
+}
+
+const titleAnimations: MotionNodeAnimationOptions = {
+  initial: { opacity: 0, scale: 0 },
+  animate: { opacity: 1, scale: 1 },
+}
+
+const descAnimations: MotionNodeAnimationOptions = {
+  initial: { opacity: 0, scale: 0 },
+  animate: { opacity: 1, scale: 1 },
+}
+
+const fastingDurationAnimations: MotionNodeAnimationOptions = {
+  initial: { opacity: 0, scale: 0 },
+  animate: { opacity: 1, scale: 1 },
+}
+
+const cardAnimations: MotionNodeAnimationOptions = {
+  initial: { opacity: 0, scale: 0 },
+  animate: { opacity: 1, scale: 1 },
+}
+
+const MotionDialogTitle = motion.create(DialogTitle)
+const MotionDialogDescription = motion.create(DialogDescription)
+const MotionCard = motion.create(Card)
 
 export default function SuccessfulFastDialog() {
   return (
@@ -20,26 +50,38 @@ export default function SuccessfulFastDialog() {
       </DialogTrigger>
 
       <DialogContent>
-        <div className='bg-primary/10 dark:bg-primary/40 mx-auto flex size-20 items-center justify-center rounded-full'>
+        <motion.div
+          className='bg-primary/10 dark:bg-primary/40 mx-auto flex size-20 items-center justify-center rounded-full'
+          {...partyIconAnimations}
+        >
           <PartyPopper className='mx-auto size-10' />
-        </div>
+        </motion.div>
 
         <DialogHeader className='items-center text-center'>
-          <DialogTitle className='w-full text-center text-2xl'>
+          <MotionDialogTitle
+            className='w-full text-center text-2xl'
+            {...titleAnimations}
+          >
             Fast completed!
-          </DialogTitle>
-          <DialogDescription className='w-full text-center'>
+          </MotionDialogTitle>
+          <MotionDialogDescription
+            className='w-full text-center'
+            {...descAnimations}
+          >
             You followed through on your plan. Take a moment to appreciate that.
-          </DialogDescription>
+          </MotionDialogDescription>
         </DialogHeader>
 
-        <div className='flex flex-col items-center justify-center'>
+        <motion.div
+          className='flex flex-col items-center justify-center'
+          {...fastingDurationAnimations}
+        >
           <p>Fasting duration</p>
           <p className='text-2xl font-semibold'>23h 30m</p>
-        </div>
+        </motion.div>
 
         <div className='grid grid-cols-2 gap-6'>
-          <Card>
+          <MotionCard {...cardAnimations}>
             <CardContent className='space-y-2'>
               <div className='flex items-center justify-center gap-2'>
                 <Sparkles className='size-6' />
@@ -50,9 +92,9 @@ export default function SuccessfulFastDialog() {
                 XP earned
               </p>
             </CardContent>
-          </Card>
+          </MotionCard>
 
-          <Card>
+          <MotionCard {...cardAnimations}>
             <CardContent className='space-y-2'>
               <div className='flex items-center justify-center gap-2'>
                 <Flame className='size-6' />
@@ -63,7 +105,7 @@ export default function SuccessfulFastDialog() {
                 Streak
               </p>
             </CardContent>
-          </Card>
+          </MotionCard>
         </div>
       </DialogContent>
     </Dialog>
