@@ -11,14 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog'
-import {
-  animate,
-  motion,
-  useMotionValue,
-  useTransform,
-  type Variants,
-} from 'motion/react'
-import { useEffect, useState } from 'react'
+import NumberFlow, { NumberFlowGroup } from '@number-flow/react'
 
 const MotionCard = motion.create(Card)
 const MotionDialogTitle = motion.create(DialogTitle)
@@ -140,9 +133,12 @@ export default function SuccessfulFastDialog() {
             }}
           >
             <p>Fasting duration</p>
-            <p className='text-2xl font-semibold'>
-              <span>{fastHours}</span>h <span>{fastMinutes}</span>m
-            </p>
+            <NumberFlowGroup>
+              <div className='text-2xl font-semibold'>
+                <NumberFlow value={fastHours} suffix='h' />{' '}
+                <NumberFlow value={fastMinutes} suffix='m' />
+              </div>
+            </NumberFlowGroup>
           </motion.div>
 
           <div className='grid grid-cols-2 gap-6'>
@@ -150,7 +146,9 @@ export default function SuccessfulFastDialog() {
               <CardContent className='space-y-2'>
                 <div className='flex items-center justify-center gap-2'>
                   <Sparkles className='size-6' />
-                  <motion.p className='text-2xl font-bold'>{xp}</motion.p>
+                  <motion.p className='text-2xl font-bold'>
+                    <NumberFlow value={xpLocal} />
+                  </motion.p>
                 </div>
 
                 <p className='text-muted-foreground text-center text-sm'>
@@ -163,7 +161,9 @@ export default function SuccessfulFastDialog() {
               <CardContent className='space-y-2'>
                 <div className='flex items-center justify-center gap-2'>
                   <Flame className='size-6' />
-                  <p className='text-2xl font-bold'>{streak}</p>
+                  <p className='text-2xl font-bold'>
+                    <NumberFlow value={streakLocal} />
+                  </p>
                 </div>
 
                 <p className='text-muted-foreground text-center text-sm'>
