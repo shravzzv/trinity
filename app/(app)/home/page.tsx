@@ -4,10 +4,11 @@ import FastingStatistics from '@/components/fasting-statistics'
 import FastingTimer from '@/components/fasting-timer'
 import WeightStatistics from '@/components/weight-statistics'
 import ProgressCard from '@/components/progress-card'
-import CelebrationDialog from '@/components/celebration-dialog'
 import { useFastingContext } from '@/providers/fasting-provider'
 import { useWeightContext } from '@/providers/weight-provider'
 import { useGamificationContext } from '@/providers/gamification-provider'
+import AchievementCelebrationDialog from '@/components/achievement-celebration-dialog'
+import { useEffect, useState } from 'react'
 
 export default function Page() {
   const {
@@ -49,13 +50,20 @@ export default function Page() {
     isLoading: isGamificationLoading,
   } = useGamificationContext()
 
+  const [showAchivementCelebration, setShowAchivementCelebration] =
+    useState(false)
+  const [showSuccessfulFastDialog, setShowSuccessfulFastDialog] =
+    useState(false)
+
+  useEffect(() => {
+    if (showSuccessfulFastDialog) return
+
+    const showAchivement = () => setShowAchivementCelebration(true)
+    if (currentAchievement) showAchivement()
+  }, [currentAchievement, showSuccessfulFastDialog])
+
   return (
     <>
-      <CelebrationDialog
-        achievement={currentAchievement}
-        onDismiss={dismissAchievement}
-      />
-
       <div className='grid items-start gap-8 sm:grid-cols-2 lg:grid-cols-3'>
         <div className='space-y-8'>
           <ProgressCard
@@ -84,6 +92,8 @@ export default function Page() {
             startAnchoredSession={startAnchoredSession}
             updateSessionStartedAt={updateSessionStartedAt}
             preferredFastStartTime={preferredFastStartTime}
+            showSuccessfulFastDialog={showSuccessfulFastDialog}
+            setShowSuccessfulFastDialog={setShowSuccessfulFastDialog}
           />
         </div>
 
@@ -107,6 +117,22 @@ export default function Page() {
           isLoading={isWeightStateLoading}
         />
       </div>
+
+      <AchievementCelebrationDialog
+        open={showAchivementCelebration}
+
+        onOpenChange={(open) => {
+          setShowAchivementCelebration(open)
+          if (!open) dismissAchievement()
+        }}
+
+        achievement={currentAchievement}
+
+        close={() => {
+          setShowAchivementCelebration(false)
+          dismissAchievement()
+        }}
+      />
     </>
   )
 }

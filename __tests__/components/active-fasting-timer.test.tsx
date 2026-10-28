@@ -2,6 +2,7 @@ import ActiveFastingTimer from '@/components/active-fasting-timer'
 import { ANCHOR_STREAK_REQUIREMENT, xpRewards } from '@/constants/gamification'
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import React from 'react'
 import { toast } from 'sonner'
 
 const mockEndFasting = jest.fn()
@@ -15,6 +16,17 @@ const mockSpendAnchor = jest.fn()
 const mockStartAnchoredSession = jest.fn()
 
 jest.mock('sonner')
+
+jest.mock('@number-flow/react', () => {
+  return {
+    __esModule: true,
+    default: ({ value, suffix }: { value: number; suffix?: string }) =>
+      React.createElement('span', null, `${value}${suffix ?? ''}`),
+
+    NumberFlowGroup: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+  }
+})
 
 jest.mock('@/components/edit-session-started-at-dialog', () => ({
   __esModule: true,
@@ -38,6 +50,18 @@ jest.mock('@/components/edit-session-started-at-dialog', () => ({
   ),
 }))
 
+jest.mock('@/providers/gamification-provider', () => ({
+  useGamificationContext: () => ({
+    streak: 0,
+  }),
+}))
+
+jest.mock('@/providers/fasting-provider', () => ({
+  useFastingContext: () => ({
+    session: {},
+  }),
+}))
+
 const renderComponent = (
   props: Partial<React.ComponentProps<typeof ActiveFastingTimer>> = {},
 ) => {
@@ -56,6 +80,8 @@ const renderComponent = (
       resetStreak={mockResetStreak}
       spendAnchor={mockSpendAnchor}
       startAnchoredSession={mockStartAnchoredSession}
+      showSuccessfulFastDialog={false}
+      setShowSuccessfulFastDialog={jest.fn}
       session={{
         status: 'fasting',
         startedAt: new Date().toISOString(),
