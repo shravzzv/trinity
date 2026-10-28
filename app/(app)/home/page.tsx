@@ -8,7 +8,6 @@ import CelebrationDialog from '@/components/celebration-dialog'
 import { useFastingContext } from '@/providers/fasting-provider'
 import { useWeightContext } from '@/providers/weight-provider'
 import { useGamificationContext } from '@/providers/gamification-provider'
-import SuccessfulFastDialog from '@/components/successful-fast-dialog'
 
 export default function Page() {
   const {
@@ -108,8 +107,6 @@ export default function Page() {
           isLoading={isWeightStateLoading}
         />
       </div>
-
-      <SuccessfulFastDialog />
     </>
   )
 }

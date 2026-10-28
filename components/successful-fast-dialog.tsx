@@ -1,6 +1,5 @@
 'use client'
 
-import { Button } from './ui/button'
 import { Flame, PartyPopper, Sparkles } from 'lucide-react'
 import { Card, CardContent } from './ui/card'
 import {
@@ -9,7 +8,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from './ui/dialog'
 import { motion, type Variants } from 'motion/react'
 import { useEffect, useState } from 'react'
@@ -44,7 +42,15 @@ const titleVariants: Variants = {
 
 const XP_REWARD = xpRewards.completedFast
 
-export default function SuccessfulFastDialog() {
+interface SuccessfulFastDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+export default function SuccessfulFastDialog({
+  open,
+  onOpenChange,
+}: SuccessfulFastDialogProps) {
   const { streak } = useGamificationContext()
   const { session } = useFastingContext()
 
@@ -127,19 +133,16 @@ export default function SuccessfulFastDialog() {
     setxpLocal(0)
     setStreakLocal(Math.max(0, streak - 1))
 
-    // localStorage.removeItem(SUCCESSFUL_FAST_STARTED_AT)
+    localStorage.removeItem(SUCCESSFUL_FAST_STARTED_AT)
+  }
+
+  const handleOpenChange = (open: boolean) => {
+    onOpenChange(open)
+    if (!open) resetState()
   }
 
   return (
-    <Dialog
-      onOpenChange={(open) => {
-        if (!open) resetState()
-      }}
-    >
-      <DialogTrigger asChild>
-        <Button variant='outline'>Show Dialog</Button>
-      </DialogTrigger>
-
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <motion.div
           variants={dialogContentVariants}
