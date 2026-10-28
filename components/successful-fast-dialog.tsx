@@ -11,7 +11,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog'
+import { motion, type Variants } from 'motion/react'
+import { useEffect, useState } from 'react'
+import { useGamificationContext } from '@/providers/gamification-provider'
+import { useFastingContext } from '@/providers/fasting-provider'
+import { xpRewards } from '@/constants/gamification'
 import NumberFlow, { NumberFlowGroup } from '@number-flow/react'
+import { SUCCESSFUL_FAST_STARTED_AT } from '@/constants/storage-keys'
 
 const MotionCard = motion.create(Card)
 const MotionDialogTitle = motion.create(DialogTitle)
@@ -36,16 +42,42 @@ const titleVariants: Variants = {
   },
 }
 
+const XP_REWARD = xpRewards.completedFast
+
 export default function SuccessfulFastDialog() {
-  const [xp, setxp] = useState(0)
-  const [streak, setStreak] = useState(7)
+  const { streak } = useGamificationContext()
+  const { session } = useFastingContext()
+
+  const [xpLocal, setxpLocal] = useState(0)
   const [fastHours, setFastHours] = useState(0)
   const [fastMinutes, setFastMinutes] = useState(0)
+  const [streakLocal, setStreakLocal] = useState(0)
+
+  useEffect(() => {
+    const syncStreak = () => setStreakLocal(Math.max(0, streak - 1))
+    syncStreak()
+  }, [streak])
+
+  const getSessionTime = () => {
+    if (!session) throw Error
+
+    const LS_value = localStorage.getItem(SUCCESSFUL_FAST_STARTED_AT)
+    if (!LS_value) throw Error
+
+    const fastStartedAt = new Date(LS_value).getTime()
+    const fastEndedAt = new Date(session.startedAt).getTime()
+
+    const ms = fastEndedAt - fastStartedAt
+    const hours = Math.floor(ms / 3600000)
+    const minutes = Math.floor((ms % 3600000) / 60000)
+
+    return { hours, minutes }
+  }
 
   const incrementxp = () => {
     const intervalId = setInterval(() => {
-      setxp((prev) => {
-        if (prev >= 10) {
+      setxpLocal((prev) => {
+        if (prev === XP_REWARD) {
           clearInterval(intervalId)
           incrementStreak()
           return prev
@@ -56,14 +88,14 @@ export default function SuccessfulFastDialog() {
     }, 150)
   }
 
-  const incrementStreak = () => {
-    setStreak((prev) => prev + 1)
-  }
+  const incrementStreak = () => setStreakLocal(streak)
 
   const incrementFastHours = () => {
+    const targetHours = getSessionTime().hours
+
     const intervalId = setInterval(() => {
       setFastHours((prev) => {
-        if (prev >= 23) {
+        if (prev === targetHours) {
           clearInterval(intervalId)
           return prev
         }
@@ -74,9 +106,11 @@ export default function SuccessfulFastDialog() {
   }
 
   const incrementFastMinutes = () => {
+    const targetMinutes = getSessionTime().minutes
+
     const intervalId = setInterval(() => {
       setFastMinutes((prev) => {
-        if (prev >= 30) {
+        if (prev === targetMinutes) {
           clearInterval(intervalId)
           incrementxp()
           return prev
@@ -87,8 +121,21 @@ export default function SuccessfulFastDialog() {
     }, 30)
   }
 
+  const resetState = () => {
+    setFastHours(0)
+    setFastMinutes(0)
+    setxpLocal(0)
+    setStreakLocal(Math.max(0, streak - 1))
+
+    // localStorage.removeItem(SUCCESSFUL_FAST_STARTED_AT)
+  }
+
   return (
-    <Dialog>
+    <Dialog
+      onOpenChange={(open) => {
+        if (!open) resetState()
+      }}
+    >
       <DialogTrigger asChild>
         <Button variant='outline'>Show Dialog</Button>
       </DialogTrigger>

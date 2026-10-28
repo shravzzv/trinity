@@ -42,6 +42,7 @@ import AnchorConfirmationDialog from './anchor-confirmation-dialog'
 import { cn } from '@/lib/utils'
 import { shouldAwardAnchor } from '@/lib/gamification'
 import { xpRewards } from '@/constants/gamification'
+import { SUCCESSFUL_FAST_STARTED_AT } from '@/constants/storage-keys'
 
 interface ActiveFastingTimerProps {
   fasts: Fast[]
@@ -108,10 +109,15 @@ export default function ActiveFastingTimer({
         awardXp(xpRewards.completedAnchoredFast)
         toast.success('Fasting session started')
       } else if (isFasting) {
-        await endFasting(selectedEndedAt)
-        if (hasExceededSessionLength) awardXp(xpRewards.completedFast)
-        else awardXp(xpRewards.missedFast)
+        if (hasExceededSessionLength) {
+          awardXp(xpRewards.completedFast)
 
+          localStorage.setItem(SUCCESSFUL_FAST_STARTED_AT, startedAt)
+        } else {
+          awardXp(xpRewards.missedFast)
+        }
+
+        await endFasting(selectedEndedAt)
         toast.success('Fast ended')
       } else {
         await startFasting(selectedEndedAt)

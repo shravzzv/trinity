@@ -9,3 +9,5 @@ export const INDEXED_DB_NAME = 'trinity'
 export const INDEXED_DB_VERSION = 2
 
 export const PROFILE_STORAGE_KEY = 'trinity-profile'
+
+export const SUCCESSFUL_FAST_STARTED_AT = 'trinity-successful-fast-started-at'
