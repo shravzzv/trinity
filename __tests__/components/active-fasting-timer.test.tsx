@@ -80,6 +80,8 @@ const renderComponent = (
       resetStreak={mockResetStreak}
       spendAnchor={mockSpendAnchor}
       startAnchoredSession={mockStartAnchoredSession}
+      showSuccessfulFastDialog={false}
+      setShowSuccessfulFastDialog={jest.fn}
       session={{
         status: 'fasting',
         startedAt: new Date().toISOString(),

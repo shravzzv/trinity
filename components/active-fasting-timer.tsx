@@ -48,8 +48,10 @@ interface ActiveFastingTimerProps {
   incrementStreak: () => void
   startAnchoredSession: () => void
   awardXp: (amount: number) => void
+  showSuccessfulFastDialog: boolean
   endFasting: (endedAt?: Date) => Promise<void>
   startFasting: (startedAt?: Date) => Promise<void>
+  setShowSuccessfulFastDialog: (value: boolean) => void
   updateSessionStartedAt: (updatedStartedAt: Date) => void
 }
 
@@ -67,14 +69,14 @@ export default function ActiveFastingTimer({
   incrementStreak,
   startAnchoredSession,
   updateSessionStartedAt,
+  showSuccessfulFastDialog,
+  setShowSuccessfulFastDialog,
   session: { status, startedAt, isAnchored },
 }: ActiveFastingTimerProps) {
   const [now, setNow] = useState(() => Date.now())
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [selectedEndedAt, setSelectedEndedAt] = useState<Date | undefined>()
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false)
-  const [showSuccessfulFastDialog, setShowSuccessfulFastDialog] =
-    useState(false)
   const [confirmationSnapshot, setConfirmationSnapshot] =
     useState<ConfirmationSnapshot | null>(null)
 
@@ -107,8 +109,6 @@ export default function ActiveFastingTimer({
         awardXp(xpRewards.completedAnchoredFast)
         toast.success('Fasting session started')
       } else if (isFasting) {
-        await endFasting(selectedEndedAt)
-
         if (hasExceededSessionLength) {
           awardXp(xpRewards.completedFast)
 
@@ -118,6 +118,8 @@ export default function ActiveFastingTimer({
           awardXp(xpRewards.missedFast)
           toast.success('Fast ended')
         }
+
+        await endFasting(selectedEndedAt)
       } else {
         await startFasting(selectedEndedAt)
         toast.success('Fast started')

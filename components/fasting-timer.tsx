@@ -24,10 +24,12 @@ interface FastingTimerProps {
   session: FastingSession | null
   startAnchoredSession: () => void
   awardXp: (amount: number) => void
+  showSuccessfulFastDialog: boolean
   endFasting: (endedAt?: Date) => Promise<void>
   updatePlanId: UseFastingResult['updatePlanId']
   startFasting: (startedAt?: Date) => Promise<void>
   preferredFastStartTime: PreferredFastStartTime | null
+  setShowSuccessfulFastDialog: (value: boolean) => void
   updateSessionStartedAt: (updatedStartedAt: Date) => void
 }
 

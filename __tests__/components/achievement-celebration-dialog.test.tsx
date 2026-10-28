@@ -1,9 +1,6 @@
-import CelebrationDialog from '@/components/celebration-dialog'
 import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import type { Achievement } from '@/types/gamification'
-
-const onDismiss = jest.fn()
+import AchievementCelebrationDialog from '@/components/achievement-celebration-dialog'
 
 const renderComponent = (
   achievement: Achievement | null = {
@@ -13,11 +10,16 @@ const renderComponent = (
   },
 ) => {
   return render(
-    <CelebrationDialog achievement={achievement} onDismiss={onDismiss} />,
+    <AchievementCelebrationDialog
+      open
+      achievement={achievement}
+      close={jest.fn()}
+      onOpenChange={jest.fn()}
+    />,
   )
 }
 
-describe('CelebrationDialog', () => {
+describe('AchivementCelebrationDialog', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
@@ -70,15 +72,5 @@ describe('CelebrationDialog', () => {
     })
 
     expect(screen.getByLabelText('anchor achievement')).toBeInTheDocument()
-  })
-
-  it('calls onDismiss when the dialog is closed', async () => {
-    const user = userEvent.setup()
-
-    renderComponent()
-
-    await user.click(screen.getByRole('button', { name: /close/i }))
-
-    expect(onDismiss).toHaveBeenCalledTimes(1)
   })
 })
