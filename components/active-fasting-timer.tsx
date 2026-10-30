@@ -32,7 +32,6 @@ interface ConfirmationSnapshot {
   isFasting: boolean
   isAnchored: boolean
   hasExceededSessionLength: boolean
-  remainingMs: number
   selectedEndedAt: Date | undefined
 }
 
@@ -147,7 +146,6 @@ export default function ActiveFastingTimer({
     setConfirmationSnapshot({
       isFasting,
       isAnchored,
-      remainingMs,
       selectedEndedAt,
       hasExceededSessionLength,
     })
@@ -298,7 +296,7 @@ export default function ActiveFastingTimer({
         setIsDrawerOpen={setIsDrawerOpen}
         isAnchored={confirmationSnapshot?.isAnchored ?? isAnchored}
         isFasting={confirmationSnapshot?.isFasting ?? isFasting}
-        remainingMs={confirmationSnapshot?.remainingMs ?? remainingMs}
+        remainingMs={remainingMs}
         selectedEndedAt={
           confirmationSnapshot?.selectedEndedAt ?? selectedEndedAt
         }
