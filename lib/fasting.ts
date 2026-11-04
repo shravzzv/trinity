@@ -232,7 +232,6 @@ export const formatPreferredTime = (time: PreferredFastStartTime): string => {
   return date.toLocaleTimeString([], {
     hour: 'numeric',
     minute: '2-digit',
-    hour12: true,
   })
 }
 
@@ -442,12 +441,10 @@ export const getActiveSessionStatistics = ({
   const startedAtFormatted = startedAt.toLocaleTimeString([], {
     hour: 'numeric',
     minute: '2-digit',
-    hour12: true,
   })
   const endsAtFormatted = endsAt.toLocaleTimeString([], {
     hour: 'numeric',
     minute: '2-digit',
-    hour12: true,
   })
 
   return {

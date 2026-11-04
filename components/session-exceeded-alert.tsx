@@ -22,7 +22,7 @@ export default function SessionExceededAlert({
             <span>
               Finish time:{' '}
               <span className='font-medium'>
-                {selectedEndedAt.toLocaleTimeString([], { hour12: true })}
+                {selectedEndedAt.toLocaleTimeString()}
               </span>{' '}
             </span>
 
