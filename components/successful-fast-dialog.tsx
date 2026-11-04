@@ -81,16 +81,16 @@ export default function SuccessfulFastDialog({
   }
 
   const incrementxp = () => {
-    const intervalId = setInterval(() => {
-      setxpLocal((prev) => {
-        if (prev === XP_REWARD) {
-          clearInterval(intervalId)
-          incrementStreak()
-          return prev
-        }
+    let current = 0
 
-        return prev + 1
-      })
+    const intervalId = setInterval(() => {
+      current += 1
+      setxpLocal(current)
+
+      if (current === XP_REWARD) {
+        clearInterval(intervalId)
+        incrementStreak()
+      }
     }, 150)
   }
 
@@ -98,32 +98,37 @@ export default function SuccessfulFastDialog({
 
   const incrementFastHours = () => {
     const targetHours = getSessionTime().hours
+    let current = 0
+
+    if (targetHours <= 0) return
 
     const intervalId = setInterval(() => {
-      setFastHours((prev) => {
-        if (prev === targetHours) {
-          clearInterval(intervalId)
-          return prev
-        }
+      current += 1
+      setFastHours(current)
 
-        return prev + 1
-      })
+      if (current >= targetHours) {
+        clearInterval(intervalId)
+      }
     }, 30)
   }
 
   const incrementFastMinutes = () => {
     const targetMinutes = getSessionTime().minutes
+    let current = 0
+
+    if (targetMinutes <= 0) {
+      incrementxp()
+      return
+    }
 
     const intervalId = setInterval(() => {
-      setFastMinutes((prev) => {
-        if (prev === targetMinutes) {
-          clearInterval(intervalId)
-          incrementxp()
-          return prev
-        }
+      current += 1
+      setFastMinutes(current)
 
-        return prev + 1
-      })
+      if (current === targetMinutes) {
+        clearInterval(intervalId)
+        incrementxp()
+      }
     }, 30)
   }
 
@@ -153,6 +158,7 @@ export default function SuccessfulFastDialog({
           <motion.div
             className='bg-primary/10 dark:bg-primary/40 mx-auto flex size-20 items-center justify-center rounded-full'
             variants={dialogContentChildVariants}
+            aria-label='successful-fast-icon'
           >
             <PartyPopper className='mx-auto size-10' />
           </motion.div>
@@ -161,6 +167,7 @@ export default function SuccessfulFastDialog({
             <MotionDialogTitle
               className='w-full text-center text-2xl'
               variants={titleVariants}
+              aria-label='successful-fast-heading'
             >
               Fast completed!
             </MotionDialogTitle>
@@ -168,6 +175,7 @@ export default function SuccessfulFastDialog({
             <MotionDialogDescription
               className='w-full text-center'
               variants={dialogContentChildVariants}
+              aria-label='successful-fast-description'
             >
               You followed through on your plan. Take a moment to appreciate
               that.
@@ -192,12 +200,18 @@ export default function SuccessfulFastDialog({
           </motion.div>
 
           <div className='grid grid-cols-2 gap-6'>
-            <MotionCard variants={dialogContentChildVariants}>
+            <MotionCard
+              variants={dialogContentChildVariants}
+              aria-label='xp-earned-card'
+            >
               <CardContent className='space-y-2'>
                 <div className='flex items-center justify-center gap-2'>
                   <Sparkles className='size-6' />
                   <motion.p className='text-2xl font-bold'>
-                    <NumberFlow value={xpLocal} />
+                    <NumberFlow
+                      value={xpLocal}
+                      aria-label={`${xpLocal} XP earned`}
+                    />
                   </motion.p>
                 </div>
 
@@ -207,7 +221,10 @@ export default function SuccessfulFastDialog({
               </CardContent>
             </MotionCard>
 
-            <MotionCard variants={dialogContentChildVariants}>
+            <MotionCard
+              variants={dialogContentChildVariants}
+              aria-label='streak-card'
+            >
               <CardContent className='space-y-2'>
                 <div className='flex items-center justify-center gap-2'>
                   <Flame className='size-6' />
