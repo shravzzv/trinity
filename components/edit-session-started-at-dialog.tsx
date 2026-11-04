@@ -91,6 +91,7 @@ export default function EditSessionStartedAtDialog({
               {draftEndsAt.toLocaleTimeString([], {
                 hour: 'numeric',
                 minute: '2-digit',
+                hour12: true,
               })}
             </span>{' '}
             {formatRelativeDay(draftEndsAt)}.
