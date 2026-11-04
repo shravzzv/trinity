@@ -35,6 +35,7 @@ export default function AnchorConfirmationDialog({
   const nextStartedAtFormatted = nextStartedAt.toLocaleTimeString([], {
     hour: 'numeric',
     minute: '2-digit',
+    hour12: true,
   })
 
   return (
