@@ -1,5 +1,5 @@
 /**
- * Synchronization engine.
+ * @fileoverview Synchronization engine.
  *
  * Coordinates synchronization between Trinity's browser storage and Supabase.
  * This is the only module that communicates with both persistence layers:
@@ -24,6 +24,7 @@ import type { Fast } from '@/types/fasting'
 import type { WeightEntry } from '@/types/weight'
 import { getProfile, saveProfile } from './profile'
 import type { SyncListener } from '@/types/sync'
+import type { StreakHistoryItem } from '@/types/gamification'
 
 /**
  * Represents the currently running synchronization, if any.
@@ -140,6 +141,7 @@ const uploadPendingChanges = async (): Promise<void> => {
     uploadFasts(),
     uploadWeightEntries(),
     uploadPendingDeletes(),
+    uploadStreakHistory(),
   ])
 }
 
@@ -153,6 +155,7 @@ const downloadRemoteChanges = async (): Promise<void> => {
     downloadWeightEntries(),
     downloadFastsDeletions(),
     downloadWeightEntriesDeletions(),
+    downloadStreakHistory(),
   ])
 }
 
@@ -380,5 +383,49 @@ const downloadWeightEntriesDeletions = async (): Promise<void> => {
     remoteDeletions.map((deletion) =>
       indexedDb.deleteWeightEntry(deletion.entityId),
     ),
+  )
+}
+
+/**
+ * Uploads locally stored streak history entries that are pending synchronization.
+ *
+ * Successfully uploaded entries are marked as synchronized in IndexedDB.
+ */
+const uploadStreakHistory = async () => {
+  const streakHistory: StreakHistoryItem[] = await indexedDb.getStreakHistory()
+  if (streakHistory.length === 0) return
+
+  const historyNeedingSync = streakHistory.filter(
+    (item) => item.needsSync === true,
+  )
+  if (historyNeedingSync.length === 0) return
+
+  await supabaseDb.insertStreakHistory(historyNeedingSync)
+
+  await Promise.all(
+    historyNeedingSync.map(indexedDb.markStreakHistoryItemAsSynced),
+  )
+}
+
+/**
+ * Downloads and syncs streak history entries from the cloud which
+ * aren't yet present locally.
+ */
+const downloadStreakHistory = async () => {
+  const remoteHistory = await supabaseDb.getStreakHistory()
+  const localHistory = await indexedDb.getStreakHistory()
+
+  if (remoteHistory.length === 0 && localHistory.length === 0) return
+
+  const localHistoryById = new Map(localHistory.map((item) => [item.id, item]))
+
+  const remoteHistoryToLocalize = remoteHistory.filter(
+    (remoteItem) => !localHistoryById.has(remoteItem.id),
+  )
+
+  if (remoteHistoryToLocalize.length === 0) return
+
+  await Promise.all(
+    remoteHistoryToLocalize.map((item) => indexedDb.addStreakHistoryItem(item)),
   )
 }
