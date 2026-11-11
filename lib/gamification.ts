@@ -1,5 +1,5 @@
 /**
- * Gamification domain utilities.
+ * @fileoverview Gamification domain utilities.
  *
  * This module contains business logic and calculations related to
  * Trinity's gamification systems. Functions in this file may depend
@@ -24,7 +24,12 @@
 import { fastingPlans } from '@/constants/fasting-plans'
 import { ANCHOR_STREAK_REQUIREMENT, levels } from '@/constants/gamification'
 import type { Fast, FastingPlanId } from '@/types/fasting'
-import type { StreakStatus } from '@/types/gamification'
+import type {
+  StreakCalendarDates,
+  StreakCounters,
+  StreakHistoryItem,
+  StreakStatus,
+} from '@/types/gamification'
 
 /**
  * Returns the streak outcome for a completed fasting session.
@@ -114,47 +119,6 @@ export const getStreakStatusChartColor = (
 
     case 'anchored':
       return 'var(--anchor)'
-  }
-}
-
-/**
- * Groups completed fasts into calendar modifier arrays based on their
- * streak outcome.
- *
- * Each returned array contains the calendar day on which the fast
- * started. These arrays are intended to be passed directly to the
- * `modifiers` prop of the streak calendar.
- *
- * @param fasts The fasting history to group.
- * @returns Calendar day arrays for completed, missed, and anchored fasts.
- */
-export const getStreakCalendarDays = (fasts: Fast[]) => {
-  const missed: Date[] = []
-  const anchored: Date[] = []
-  const completed: Date[] = []
-
-  for (const fast of fasts) {
-    const day = new Date(fast.endedAt)
-
-    switch (fast.streakStatus) {
-      case 'completed':
-        completed.push(day)
-        break
-
-      case 'missed':
-        missed.push(day)
-        break
-
-      case 'anchored':
-        anchored.push(day)
-        break
-    }
-  }
-
-  return {
-    missed,
-    anchored,
-    completed,
   }
 }
 
@@ -290,4 +254,112 @@ export const shouldCelebrateStreak = (streak: number): boolean => {
     streak === 50 ||
     (streak >= 100 && streak % 100 === 0)
   )
+}
+
+/**
+ * Calculates the current and longest streak from streak history.
+ *
+ * @param history - The history of recorded streak outcomes.
+ * @returns The calculated current and longest streak counters.
+ */
+export const getStreakCounters = (
+  history: StreakHistoryItem[],
+): StreakCounters => {
+  let currentStreak = 0
+  let longestStreak = 0
+
+  const historyAsc = [...history].sort(
+    (a, b) => a.date.getTime() - b.date.getTime(),
+  )
+
+  for (const item of historyAsc) {
+    if (item.status !== 'missed') {
+      currentStreak++
+      if (currentStreak > longestStreak) longestStreak = currentStreak
+    } else {
+      currentStreak = 0
+    }
+  }
+
+  return { currentStreak, longestStreak }
+}
+
+/**
+ * Groups completed fasts into calendar modifier arrays based on their
+ * streak outcome.
+ *
+ * Each returned array contains the calendar day on which the fast
+ * started. These arrays are intended to be passed directly to the
+ * `modifiers` prop of the streak calendar.
+ *
+ * @param fasts The fasting history to group.
+ * @returns Calendar day arrays for completed, missed, and anchored fasts.
+ */
+export const getStreakCalendarDays = (fasts: Fast[]) => {
+  const missed: Date[] = []
+  const anchored: Date[] = []
+  const completed: Date[] = []
+
+  for (const fast of fasts) {
+    const day = new Date(fast.endedAt)
+
+    switch (fast.streakStatus) {
+      case 'completed':
+        completed.push(day)
+        break
+
+      case 'missed':
+        missed.push(day)
+        break
+
+      case 'anchored':
+        anchored.push(day)
+        break
+    }
+  }
+
+  return {
+    missed,
+    anchored,
+    completed,
+  }
+}
+
+/**
+ * Groups streak history dates by their recorded outcome for calendar display.
+ *
+ * Each date is included in the group corresponding to its fasting outcome.
+ * Multiple outcomes on the same date may therefore produce duplicate dates.
+ *
+ * @param streakHistory - The recorded streak outcomes.
+ * @return The dates grouped by outcome.
+ */
+export const getStreakCalendarDates = (
+  streakHistory: StreakHistoryItem[],
+): StreakCalendarDates => {
+  const missed: Date[] = []
+  const anchored: Date[] = []
+  const completed: Date[] = []
+
+  const streakHistoryAsc = streakHistory
+    .slice()
+    .sort((a, b) => a.date.getTime() - b.date.getTime())
+
+  for (const item of streakHistoryAsc) {
+    switch (item.status) {
+      case 'completed':
+        completed.push(item.date)
+        break
+
+      case 'missed':
+        missed.push(item.date)
+        break
+
+      case 'anchored':
+        anchored.push(item.date)
+        break
+    }
+  }
+
+  return { missed, anchored, completed }
 }
