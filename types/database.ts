@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: '14.5'
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       fasts: {
@@ -128,6 +153,38 @@ export type Database = {
           xp?: number
         }
         Relationships: []
+      }
+      streak_history: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          profile_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id: string
+          profile_id: string
+          status: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          profile_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'streak_history_profile_id_fkey'
+            columns: ['profile_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
       }
       weight_entries: {
         Row: {
@@ -327,6 +384,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },

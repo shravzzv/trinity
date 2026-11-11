@@ -1,5 +1,5 @@
 /**
- * Supabase persistence utilities.
+ * @fileoverview Supabase persistence utilities.
  *
  * Provides low-level CRUD operations for Trinity's Supabase database.
  *
@@ -22,7 +22,7 @@ import type {
   FastingSession,
   PreferredFastStartTime,
 } from '@/types/fasting'
-import type { StreakStatus } from '@/types/gamification'
+import type { StreakHistoryItem, StreakStatus } from '@/types/gamification'
 import type { Profile } from '@/types/profile'
 import type { PendingDelete, PendingDeleteEntity } from '@/types/sync'
 import type { WeightEntry } from '@/types/weight'
@@ -506,3 +506,96 @@ const toProfileRow = (
 
   last_synced_at: profile.lastSyncedAt,
 })
+
+/**
+ * Fetches all streak history entries accessible to the current user,
+ * ordered chronologically by their timestamps.
+ *
+ * Downloaded entries are marked as synchronized.
+ *
+ * @returns The user's streak history.
+ * @throws If the database query fails.
+ */
+export const getStreakHistory = async (): Promise<StreakHistoryItem[]> => {
+  const supabase = createClient()
+
+  const { data, error } = await supabase
+    .from('streak_history')
+    .select()
+    .order('date', { ascending: true })
+
+  if (error) {
+    throw Error('Fetching streak history failed', {
+      cause: error,
+    })
+  }
+
+  return data.map(toStreakHistory)
+}
+
+/**
+ * Inserts streak history entries into the database for the current user.
+ *
+ * The entries retain their local IDs so that their identities remain
+ * consistent across local and remote storage.
+ *
+ * @param history - The streak history entries to insert.
+ * @throws If retrieving the profile ID or inserting the entries fails.
+ */
+export const insertStreakHistory = async (history: StreakHistoryItem[]) => {
+  if (history.length === 0) return
+
+  const supabase = createClient()
+  const profileId = await getProfileId(supabase)
+
+  const streakHistoryRows = history.map((item) =>
+    toStreakHistoryRow(item, profileId),
+  )
+
+  const { error } = await supabase
+    .from('streak_history')
+    .insert(streakHistoryRows)
+
+  if (error) {
+    throw Error('Inserting streak history failed', {
+      cause: error,
+    })
+  }
+}
+
+/**
+ * Converts a database streak history row into a local history item.
+ *
+ * Database entries are considered synchronized because they have
+ * already been persisted remotely.
+ *
+ * @param row - The database row to convert.
+ * @returns The corresponding local streak history item.
+ */
+const toStreakHistory = (row: Tables<'streak_history'>): StreakHistoryItem => {
+  return {
+    id: row.id,
+    date: new Date(row.date),
+    status: row.status as StreakStatus,
+    needsSync: false,
+  }
+}
+
+/**
+ * Converts a local streak history item into a database insert row.
+ *
+ * @param item - The local history item to convert.
+ * @param profileId - The ID of the profile that owns the entry.
+ * @returns The corresponding database insert row.
+ */
+const toStreakHistoryRow = (
+  item: StreakHistoryItem,
+  profileId: string,
+): TablesInsert<'streak_history'> => {
+  return {
+    id: item.id,
+    profile_id: profileId,
+    date: item.date.toISOString(),
+    status: item.status,
+  }
+}
