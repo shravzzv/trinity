@@ -1,5 +1,5 @@
 /**
- * IndexedDB persistence utilities.
+ * @fileoverview IndexedDB persistence utilities.
  *
  * Provides low-level CRUD operations for Trinity's local IndexedDB database.
  *
@@ -13,6 +13,7 @@ import type { Fast } from '@/types/fasting'
 import { INDEXED_DB_NAME, INDEXED_DB_VERSION } from '@/constants/storage-keys'
 import type { WeightEntry } from '@/types/weight'
 import type { PendingDelete, PendingDeleteEntity } from '@/types/sync'
+import type { StreakHistoryItem } from '@/types/gamification'
 
 /**
  * Application database schema.
@@ -46,11 +47,20 @@ interface TrinityDB extends DBSchema {
       deletedAt: string
     }
   }
+
+  streakHistory: {
+    key: string
+    value: StreakHistoryItem
+    indexes: {
+      date: string
+    }
+  }
 }
 
 const FASTS_STORE_NAME = 'fasts'
 const WEIGHT_ENTRIES_STORE_NAME = 'weightEntries'
 const PENDING_DELETES_STORE_NAME = 'pendingDeletes'
+const STREAK_HISTORY_STORE_NAME = 'streakHistory'
 
 /**
  * Lazily initialized database connection.
@@ -104,6 +114,15 @@ const getDb = () => {
 
             pendingDeletesStore.createIndex('entity', 'entity')
             pendingDeletesStore.createIndex('deletedAt', 'deletedAt')
+          }
+
+          case 2: {
+            const streakHistoryStore = db.createObjectStore(
+              STREAK_HISTORY_STORE_NAME,
+              { keyPath: 'id' },
+            )
+
+            streakHistoryStore.createIndex('date', 'date')
           }
         }
       },
@@ -223,4 +242,41 @@ export const addPendingDelete = async (pendingDelete: PendingDelete) => {
 export const removePendingDelete = async (id: string) => {
   const db = await getDb()
   await db.delete(PENDING_DELETES_STORE_NAME, id)
+}
+
+/**
+ * Returns the streak history.
+ *
+ * @returns A promise that resolves to streak history.
+ */
+export const getStreakHistory = async () => {
+  const db = await getDb()
+  return db.getAll(STREAK_HISTORY_STORE_NAME)
+}
+
+/**
+ * Persists a new streak history item.
+ *
+ * @param item The streak history item to add.
+ */
+export const addStreakHistoryItem = async (item: StreakHistoryItem) => {
+  const db = await getDb()
+  await db.add(STREAK_HISTORY_STORE_NAME, item)
+}
+
+/**
+ * Marks a streak history item as synchronized.
+ * Streak history is immutable.
+ *
+ * @param item - The streak history item to mark as synchronized.
+ */
+export const markStreakHistoryItemAsSynced = async (
+  item: StreakHistoryItem,
+) => {
+  const db = await getDb()
+
+  await db.put(STREAK_HISTORY_STORE_NAME, {
+    ...item,
+    needsSync: false,
+  })
 }
