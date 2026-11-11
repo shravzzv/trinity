@@ -24,7 +24,11 @@
 import { fastingPlans } from '@/constants/fasting-plans'
 import { ANCHOR_STREAK_REQUIREMENT, levels } from '@/constants/gamification'
 import type { Fast, FastingPlanId } from '@/types/fasting'
-import type { StreakStatus } from '@/types/gamification'
+import type {
+  StreakCounters,
+  StreakHistoryItem,
+  StreakStatus,
+} from '@/types/gamification'
 
 /**
  * Returns the streak outcome for a completed fasting session.
@@ -290,4 +294,32 @@ export const shouldCelebrateStreak = (streak: number): boolean => {
     streak === 50 ||
     (streak >= 100 && streak % 100 === 0)
   )
+}
+
+/**
+ * Calculates the current and longest streak from streak history.
+ *
+ * @param history - The history of recorded streak outcomes.
+ * @returns The calculated current and longest streak counters.
+ */
+export const getStreakCounters = (
+  history: StreakHistoryItem[],
+): StreakCounters => {
+  let currentStreak = 0
+  let longestStreak = 0
+
+  const historyAsc = [...history].sort(
+    (a, b) => a.date.getTime() - b.date.getTime(),
+  )
+
+  for (const item of historyAsc) {
+    if (item.status !== 'missed') {
+      currentStreak++
+      if (currentStreak > longestStreak) longestStreak = currentStreak
+    } else {
+      currentStreak = 0
+    }
+  }
+
+  return { currentStreak, longestStreak }
 }
