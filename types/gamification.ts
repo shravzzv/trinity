@@ -38,6 +38,20 @@ export interface StreakCounters {
   longestStreak: number
 }
 
+/**
+ * Contains streak history dates grouped by their calendar outcome.
+ */
+export interface StreakCalendarDates {
+  /** Dates on which at least one successful fast was completed. */
+  completed: Date[]
+
+  /** Dates on which at least one fast was missed. */
+  missed: Date[]
+
+  /** Dates on which an anchor was used for a fast. */
+  anchored: Date[]
+}
+
 export interface LevelDefinition {
   level: number
   requiredXp: number

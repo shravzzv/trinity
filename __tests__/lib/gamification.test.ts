@@ -3,6 +3,7 @@ import {
   getLevelForXp,
   getLevelProgress,
   getLongestStreak,
+  getStreakCalendarDates,
   getStreakCalendarDays,
   getStreakCounters,
   getStreakStatus,
@@ -520,5 +521,93 @@ describe('getStreakCounters', () => {
 
     expect(currentStreak).toBe(0)
     expect(longestStreak).toBe(1)
+  })
+})
+
+describe('getStreakCalendarDates', () => {
+  it('should return empty arrays when history is empty', () => {
+    const { missed, anchored, completed } = getStreakCalendarDates([])
+
+    expect(missed).toEqual([])
+    expect(anchored).toEqual([])
+    expect(completed).toEqual([])
+  })
+
+  it('should group dates by their recorded status', () => {
+    const history = [
+      createStreakHistoryItem({
+        date: new Date('2026-11-09T10:00:00.000Z'),
+        status: 'completed',
+      }),
+      createStreakHistoryItem({
+        date: new Date('2026-11-10T10:00:00.000Z'),
+        status: 'missed',
+      }),
+      createStreakHistoryItem({
+        date: new Date('2026-11-11T10:00:00.000Z'),
+        status: 'anchored',
+      }),
+    ]
+
+    const { missed, anchored, completed } = getStreakCalendarDates(history)
+
+    expect(missed).toEqual([history[1].date])
+    expect(anchored).toEqual([history[2].date])
+    expect(completed).toEqual([history[0].date])
+  })
+
+  it('should sort dates chronologically within each group', () => {
+    const history = [
+      createStreakHistoryItem({
+        date: new Date('2026-11-11'),
+      }),
+      createStreakHistoryItem({
+        date: new Date('2026-11-09'),
+      }),
+      createStreakHistoryItem({
+        date: new Date('2026-11-10'),
+      }),
+    ]
+
+    const { completed } = getStreakCalendarDates(history)
+
+    expect(completed).toEqual([
+      history[1].date,
+      history[2].date,
+      history[0].date,
+    ])
+  })
+
+  it('should preserve multiple outcomes recorded on the same date', () => {
+    const date = new Date('2026-11-11T10:00:00.000Z')
+
+    const history = [
+      createStreakHistoryItem({ date, status: 'completed' }),
+      createStreakHistoryItem({ date, status: 'missed' }),
+      createStreakHistoryItem({ date, status: 'anchored' }),
+    ]
+
+    const { missed, anchored, completed } = getStreakCalendarDates(history)
+
+    expect(missed).toEqual([date])
+    expect(anchored).toEqual([date])
+    expect(completed).toEqual([date])
+  })
+
+  it('should not modify the original streak history', () => {
+    const history = [
+      createStreakHistoryItem({
+        date: new Date('2026-11-11T10:00:00.000Z'),
+      }),
+      createStreakHistoryItem({
+        date: new Date('2026-11-09T10:00:00.000Z'),
+      }),
+    ]
+
+    const originalOrder = [...history]
+
+    getStreakCalendarDates(history)
+
+    expect(history).toEqual(originalOrder)
   })
 })
